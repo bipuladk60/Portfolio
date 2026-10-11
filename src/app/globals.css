@@ -61,13 +61,15 @@ body {
   outline-offset: 3px;
 }
 
-/* Uppercase mono micro-label used across the HUD */
-.hud-label {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-dim);
+/* Uppercase mono micro-label used across the HUD (layered so utilities can override it) */
+@layer components {
+  .hud-label {
+    font-family: var(--font-jetbrains), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
 }
 
 /* Faint coordinate grid */
