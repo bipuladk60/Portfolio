@@ -41,7 +41,7 @@ export function Patch({
         type="button"
         onClick={onSelect}
         aria-pressed={active}
-        aria-label={`${h.event}: ${isWin ? h.award : "attempt, data gathered"}. Show expedition report.`}
+        aria-label={`${h.event}: ${isWin ? h.award : "competed, data gathered"}. Show expedition report.`}
         className="group relative flex h-full w-full cursor-pointer flex-col items-center gap-2 border px-3 pb-3 pt-4 text-center transition-[opacity,border-color,background-color] duration-300"
         style={{
           opacity: dim ? 0.3 : 1,
@@ -76,7 +76,7 @@ export function Patch({
         </svg>
         <span className="font-display text-sm font-semibold uppercase leading-tight tracking-wide text-text">{h.event}</span>
         <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color }}>
-          {isWin ? "Summit" : "Attempt"} · {h.when}
+          {isWin ? "Summit" : "Competed"} · {h.when}
         </span>
       </button>
     </motion.li>

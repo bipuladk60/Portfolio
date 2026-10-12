@@ -66,6 +66,18 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
   const markerRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [geo, setGeo] = useState<Geometry | null>(null);
   const [reached, setReached] = useState(0);
+  // Most recent log starts open; the rest show a preview.
+  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(entries.slice(0, 1).map((e) => e.id)));
+  const expandable = entries.filter((e) => e.bullets.length > 2);
+  const allOpen = expandable.every((e) => openIds.has(e.id));
+  const toggle = (id: string) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const toggleAll = () => setOpenIds(allOpen ? new Set() : new Set(expandable.map((e) => e.id)));
   const reduce = useReducedMotion();
   const alts = altitudes(entries.length);
 
@@ -108,6 +120,24 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
   useEffect(() => updateReached(drawn.get()), [updateReached, drawn]);
 
   return (
+    <>
+    {expandable.length > 0 && (
+      <div className="mb-10 flex justify-start md:-mt-4 md:mb-14 md:justify-end">
+        <button
+          type="button"
+          onClick={toggleAll}
+          aria-pressed={allOpen}
+          className="group inline-flex items-center gap-3 border border-line-hi px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-text transition-colors hover:border-sky hover:text-sky"
+        >
+          <span aria-hidden className="flex flex-col gap-[3px]">
+            <span className="h-px w-3 bg-current" />
+            <span className="h-px w-3 bg-current" />
+            <span className="h-px w-3 bg-current" />
+          </span>
+          {allOpen ? "Collapse all" : "Expand all logs"}
+        </button>
+      </div>
+    )}
     <div ref={listRef} className="relative">
       {/* SSR / pre-measure guide so the route is never missing */}
       <span
@@ -136,7 +166,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
         </svg>
       )}
 
-      <ol className="relative space-y-14 pb-6 md:space-y-20">
+      <ol className="relative space-y-14 md:space-y-20">
         {entries.map((entry, i) => {
           const left = i % 2 === 0;
           const isReached = i < reached;
@@ -187,12 +217,13 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
               </span>
 
               <div className={`min-w-0 pl-12 md:pl-0 ${left ? "md:col-start-1" : "md:col-start-3"}`}>
-                <RouteCard entry={entry} altitude={alt} index={i} />
+                <RouteCard entry={entry} altitude={alt} index={i} open={openIds.has(entry.id)} onToggle={() => toggle(entry.id)} />
               </div>
             </li>
           );
         })}
       </ol>
     </div>
+    </>
   );
 }

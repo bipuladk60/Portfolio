@@ -17,6 +17,8 @@ const CHANNELS = [
   { id: "CH-03", name: "LinkedIn", value: strip(profile.links.linkedin), href: profile.links.linkedin, external: true },
 ];
 
+const [EMAIL_LOCAL, EMAIL_DOMAIN] = profile.email.split("@");
+
 type Status = "idle" | "sent" | "failed";
 
 export function TransmitConsole() {
@@ -50,7 +52,10 @@ export function TransmitConsole() {
           </dl>
 
           <p className="hud-label mt-8">Frequency</p>
-          <p className="mt-2 break-all font-mono text-lg text-air md:text-2xl">{profile.email}</p>
+          <p className="mt-2 font-mono text-[clamp(0.8rem,4.2vw,1.5rem)] leading-tight text-air">
+            {EMAIL_LOCAL}
+            <wbr />@{EMAIL_DOMAIN}
+          </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-4">
             <div className="relative">
@@ -87,7 +92,7 @@ export function TransmitConsole() {
           </div>
           <p className="mt-4 text-sm text-dim">
             Prefer your own client?{" "}
-            <a href={`mailto:${profile.email}`} className="text-text underline decoration-line-hi underline-offset-4 hover:decoration-air">
+            <a href={`mailto:${profile.email}`} className="inline-flex min-h-8 items-center py-2 text-text underline decoration-line-hi underline-offset-4 hover:decoration-air">
               Open a mail draft
             </a>
             .

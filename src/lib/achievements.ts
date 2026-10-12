@@ -48,15 +48,26 @@ export const useAchievements = () => useStore(achievementStore);
 export const isUnlocked = (id: AchievementId) => achievementStore.get().includes(id);
 
 /** Unlock a secret. Returns true only the first time; announces it with a toast and a chime. */
-export function unlock(id: AchievementId, { silent = false }: { silent?: boolean } = {}): boolean {
+export function unlock(
+  id: AchievementId,
+  { silent = false, toastDelay = 0, toastDuration = 3200 }: { silent?: boolean; toastDelay?: number; toastDuration?: number } = {},
+): boolean {
   if (isUnlocked(id)) return false;
   achievementStore.set((prev) => [...prev, id]);
   writeLocal(KEY, JSON.stringify(achievementStore.get()));
   if (!silent) {
     const a = ACHIEVEMENTS.find((x) => x.id === id)!;
     const count = achievementStore.get().length;
-    toast(`${a.title} · ${count}/${ACHIEVEMENTS.length} secrets`, { title: "Achievement unlocked", tone: "water" });
-    playBlip("unlock");
+    const announce = () => {
+      toast(`${a.title} · ${count}/${ACHIEVEMENTS.length} secrets`, {
+        title: "Achievement unlocked",
+        tone: "water",
+        duration: toastDuration,
+      });
+      playBlip("unlock");
+    };
+    if (toastDelay > 0 && typeof window !== "undefined") window.setTimeout(announce, toastDelay);
+    else announce();
   }
   return true;
 }

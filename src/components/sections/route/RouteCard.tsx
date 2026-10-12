@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Chip, Panel } from "@/components/hud/Panel";
 import type { Experience } from "@/data/content";
@@ -11,13 +11,28 @@ type RouteCardProps = {
   entry: Experience;
   altitude: string;
   index: number;
+  open: boolean;
+  onToggle: () => void;
 };
 
+const PREVIEW = 2;
+
+function Bullet({ n, text }: { n: number; text: string }) {
+  return (
+    <>
+      <span aria-hidden className="pt-[3px] font-mono text-[11px] text-sky/80">
+        {String(n).padStart(2, "0")}
+      </span>
+      <span>{text}</span>
+    </>
+  );
+}
+
 /** One camp on the route: role summary up front, full log behind an accessible disclosure. */
-export function RouteCard({ entry, altitude, index }: RouteCardProps) {
-  const [open, setOpen] = useState(false);
+export function RouteCard({ entry, altitude, index, open, onToggle }: RouteCardProps) {
   const reduce = useReducedMotion();
   const logId = useId();
+  const hidden = Math.max(0, entry.bullets.length - PREVIEW);
 
   return (
     <motion.div
@@ -52,34 +67,18 @@ export function RouteCard({ entry, altitude, index }: RouteCardProps) {
           ))}
         </ul>
 
-        <div className="mt-6 border-t border-line pt-4">
-          <button
-            type="button"
-            aria-expanded={open}
-            aria-controls={logId}
-            onClick={() => setOpen((v) => !v)}
-            className="group/btn inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-text transition-colors hover:text-sky"
-          >
-            <span
-              aria-hidden
-              className="grid h-6 w-6 place-items-center border border-line-hi transition-colors group-hover/btn:border-sky"
-            >
-              <motion.svg
-                width="10"
-                height="10"
-                viewBox="0 0 10 10"
-                animate={{ rotate: open ? 45 : 0 }}
-                transition={{ duration: reduce ? 0 : 0.3, ease: EASE }}
-              >
-                <path d="M5 0v10M0 5h10" stroke="currentColor" strokeWidth="1.5" />
-              </motion.svg>
-            </span>
-            {open ? "Close log" : "Open log"}
-            <span className="text-dim">· {entry.bullets.length} entries</span>
-          </button>
+        <div className="mt-6 border-t border-line pt-5">
+          <p className="hud-label">Log</p>
+          <ul className="mt-3 space-y-3">
+            {entry.bullets.slice(0, PREVIEW).map((b, i) => (
+              <li key={i} className="grid grid-cols-[2rem_1fr] gap-2 text-[15px] leading-relaxed text-text/90">
+                <Bullet n={i + 1} text={b} />
+              </li>
+            ))}
+          </ul>
 
           <AnimatePresence initial={false}>
-            {open && (
+            {open && hidden > 0 && (
               <motion.div
                 id={logId}
                 key="log"
@@ -90,12 +89,12 @@ export function RouteCard({ entry, altitude, index }: RouteCardProps) {
                 className="overflow-hidden"
               >
                 <motion.ul
-                  className="space-y-3 pt-5"
+                  className="space-y-3 pt-3"
                   initial="hidden"
                   animate="shown"
                   variants={{ shown: { transition: { staggerChildren: reduce ? 0 : 0.06, delayChildren: reduce ? 0 : 0.1 } } }}
                 >
-                  {entry.bullets.map((b, i) => (
+                  {entry.bullets.slice(PREVIEW).map((b, i) => (
                     <motion.li
                       key={i}
                       className="grid grid-cols-[2rem_1fr] gap-2 text-[15px] leading-relaxed text-text/90"
@@ -104,16 +103,40 @@ export function RouteCard({ entry, altitude, index }: RouteCardProps) {
                         shown: { opacity: 1, x: 0, transition: { duration: reduce ? 0 : 0.35, ease: EASE } },
                       }}
                     >
-                      <span aria-hidden className="pt-[3px] font-mono text-[11px] text-sky/80">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span>{b}</span>
+                      <Bullet n={i + PREVIEW + 1} text={b} />
                     </motion.li>
                   ))}
                 </motion.ul>
               </motion.div>
             )}
           </AnimatePresence>
+
+          {hidden > 0 && (
+            <button
+              type="button"
+              aria-expanded={open}
+              aria-controls={logId}
+              onClick={onToggle}
+              className="group/btn mt-5 inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-text transition-colors hover:text-sky"
+            >
+              <span
+                aria-hidden
+                className="grid h-6 w-6 place-items-center border border-line-hi transition-colors group-hover/btn:border-sky"
+              >
+                <motion.svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  animate={{ rotate: open ? 45 : 0 }}
+                  transition={{ duration: reduce ? 0 : 0.3, ease: EASE }}
+                >
+                  <path d="M5 0v10M0 5h10" stroke="currentColor" strokeWidth="1.5" />
+                </motion.svg>
+              </span>
+              {open ? "Close log" : "Open log"}
+              {!open && <span className="text-sky">+{hidden} more</span>}
+            </button>
+          )}
         </div>
       </Panel>
     </motion.div>

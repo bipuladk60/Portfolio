@@ -48,7 +48,7 @@ export function CampSection({
       id={campId}
       data-camp={campId}
       data-altitude={camp.altitude}
-      className={`relative scroll-mt-16 px-5 py-24 md:px-12 md:py-32 lg:px-20 ${className}`}
+      className={`relative scroll-mt-16 px-5 py-16 md:px-12 md:py-20 lg:px-20 ${className}`}
     >
       <div className="mx-auto max-w-6xl">{children}</div>
     </section>

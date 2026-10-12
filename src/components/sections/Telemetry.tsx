@@ -20,7 +20,7 @@ function parseDetail(detail: string) {
 
 function Field({ label, children, wide = false }: { label: string; children: React.ReactNode; wide?: boolean }) {
   return (
-    <div className={`min-w-0 border-t border-line py-3 ${wide ? "sm:col-span-2" : ""}`}>
+    <div className={`min-w-0 border-t border-line py-3 ${wide ? "col-span-2" : ""}`}>
       <dt className="hud-label">{label}</dt>
       <dd className="mt-1 text-[15px] leading-snug text-text">{children}</dd>
     </div>
@@ -36,6 +36,26 @@ export function Telemetry() {
         title="Telemetry"
         kicker="Pilot dossier and the readings logged on the way up."
       />
+
+      {/* Instrument cluster: full-width strip of gauges */}
+      <Reveal trigger="view" className="relative mb-12">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-24 right-0 hidden select-none font-display text-[9rem] font-bold leading-none text-transparent lg:block"
+          style={{ WebkitTextStroke: "1px var(--line-hi)" }}
+        >
+          01
+        </span>
+        <Panel label="Instrument cluster" accent="var(--signal)" className="relative px-3 pb-7 pt-8 sm:px-6">
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
+            {stats.map((s, i) => (
+              <li key={s.label}>
+                <StatGauge value={s.value} suffix={s.suffix} label={s.label} index={i} />
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      </Reveal>
 
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
         {/* Dossier: the wide, document-like column */}
@@ -61,11 +81,6 @@ export function Telemetry() {
             <dl className="mt-6 grid sm:grid-cols-2 sm:gap-x-8">
               <Field label="Role">{profile.role}</Field>
               <Field label="Callsign">{profile.handle}</Field>
-              <Field label="Origin">{profile.origin}</Field>
-              <Field label="Base">{profile.base}</Field>
-              <Field label="Status" wide>
-                <span className="font-mono text-[13px] text-dim">{profile.status}</span>
-              </Field>
             </dl>
 
             <div className="mt-6 border-t border-line pt-5">
@@ -84,30 +99,22 @@ export function Telemetry() {
           </Panel>
         </Reveal>
 
-        {/* Instruments and training record, dropped lower for an off-axis rhythm */}
-        <div className="relative min-w-0 lg:col-span-5 lg:pt-20">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-6 right-0 hidden select-none font-display text-[9rem] font-bold leading-none text-transparent lg:block"
-            style={{ WebkitTextStroke: "1px var(--line-hi)" }}
-          >
-            01
-          </span>
-
-          <Reveal trigger="view" delay={0.1} className="relative">
-            <Panel label="Instrument cluster" accent="var(--signal)" className="px-3 pb-8 pt-8 sm:px-6">
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-2">
-                {stats.map((s, i) => (
-                  <li key={s.label} className={i % 2 === 1 ? "lg:translate-y-6" : ""}>
-                    <StatGauge value={s.value} suffix={s.suffix} label={s.label} index={i} />
-                  </li>
-                ))}
-              </ul>
+        {/* Flight plan and training record */}
+        <div className="min-w-0 space-y-12 lg:col-span-5">
+          <Reveal trigger="view" delay={0.1}>
+            <Panel label="Flight plan" accent="var(--text-dim)" className="px-5 pb-2 pt-6 sm:px-6">
+              <dl className="grid grid-cols-2 gap-x-6">
+                <Field label="Origin">{profile.origin}</Field>
+                <Field label="Base">{profile.base}</Field>
+                <Field label="Status" wide>
+                  <span className="font-mono text-[13px] text-dim">{profile.status}</span>
+                </Field>
+              </dl>
             </Panel>
           </Reveal>
 
-          <Reveal trigger="view" delay={0.15} className="mt-12">
-            <Panel label="Training record" className="p-5 pt-7 sm:p-6 sm:pt-8">
+          <Reveal trigger="view" delay={0.15}>
+            <Panel label="Training record" accent="var(--text-dim)" className="p-5 pt-7 sm:p-6 sm:pt-8">
               <ol className="space-y-6">
                 {education.map((e, i) => {
                   const d = parseDetail(e.detail);

@@ -14,11 +14,11 @@ export function ModelChart() {
   const reduce = useReducedMotionSafe();
   return (
     <Panel label="Model comparison · accuracy" accent="var(--water)" className="h-full">
-      <figure className="p-5 sm:p-7">
+      <figure className="flex h-full flex-col p-5 sm:p-7">
         <figcaption className="sr-only">
           Prediction accuracy by model: {models.map((m) => `${m.name} ${m.accuracy.toFixed(1)}%`).join(", ")}.
         </figcaption>
-        <ul className="space-y-5" aria-hidden>
+        <ul className="flex flex-1 flex-col justify-evenly gap-5 py-2" aria-hidden>
           {models.map((m, i) => {
             const isBest = m.accuracy === best;
             return (
@@ -34,7 +34,7 @@ export function ModelChart() {
                   </span>
                   <span className={`font-mono text-sm tabular-nums ${isBest ? "text-water" : "text-dim"}`}>{m.accuracy.toFixed(1)}%</span>
                 </div>
-                <div className="relative h-3 bg-panel-2">
+                <div className="relative h-3 bg-panel-2 lg:h-4">
                   {TICKS.slice(1, -1).map((t) => (
                     <span key={t} className="absolute inset-y-0 w-px bg-line" style={{ left: `${t}%` }} />
                   ))}

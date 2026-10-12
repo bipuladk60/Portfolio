@@ -44,7 +44,7 @@ function Contours() {
 /** Camp 02, Route Log: experience as a climbing route that draws itself on scroll. */
 export function RouteLog() {
   return (
-    <CampSection campId="route" className="overflow-hidden">
+    <CampSection campId="route" className="overflow-hidden pb-10! md:pb-12!">
       <Contours />
       <div className="relative">
         <SectionHeader
@@ -53,7 +53,7 @@ export function RouteLog() {
           kicker="Each role is a camp on the way up. Open a log for the full record."
         />
         <RouteTrack entries={experience} />
-        <p className="hud-label mt-10 flex items-center gap-3 md:justify-center">
+        <p className="hud-label mt-8 flex items-center gap-3 md:justify-center">
           <span aria-hidden className="h-px w-10 bg-line-hi" />
           Route continues
           <span aria-hidden className="h-px w-10 bg-line-hi" />

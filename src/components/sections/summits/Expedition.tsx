@@ -14,13 +14,13 @@ export type Filter = "all" | "win" | "participant";
 const wins = hackathons.filter((h) => h.result === "win");
 const SUMMITS = wins.length;
 const ATTEMPTS = hackathons.length;
-const TURNED_BACK = ATTEMPTS - SUMMITS;
+const COMPETED = ATTEMPTS - SUMMITS;
 const DEFAULT_ID = (wins[wins.length - 1] ?? hackathons[hackathons.length - 1]).id;
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All" },
   { id: "win", label: "Summits" },
-  { id: "participant", label: "Attempts" },
+  { id: "participant", label: "Competed" },
 ];
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -50,7 +50,7 @@ export function Expedition() {
         <Panel label="Scoreboard" accent="var(--signal)" className="lg:col-span-7">
           <div className="grid grid-cols-2 divide-x divide-line">
             <Score label="Summits" value={SUMMITS} color="var(--signal)" note="Awards won" reduce={reduce} delay={0} />
-            <Score label="Attempts" value={ATTEMPTS} color="var(--text)" note={`${pad(TURNED_BACK)} turned back, data gathered`} reduce={reduce} delay={0.12} />
+            <Score label="Attempts" value={ATTEMPTS} color="var(--text)" note={`${pad(SUMMITS)} summits · ${pad(COMPETED)} competed`} reduce={reduce} delay={0.12} />
           </div>
         </Panel>
 

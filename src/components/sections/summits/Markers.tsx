@@ -78,7 +78,7 @@ export function PlantedFlag({
   );
 }
 
-/** Blue base marker: turned back below the summit, data gathered. */
+/** Blue base marker: competed, data gathered. */
 export function BaseBeacon({
   shown,
   delay = 0,

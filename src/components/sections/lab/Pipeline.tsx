@@ -95,7 +95,7 @@ export function Pipeline() {
           })}
         </ol>
 
-        <div id="lab-pipeline-detail" aria-live="polite" className="mt-6 min-h-[92px] border-t border-line pt-5">
+        <div id="lab-pipeline-detail" aria-live="polite" className="mt-5 border-t border-line pt-4">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={step.step}

@@ -89,16 +89,19 @@ export function LaunchChecklist() {
               transition={reduce ? { duration: 0 } : { duration: 0.5, ease: EASE, delay: gi * 0.06 }}
             >
               <Panel
-                label={`${String(gi + 1).padStart(2, "0")} · ${g.group}`}
+                label={`Console ${String(gi + 1).padStart(2, "0")}`}
                 accent={state === "GO" ? WATER : "var(--line-hi)"}
                 className="h-full px-4 pb-4 pt-6 transition-colors duration-500"
               >
-                <div className="mb-3 flex items-center justify-between border-b border-line pb-2 font-mono text-[10px] uppercase tracking-[0.14em]">
-                  <span className="text-dim">
-                    {groupGo}/{g.items.length}
-                  </span>
-                  <span className={state === "GO" ? "text-water" : state === "POLLING" ? "text-signal" : "text-dim/60"}>
-                    {state}
+                <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-line pb-2">
+                  <h3 className="font-display text-lg font-semibold uppercase tracking-wide text-text">{g.group}</h3>
+                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em]">
+                    <span className="text-dim">
+                      {groupGo}/{g.items.length}
+                    </span>{" "}
+                    <span className={state === "GO" ? "text-water" : state === "POLLING" ? "text-signal" : "text-dim/60"}>
+                      {state}
+                    </span>
                   </span>
                 </div>
                 <ul>
@@ -127,9 +130,8 @@ export function LaunchChecklist() {
               initial={{ opacity: 0, scaleX: 0.6 }}
               animate={{ opacity: 1, scaleX: 1 }}
               transition={reduce ? { duration: 0 } : { duration: 0.5, ease: EASE }}
-              className="relative overflow-hidden border border-water/60 bg-water/5 px-5 py-5 text-center"
+              className="border border-water/60 bg-water/5 px-5 py-5 text-center"
             >
-              <span aria-hidden className="sys-banner-sweep pointer-events-none absolute inset-y-0 -left-1/3 w-1/3" />
               <p className="font-display text-3xl font-bold uppercase tracking-[0.08em] text-water md:text-5xl">All systems go</p>
               <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.14em] text-dim">
                 {TOTAL} of {TOTAL} checks · {skills.length} consoles green

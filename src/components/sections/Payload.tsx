@@ -18,17 +18,18 @@ const VISUALS: Record<string, ReactNode> = {
   typetrie: <TrieGrow />,
 };
 
-// Bento placement on a 6-column grid (lg). Big cards zig-zag: openbook top-left, clipfinder lower-right.
+// Bento placement on a 6-column grid (lg). Large cards are 4 columns wide and lay out side by side
+// (visual left, copy right) so they never stretch taller than their row.
 const LAYOUT: Record<string, { className: string; large?: boolean }> = {
-  openbook: { className: "md:col-span-2 lg:col-span-4 lg:row-span-2", large: true },
+  openbook: { className: "md:col-span-2 lg:col-span-4", large: true },
   mhd: { className: "lg:col-span-2" },
   jobradar: { className: "lg:col-span-2" },
-  clipfinder: { className: "md:col-span-2 lg:col-span-4 lg:col-start-3 lg:row-span-2 lg:row-start-3", large: true },
-  partysync: { className: "lg:col-span-2 lg:col-start-1 lg:row-start-3" },
-  typetrie: { className: "lg:col-span-2 lg:col-start-1 lg:row-start-4" },
+  clipfinder: { className: "md:col-span-2 lg:col-span-4", large: true },
+  partysync: { className: "lg:col-span-3" },
+  typetrie: { className: "lg:col-span-3" },
 };
 
-// Reading order follows the visual zig-zag.
+// Rows on lg: openbook + MHD | jobradar + clipfinder | PartySync + TypeTrie.
 const ORDER = ["openbook", "mhd", "jobradar", "clipfinder", "partysync", "typetrie"];
 
 const PAYLOAD_CSS = `
@@ -58,7 +59,7 @@ export function Payload() {
         title="Payload Bay"
         kicker="What I carried up the mountain. Each module runs a small live readout of the idea inside it."
       />
-      <ul className="grid grid-flow-row-dense grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-6 lg:gap-6">
+      <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-6 lg:gap-6">
         {ordered.map((p, i) => (
           <MissionCard
             key={p.id}

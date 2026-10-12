@@ -67,7 +67,7 @@ export function MissionCard({ project, index, visual, large = false, className =
       <Panel
         as="article"
         accent={FIRE}
-        className="flex h-full flex-col transition-colors duration-300 group-focus-within:border-fire/60 group-hover:border-fire/60"
+        className={`flex h-full flex-col ${large ? "lg:flex-row" : ""} transition-colors duration-300 group-focus-within:border-fire/60 group-hover:border-fire/60`}
       >
         {/* scanline sweep on hover / focus */}
         <span aria-hidden className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
@@ -76,17 +76,22 @@ export function MissionCard({ project, index, visual, large = false, className =
 
         <div
           aria-hidden
-          className={`relative overflow-hidden border-b border-line bg-bg/70 ${large ? "min-h-56 md:min-h-64 lg:flex-1" : "h-36"}`}
+          className={`relative overflow-hidden border-b border-line bg-bg/70 ${
+            large ? "h-72 md:h-80 lg:h-auto lg:min-h-[26rem] lg:w-[56%] lg:shrink-0 lg:border-b-0 lg:border-r" : "h-36"
+          }`}
         >
           {visual}
-          <span className="hud-label absolute right-2 top-2 !text-[9px] text-dim/80">Live</span>
         </div>
 
-        <div className={`flex flex-col p-5 md:p-6 ${large ? "" : "flex-1"}`}>
+        <div className="flex min-w-0 flex-1 flex-col p-5 md:p-6">
           <p className="hud-label flex flex-wrap items-center gap-2" style={{ color: FIRE }}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <span className="h-px w-5 bg-line-hi" />
             <span className="text-dim">{project.kind}</span>
+            <span aria-hidden className="ml-auto inline-flex items-center gap-1.5 text-dim/70">
+              <span className="led inline-block h-1 w-1 rounded-full bg-fire" />
+              Live
+            </span>
           </p>
           <h3
             className={`mt-3 font-display font-bold uppercase leading-none tracking-tight text-text ${large ? "text-3xl md:text-4xl" : "text-2xl"}`}
@@ -129,7 +134,7 @@ export function MissionCard({ project, index, visual, large = false, className =
                 aria-expanded={open}
                 aria-controls={extraId}
                 onClick={() => setOpen((o) => !o)}
-                className="mt-3 inline-flex w-fit cursor-pointer items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-dim transition-colors hover:text-fire focus-visible:text-fire"
+                className="mt-1 inline-flex min-h-8 w-fit cursor-pointer items-center gap-2 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-dim transition-colors hover:text-fire focus-visible:text-fire"
               >
                 <span aria-hidden className="inline-block w-3 text-center">{open ? "−" : "+"}</span>
                 {open ? "Less detail" : `${extra.length} more ${extra.length === 1 ? "detail" : "details"}`}
@@ -148,7 +153,7 @@ export function MissionCard({ project, index, visual, large = false, className =
                 href={project.href}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-text transition-colors hover:text-fire"
+                className="mt-2 inline-flex min-h-8 items-center gap-2 py-2 font-mono text-xs uppercase tracking-[0.14em] text-text transition-colors hover:text-fire"
               >
                 Source on GitHub <span aria-hidden>↗</span>
                 <span className="sr-only">({project.title})</span>

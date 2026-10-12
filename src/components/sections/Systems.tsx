@@ -4,18 +4,9 @@ import { honors } from "@/data/content";
 import { LaunchChecklist } from "./systems/LaunchChecklist";
 import { Reveal } from "./chautari/Reveal";
 
-const SYSTEMS_CSS = `
-.sys-banner-sweep {
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--water) 22%, transparent), transparent);
-  animation: sys-sweep 2.8s var(--ease-hud) 1 forwards;
-}
-@keyframes sys-sweep { from { transform: translateX(0); } to { transform: translateX(420%); } }
-`;
-
 export function Systems() {
   return (
     <CampSection campId="systems">
-      <style>{SYSTEMS_CSS}</style>
       <SectionHeader
         campId="systems"
         title="Systems Check"

@@ -56,7 +56,7 @@ export function Station() {
                 <p className="hud-label mt-2 text-water">{research.when}</p>
               </div>
               <figure className="relative lg:col-span-7 lg:border-l lg:border-line lg:pl-8">
-                <span aria-hidden className="absolute -top-6 left-0 font-display text-7xl leading-none text-water/30 lg:left-6">
+                <span aria-hidden className="pointer-events-none absolute -top-2 right-0 font-display text-7xl leading-none text-water/25">
                   &ldquo;
                 </span>
                 <p className="hud-label">Research question</p>
@@ -79,7 +79,7 @@ export function Station() {
             {research.findings.map((f, i) => (
               <motion.div key={f.label} {...rise(0.08 * i)}>
                 <Panel label={`Reading ${String(i + 1).padStart(2, "0")}`} accent="var(--water)" className="h-full">
-                  <div className="p-5 sm:p-6">
+                  <div className="p-5">
                     <div className="flex items-center justify-between">
                       <span className="hud-label">Finding</span>
                       <span aria-hidden className="flex gap-1">
@@ -88,7 +88,7 @@ export function Station() {
                         ))}
                       </span>
                     </div>
-                    <p className="mt-3 border border-line bg-bg/70 px-4 py-3 font-display text-5xl font-bold leading-none tracking-tight text-water tabular-nums sm:text-6xl">
+                    <p className="mt-3 border border-line bg-bg/70 px-4 py-2.5 font-display text-5xl font-bold leading-none tracking-tight text-water tabular-nums sm:text-6xl">
                       {f.value}
                     </p>
                     <p className="mt-3 text-sm leading-snug text-text">{f.label}</p>
@@ -159,8 +159,8 @@ export function Station() {
                   {w.metrics.length > 0 && (
                     <dl className="mt-5 grid grid-cols-3 gap-px border border-line bg-line">
                       {w.metrics.map((m) => (
-                        <div key={m.label} className="flex flex-col-reverse bg-bg px-2 py-3">
-                          <dt className="mt-2 font-mono text-[9.5px] uppercase leading-tight tracking-[0.1em] text-dim">{m.label}</dt>
+                        <div key={m.label} className="flex flex-col-reverse justify-end bg-bg px-2 py-3">
+                          <dt className="mt-2 min-h-[2.4em] font-mono text-[9.5px] uppercase leading-tight tracking-[0.1em] text-dim">{m.label}</dt>
                           <dd className="font-display text-xl font-bold leading-none text-water tabular-nums">{m.value}</dd>
                         </div>
                       ))}

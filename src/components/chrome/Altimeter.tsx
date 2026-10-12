@@ -174,7 +174,7 @@ export function Altimeter() {
                     onClick={() => scrollToCamp(c.id)}
                     aria-current={isActive ? "location" : undefined}
                     aria-label={`${c.name}, ${fmt(c.altitude)} metres`}
-                    className="group flex h-5 items-center justify-end gap-2 pl-2 outline-offset-2"
+                    className="group flex h-6 min-w-6 items-center justify-end gap-2 pl-2 outline-offset-2"
                   >
                     <span
                       className={`hud-label pointer-events-none whitespace-nowrap border border-line bg-bg px-1.5 py-0.5 !text-[10px] opacity-0 transition-all duration-300 [transition-timing-function:var(--ease-hud)] group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 ${

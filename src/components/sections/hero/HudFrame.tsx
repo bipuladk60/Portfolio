@@ -54,7 +54,7 @@ export function HudFrame() {
         transition={t(0.3, 0.7)}
       />
       <motion.div
-        className="absolute left-12 right-12 top-3 hidden justify-between font-mono text-[10px] tracking-widest text-dim/70 md:left-16 md:right-16 md:flex"
+        className="absolute left-12 right-12 top-6 hidden justify-between font-mono text-[10px] tracking-widest text-dim/70 md:left-16 md:right-16 md:flex"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={t(0.8)}

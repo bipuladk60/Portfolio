@@ -7,7 +7,7 @@ import { indieGame, profile } from "@/data/content";
 import { copyEmail } from "@/lib/clipboard";
 import { ACHIEVEMENTS, unlock, useAchievements } from "@/lib/achievements";
 import { closePalette, openDevLog, togglePalette, useChromeUI } from "@/lib/chrome-ui";
-import { fuzzyMatch } from "@/lib/fuzzy";
+import { strictLabelMatch, tokenPrefixMatch } from "@/lib/fuzzy";
 import { EASE_HUD } from "@/lib/motion";
 import { scrollToCamp } from "@/lib/scroll";
 import { playBlip, toggleSound, useSoundEnabled } from "@/lib/sound";
@@ -22,6 +22,18 @@ type Command = {
   keywords?: string;
   disabled?: boolean;
   run: () => void;
+};
+
+const CAMP_KEYWORDS: Record<string, string> = {
+  base: "home hero top start",
+  telemetry: "about bio education",
+  route: "experience work jobs career",
+  summits: "hackathons hackathon awards wins",
+  lab: "research ml machine learning pfas copd",
+  chautari: "games ludo warmer",
+  payload: "projects work openbook",
+  systems: "skills stack honors",
+  uplink: "contact email reach",
 };
 
 function openExternal(url: string) {
@@ -81,7 +93,7 @@ export function CommandPalette() {
       group: "Navigate",
       label: `goto ${c.name.toLowerCase()}`,
       hint: `CAMP ${String(i).padStart(2, "0")} · ${c.altitude.toLocaleString("en-US")} M`,
-      keywords: `${c.short} ${c.id} camp section`,
+      keywords: `${c.short} ${c.id} ${CAMP_KEYWORDS[c.id] ?? ""} camp section`,
       run: () => scrollToCamp(c.id),
     }));
     list.push(
@@ -173,10 +185,10 @@ export function CommandPalette() {
   const results = useMemo(() => {
     const scored = commands
       .map((cmd, order) => {
-        const m = fuzzyMatch(query, cmd.label);
-        const k = m ? null : fuzzyMatch(query, `${cmd.label} ${cmd.keywords ?? ""} ${cmd.group}`);
-        if (!m && !k) return null;
-        return { cmd, order, score: m ? m.score + 4 : k!.score, indices: m ? m.indices : [] };
+        const m = strictLabelMatch(query, cmd.label);
+        const k = m ? null : tokenPrefixMatch(query, `${cmd.label} ${cmd.keywords ?? ""}`);
+        if (!m && k === null) return null;
+        return { cmd, order, score: m ? m.score + 4 : k!, indices: m ? m.indices : [] };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null);
     if (query.trim()) scored.sort((a, b) => b.score - a.score || a.order - b.order);
@@ -279,7 +291,7 @@ export function CommandPalette() {
               <span className="text-signal">Mission console</span>
               <span>{results.length} cmds</span>
             </div>
-            <div className="flex items-center gap-3 border-b border-line px-4">
+            <div className="flex items-center gap-3 border-b border-line px-4 transition-colors focus-within:border-b-signal focus-within:bg-panel-2/60">
               <span aria-hidden className="font-mono text-signal">
                 &gt;
               </span>
@@ -299,7 +311,7 @@ export function CommandPalette() {
                   setActive(0);
                 }}
                 placeholder="type a command or camp"
-                className="h-12 w-full bg-transparent font-mono text-[14px] text-text placeholder:text-dim/70 focus:outline-none"
+                className="h-12 w-full bg-transparent font-mono text-[14px] text-text placeholder:text-dim/70 focus:outline-none focus-visible:outline-none"
               />
               <kbd className="hud-label shrink-0 border border-line px-1.5 py-0.5 !text-[10px]">ESC</kbd>
             </div>

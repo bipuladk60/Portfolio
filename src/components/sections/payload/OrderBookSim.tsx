@@ -18,9 +18,11 @@ type Snap = {
   mid: number;
   max: number;
   trade: Trade | null;
+  tape: Trade[];
 };
 
-const ROWS = 5;
+const ROWS = 6;
+const TAPE = 9;
 const DEPTH = 9;
 
 function initialBook(): Book {
@@ -43,7 +45,7 @@ function snapshot(b: Book, trade: Trade | null): Snap {
   const max = Math.max(1, ...asks.map((l) => l[1]), ...bids.map((l) => l[1]));
   const ba = asks[0]?.[0] ?? 0;
   const bb = bids[0]?.[0] ?? 0;
-  return { asks, bids, spread: ba - bb, mid: (ba + bb) / 2, max, trade };
+  return { asks, bids, spread: ba - bb, mid: (ba + bb) / 2, max, trade, tape: [] };
 }
 
 function step(b: Book, rng: () => number, id: number): Trade | null {
@@ -123,7 +125,7 @@ export function OrderBookSim() {
     const id = window.setInterval(() => {
       idRef.current += 1;
       const t = step(book, rng, idRef.current);
-      setSnap((prev) => snapshot(book, t ?? prev.trade));
+      setSnap((prev) => ({ ...snapshot(book, t ?? prev.trade), tape: t ? [t, ...prev.tape].slice(0, TAPE) : prev.tape }));
     }, 460);
     return () => window.clearInterval(id);
   }, [inView, reduce]);
@@ -134,7 +136,7 @@ export function OrderBookSim() {
     return (
       <div
         key={`${price}-${traded ? snap.trade?.id : "r"}`}
-        className={`relative grid grid-cols-[1fr_auto] items-center px-2 leading-[15px] ${traded ? "pb-flash" : ""}`}
+        className={`relative grid grid-cols-[1fr_auto] items-center px-2 leading-[15px] lg:leading-[21px] ${traded ? "pb-flash" : ""}`}
       >
         <span
           className="absolute inset-y-[1px] right-0 transition-[width] duration-300 ease-out"
@@ -162,23 +164,30 @@ export function OrderBookSim() {
         </div>
         {snap.bids.map((l) => row("bid", l))}
       </div>
-      <div className="hidden w-[38%] flex-col justify-between border-l border-line pl-3 sm:flex">
-        <div>
-          <p className="text-[9px] uppercase tracking-[0.14em] text-dim/70">Engine</p>
-          <p className="mt-1 text-text">Array-indexed levels</p>
-          <p className="text-dim">O(1) cancel</p>
-        </div>
-        <div>
-          <p className="text-[9px] uppercase tracking-[0.14em] text-dim/70">Last fill</p>
-          {snap.trade ? (
-            <p key={snap.trade.id} className="pb-flash mt-1" style={{ color: snap.trade.buy ? "var(--water)" : "var(--fire)" }}>
-              {snap.trade.buy ? "BUY" : "SELL"} {snap.trade.qty} @ {px(snap.trade.price)}
-            </p>
-          ) : (
-            <p className="mt-1 text-dim">waiting</p>
-          )}
-        </div>
-        <p className="text-[9px] uppercase tracking-[0.14em] text-dim/70">Sim · not market data</p>
+      <div className="hidden w-[40%] min-w-0 flex-col border-l border-line pl-3 sm:flex">
+        <p className="text-[9px] uppercase tracking-[0.14em] text-dim/70">Engine</p>
+        <p className="mt-1 text-text">Array-indexed levels</p>
+        <p className="text-dim">O(1) cancel</p>
+        <p className="mt-4 flex items-center justify-between text-[9px] uppercase tracking-[0.14em] text-dim/70">
+          <span>Fills tape</span>
+          <span>Qty @ px</span>
+        </p>
+        <ol className="mt-1 min-h-0 flex-1 overflow-hidden border-t border-line">
+          {snap.tape.length === 0 && <li className="py-1 text-dim">Waiting for an aggressive order</li>}
+          {snap.tape.map((t, i) => (
+            <li
+              key={t.id}
+              className={`flex justify-between border-b border-line/60 py-[3px] lg:py-[5px] ${i === 0 ? "pb-flash" : ""}`}
+              style={{ opacity: 1 - i * 0.08 }}
+            >
+              <span style={{ color: t.buy ? "var(--water)" : "var(--fire)" }}>{t.buy ? "BUY" : "SELL"}</span>
+              <span className="tabular-nums text-text/80">
+                {t.qty} @ {px(t.price)}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-dim/70">Sim · not market data</p>
       </div>
     </div>
   );

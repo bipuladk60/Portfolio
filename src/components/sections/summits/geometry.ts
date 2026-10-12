@@ -11,7 +11,7 @@ const r1 = (n: number) => Math.round(n * 10) / 10;
 const toPath = (pts: Pt[]) => pts.map((p, i) => `${i ? "L" : "M"}${r1(p.x)} ${r1(p.y)}`).join(" ");
 
 // Summit heights in drawing units (lower y = higher peak). Wins stand taller than the
-// events where the team turned back, and the line climbs over time.
+// events the team competed in, and the line climbs over time.
 const PEAK_Y: Record<Hackathon["result"], number[]> = {
   win: [176, 150, 118, 72],
   participant: [158, 104],
@@ -54,7 +54,7 @@ export function buildRidge(items: Hackathon[]) {
     if (h.result === "win") {
       markers.push({ id: h.id, index: i, result: h.result, x, y: peakY, peakX: x, peakY });
     } else {
-      // turned back partway up the left face; the unclimbed route continues to the summit
+      // base marker partway up the left face; the unclimbed route continues to the summit
       const t = 0.55;
       const mx = shoulderL.x + (notchL.x - shoulderL.x) * t;
       const my = shoulderL.y + (notchL.y - shoulderL.y) * t;

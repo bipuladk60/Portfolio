@@ -37,11 +37,19 @@ export function SummitScene() {
   const alt = formatAltitude(campById("uplink").altitude);
   return (
     <div className="relative -mx-5 overflow-hidden md:mx-0">
+      <div className="relative px-5 md:px-0">
+        <p className="hud-label text-air">Expedition complete</p>
+        <p className="mt-2 flex flex-wrap items-baseline gap-x-3 font-display text-3xl font-bold uppercase leading-none tracking-tight text-air sm:text-4xl md:text-6xl">
+          <span>Summit reached</span>
+          <span className="text-dim">·</span>
+          <span>{alt}</span>
+        </p>
+      </div>
       <svg
         aria-hidden
         viewBox="0 0 1200 420"
         preserveAspectRatio="xMidYMax slice"
-        className="block h-[260px] w-full sm:h-[320px] md:h-[400px]"
+        className="mt-4 block h-[240px] w-full sm:h-[300px] md:mt-2 md:h-[380px]"
       >
         <defs>
           <linearGradient id="uplink-peak" x1="0" y1="0" x2="0" y2="1">
@@ -93,14 +101,6 @@ export function SummitScene() {
         <circle cx="640" cy="92" r="9" fill="none" stroke="#EDEDE6" strokeOpacity="0.5" className="up-ping" />
       </svg>
 
-      <div className="pointer-events-none absolute inset-x-5 top-4 md:inset-x-0 md:top-6">
-        <p className="hud-label text-air">Expedition complete</p>
-        <p className="mt-2 flex flex-wrap items-baseline gap-x-3 font-display text-3xl font-bold uppercase leading-none tracking-tight text-air sm:text-4xl md:text-6xl">
-          <span>Summit reached</span>
-          <span className="text-dim">·</span>
-          <span>{alt}</span>
-        </p>
-      </div>
     </div>
   );
 }

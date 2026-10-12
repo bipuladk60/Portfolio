@@ -37,7 +37,7 @@ export function Report({ h, index, total, reduce }: { h: Hackathon; index: numbe
                 }}
               >
                 <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: isWin ? "var(--bg)" : color }} />
-                {isWin ? "Summit · flag planted" : "Turned back · data gathered"}
+                {isWin ? "Summit · flag planted" : "Competed · data gathered"}
               </span>
               <span className="hud-label">{h.when}</span>
             </div>

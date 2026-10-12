@@ -122,7 +122,7 @@ export function StatGauge({ value, suffix, label, index, accent = "var(--signal)
           </span>
         </div>
       </div>
-      <p aria-hidden className="hud-label mt-2 max-w-[16ch] text-center leading-snug">
+      <p aria-hidden className="hud-label mt-2 max-w-[22ch] text-center leading-snug tracking-[0.06em]!">
         {label}
       </p>
     </div>

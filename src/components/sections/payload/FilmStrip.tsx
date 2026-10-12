@@ -73,44 +73,106 @@ export function FilmStrip() {
   const view: State = reduce ? { ...INITIAL, cursor: INITIAL.target, locked: true } : s;
   const dist = hamming(view.query, STRIP[view.cursor]);
 
+  const mirror = (bits: number[]) => bits.map((_, i) => bits[Math.floor(i / 4) * 4 + (3 - (i % 4))]);
+  const variants: { label: string; bits: number[]; narrow?: boolean; crop?: boolean }[] = [
+    { label: "Full", bits: view.query },
+    { label: "Mirror", bits: mirror(view.query) },
+    { label: "Crop", bits: view.query, crop: true },
+    { label: "9:16", bits: view.query, narrow: true },
+  ];
+
   return (
-    <div ref={ref} className="flex h-full flex-col justify-center gap-3 px-3 py-3 sm:px-4">
-      <div className="flex items-stretch gap-3">
-        {/* query clip */}
-        <div className="flex w-[18%] shrink-0 flex-col gap-1">
+    <div ref={ref} className="flex h-full flex-col justify-between gap-3 px-3 py-3 sm:px-4 lg:gap-4 lg:px-5 lg:py-5">
+      {/* query clip and its indexed crop variants */}
+      <div className="flex items-end gap-3">
+        <div className="flex w-[24%] shrink-0 flex-col gap-1">
           <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-signal">Clip</span>
           <span className="block aspect-[4/3] border border-signal/70 bg-bg">
             <HashGrid bits={view.query} tone="var(--signal)" />
           </span>
         </div>
-        {/* strip */}
-        <div className="relative min-w-0 flex-1">
-          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-dim/80">Index</span>
-          <div className="mt-1 border-y border-line bg-[#07090c] py-[6px]">
-            <div className="pb-sprockets h-[4px]" />
-            <div className="my-[5px] grid grid-cols-7 gap-[3px] px-[3px]">
-              {STRIP.map((bits, i) => {
-                const active = i === view.cursor;
-                const match = active && view.locked;
-                return (
+        <div className="min-w-0 flex-1">
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-dim/80">Crop variants</span>
+          <div className="mt-1 grid grid-cols-4 gap-[4px]">
+            {variants.map((v) => (
+              <span key={v.label} className="flex flex-col gap-1">
+                <span className="relative block aspect-[4/3] overflow-hidden border border-line bg-bg">
                   <span
-                    key={i}
-                    className="relative block aspect-[4/3] overflow-hidden border bg-bg transition-colors duration-200"
+                    className="absolute inset-0"
                     style={{
-                      borderColor: match ? "var(--fire)" : active ? "var(--signal)" : "var(--line)",
-                      boxShadow: match ? "0 0 0 1px var(--fire), 0 0 14px color-mix(in oklab, var(--fire) 45%, transparent)" : undefined,
+                      transform: v.crop ? "scale(1.5)" : undefined,
+                      clipPath: v.narrow ? "inset(0 32% 0 32%)" : undefined,
                     }}
                   >
-                    <HashGrid bits={bits} tone={match ? "var(--fire)" : "color-mix(in oklab, var(--text) 70%, transparent)"} />
-                    {active && !match && <span className="pb-scan absolute inset-x-0 top-0 h-px bg-signal" />}
+                    <HashGrid bits={v.bits} tone="color-mix(in oklab, var(--signal) 70%, transparent)" />
                   </span>
-                );
-              })}
-            </div>
-            <div className="pb-sprockets h-[4px]" />
+                  {v.narrow && <span className="absolute inset-y-0 left-0 w-[32%] bg-signal/10 blur-[2px]" />}
+                  {v.narrow && <span className="absolute inset-y-0 right-0 w-[32%] bg-signal/10 blur-[2px]" />}
+                </span>
+                <span className="text-center font-mono text-[8px] uppercase tracking-[0.12em] text-dim/70">{v.label}</span>
+              </span>
+            ))}
           </div>
         </div>
       </div>
+
+      {/* film strip index */}
+      <div className="relative min-w-0">
+        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-dim/80">Index</span>
+        <div className="mt-1 border-y border-line bg-[#07090c] py-[6px]">
+          <div className="pb-sprockets h-[4px]" />
+          <div className="my-[5px] grid grid-cols-7 gap-[3px] px-[3px]">
+            {STRIP.map((bits, i) => {
+              const active = i === view.cursor;
+              const match = active && view.locked;
+              return (
+                <span
+                  key={i}
+                  className="relative block aspect-[4/3] overflow-hidden border bg-bg transition-colors duration-200"
+                  style={{
+                    borderColor: match ? "var(--fire)" : active ? "var(--signal)" : "var(--line)",
+                    boxShadow: match ? "0 0 0 1px var(--fire), 0 0 14px color-mix(in oklab, var(--fire) 45%, transparent)" : undefined,
+                  }}
+                >
+                  <HashGrid bits={bits} tone={match ? "var(--fire)" : "color-mix(in oklab, var(--text) 70%, transparent)"} />
+                  {active && !match && <span className="pb-scan absolute inset-x-0 top-0 h-px bg-signal" />}
+                </span>
+              );
+            })}
+          </div>
+          <div className="pb-sprockets h-[4px]" />
+        </div>
+      </div>
+
+      {/* Hamming distance per frame scanned so far */}
+      <div className="hidden min-h-0 sm:block">
+        <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.14em] text-dim/80">
+          <span>Δ bits per frame</span>
+          <span>Match ≤ {MATCH_AT}</span>
+        </div>
+        <div className="relative mt-1 grid h-14 grid-cols-7 items-end gap-[3px] border-b border-line px-[3px] lg:h-20">
+          <span
+            className="absolute inset-x-0 border-t border-dashed border-fire/50"
+            style={{ bottom: `${(MATCH_AT / BITS) * 100}%` }}
+          />
+          {STRIP.map((bits, i) => {
+            const scanned = i <= view.cursor;
+            const d = hamming(view.query, bits);
+            const match = scanned && d <= MATCH_AT;
+            return (
+              <span
+                key={i}
+                className="relative block transition-[height,background-color] duration-300"
+                style={{
+                  height: scanned ? `${Math.max(4, (d / BITS) * 100)}%` : "2px",
+                  background: match ? "var(--fire)" : i === view.cursor ? "var(--signal)" : "var(--line-hi)",
+                }}
+              />
+            );
+          })}
+        </div>
+      </div>
+
       <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-dim">
         {view.locked ? (
           <span className="text-fire">Match locked · frame {String(view.cursor + 1).padStart(2, "0")}</span>

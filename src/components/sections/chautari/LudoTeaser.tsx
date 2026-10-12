@@ -70,13 +70,16 @@ const PIPS: Record<number, number[]> = {
 
 function DieFace({ value }: { value: number }) {
   return (
-    <span className="ch-die-face grid h-full w-full grid-cols-3 grid-rows-3 gap-[3px] rounded-[10px] border border-[#d9ccb4] bg-[#f3eadb] p-[9px] shadow-[inset_0_-4px_0_rgba(0,0,0,0.12),0_6px_18px_rgba(0,0,0,0.45)]">
+    <span className="ch-die-face relative grid h-full w-full grid-cols-3 grid-rows-3 gap-[3px] rounded-[10px] border border-[#d9ccb4] bg-[#f3eadb] p-[9px] shadow-[inset_0_-4px_0_rgba(0,0,0,0.12),0_6px_18px_rgba(0,0,0,0.45)]">
+      {value === 0 && (
+        <span className="absolute inset-[10px] rounded-[5px] border border-dashed border-[#b9a98c]" />
+      )}
       {Array.from({ length: 9 }, (_, i) => (
         <span
           key={i}
           className="m-auto h-[9px] w-[9px] rounded-full"
           style={{
-            background: PIPS[value].includes(i) ? (value === 1 ? "#c8322b" : "#1c130e") : "transparent",
+            background: (PIPS[value] ?? []).includes(i) ? (value === 1 ? "#c8322b" : "#1c130e") : "transparent",
           }}
         />
       ))}
@@ -88,7 +91,7 @@ const HOP_MS = 240;
 
 export function LudoTeaser() {
   const reduce = useReducedMotion();
-  const [face, setFace] = useState(1);
+  const [face, setFace] = useState(0); // 0 = blank until the first throw
   const [pos, setPos] = useState(0);
   const [hop, setHop] = useState(0);
   const [spin, setSpin] = useState(0);
@@ -155,9 +158,9 @@ export function LudoTeaser() {
   const cy = gy * C + C / 2;
 
   return (
-    <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:gap-6">
+    <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:gap-8">
       {/* board vignette */}
-      <svg viewBox="-4 -4 158 158" className="block h-auto w-full max-w-[260px]" aria-hidden>
+      <svg viewBox="-4 -4 158 158" className="block h-auto w-full max-w-[380px] justify-self-center" aria-hidden>
         <rect x="-4" y="-4" width="158" height="158" rx="6" fill="#2a1912" stroke="#5a3a26" />
         <rect x="0" y="0" width="150" height="150" fill="#efe4cf" />
         {HOMES.map((h) => (

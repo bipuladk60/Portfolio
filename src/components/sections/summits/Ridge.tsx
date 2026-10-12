@@ -159,7 +159,7 @@ export function Ridge({
                   type="button"
                   onClick={() => onSelect(h.id)}
                   aria-pressed={active}
-                  aria-label={`${h.event}, ${h.when}: ${isWin ? `summit, ${h.award}` : "attempt, turned back, data gathered"}. Show expedition report.`}
+                  aria-label={`${h.event}, ${h.when}: ${isWin ? `summit, ${h.award}` : "competed, data gathered"}. Show expedition report.`}
                   className="group relative flex h-14 w-10 cursor-pointer items-end justify-center transition-opacity duration-300 sm:h-[72px] sm:w-12"
                   style={{ opacity: dim ? 0.22 : 1, filter: dim ? "grayscale(0.8)" : undefined }}
                 >
@@ -194,8 +194,8 @@ export function Ridge({
                 </button>
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute left-1/2 top-full hidden -translate-x-1/2 whitespace-nowrap pt-3 text-center font-mono text-[10px] uppercase tracking-[0.12em] transition-opacity duration-300 md:block"
-                  style={{ color: active ? color : "var(--text-dim)", opacity: dim ? 0.3 : 1 }}
+                  className="pointer-events-none absolute left-1/2 top-full mt-2.5 hidden -translate-x-1/2 whitespace-nowrap border bg-bg px-1.5 py-0.5 text-center font-mono text-[10px] uppercase tracking-[0.12em] transition-opacity duration-300 md:block"
+                  style={{ color: active ? color : "var(--text-dim)", borderColor: active ? color : "var(--line)", opacity: dim ? 0.3 : 1 }}
                 >
                   {String(i + 1).padStart(2, "0")} · {h.when}
                 </span>
@@ -212,7 +212,7 @@ export function Ridge({
         </span>
         <span className="flex items-center gap-2">
           <span aria-hidden className="inline-block h-2.5 w-2.5 rotate-45 border" style={{ borderColor: "var(--sky)" }} />
-          Attempt · turned back, data gathered
+          Competed · data gathered
         </span>
         <span className="text-dim/70">Time runs left to right</span>
       </div>

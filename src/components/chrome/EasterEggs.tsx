@@ -72,7 +72,7 @@ export function EasterEggs() {
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((en) => en.isIntersecting)) {
-          unlock("summit");
+          unlock("summit", { toastDelay: 1500, toastDuration: 2000 });
           io.disconnect();
         }
       },

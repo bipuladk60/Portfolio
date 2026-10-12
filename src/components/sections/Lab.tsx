@@ -3,7 +3,7 @@ import { Station } from "./lab/Station";
 
 export function Lab() {
   return (
-    <CampSection campId="lab">
+    <CampSection campId="lab" className="pt-8 md:pt-10">
       <SectionHeader
         campId="lab"
         title="Atmospheric Lab"

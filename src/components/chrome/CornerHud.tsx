@@ -11,8 +11,14 @@ export function CornerHud() {
   const dim = camp === "chautari";
   return (
     <>
+      {/* Scrim so the fixed HUD never sits directly on body text */}
       <div
-        className="pointer-events-none fixed left-4 top-4 z-[70] hidden items-center gap-2 border border-line bg-bg/85 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-dim transition-opacity duration-700 md:flex"
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 top-0 z-[69] hidden h-16 md:block"
+        style={{ background: "linear-gradient(to bottom, var(--bg) 0%, color-mix(in oklab, var(--bg) 70%, transparent) 55%, transparent 100%)" }}
+      />
+      <div
+        className="pointer-events-none fixed left-4 top-4 z-[70] hidden items-center gap-1.5 border border-line bg-bg/85 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-dim transition-opacity duration-700 md:flex"
         style={{ opacity: dim ? 0.45 : 1 }}
       >
         <span className="text-text">EXP-CTRL</span>
@@ -36,7 +42,7 @@ export function CornerHud() {
 }
 
 const btn =
-  "group relative flex h-[26px] items-center gap-1.5 border border-line bg-bg/85 px-2 font-mono text-[10px] uppercase tracking-[0.14em] text-dim transition-colors duration-300 hover:border-signal hover:text-signal md:h-[28px] md:px-2.5";
+  "group relative flex h-[26px] items-center gap-1.5 border border-line bg-bg/85 px-2 font-mono text-[10px] uppercase tracking-[0.14em] text-dim transition-colors duration-300 hover:border-signal hover:text-signal md:h-[26px] md:px-2";
 
 function PaletteButton() {
   const [mac, setMac] = useState(true);

@@ -112,7 +112,10 @@ export function Crosshair() {
       shownOpacity += (target - shownOpacity) * 0.25;
       if (root.current) root.current.style.opacity = shownOpacity.toFixed(3);
 
-      if (dot.current) dot.current.style.transform = `translate3d(${mouse.x}px, ${mouse.y}px, 0)`;
+      if (dot.current) {
+        dot.current.style.transform = `translate3d(${mouse.x}px, ${mouse.y}px, 0)`;
+        dot.current.style.opacity = locked ? "0" : "1";
+      }
       const c = corners.current;
       const s = locked ? 9 : 6;
       const pos: [number, number][] = [
@@ -165,7 +168,8 @@ export function Crosshair() {
   return (
     <div ref={root} aria-hidden className="pointer-events-none fixed inset-0 z-[110] overflow-hidden" style={{ opacity: 0 }}>
       <style>{`html.xc-cursor, html.xc-cursor * { cursor: none !important; }
-html.xc-cursor input:not([type="checkbox"]):not([type="radio"]), html.xc-cursor textarea, html.xc-cursor [contenteditable="true"] { cursor: text !important; }`}</style>
+html.xc-cursor :is(${INTERACTIVE}), html.xc-cursor :is(${INTERACTIVE}) * { cursor: pointer !important; }
+html.xc-cursor :is(${TEXT_INPUT}) { cursor: text !important; }`}</style>
       {sides.map((cls, i) => (
         <span
           key={cls}
