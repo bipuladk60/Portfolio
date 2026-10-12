@@ -6,10 +6,7 @@ import { RouteTrack } from "./route/RouteTrack";
 export function RouteLog() {
   return (
     <CampSection campId="route" className="md:py-28!">
-      <SectionHeader
-        campId="route"
-        kicker="Oldest first. Gulf South, the gold line on the left, ran the whole way through, alongside CadenceAI and then Illumibot."
-      />
+      <SectionHeader campId="route" />
       <RouteTrack entries={experience} />
     </CampSection>
   );
