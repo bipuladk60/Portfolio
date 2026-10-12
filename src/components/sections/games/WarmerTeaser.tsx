@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { playBlip } from "@/lib/sound";
-import { heatRGB, WarmerGlobe, type GlobeGuess, type LatLon } from "./WarmerGlobe";
+import { WarmerGlobe, type GlobeGuess, type LatLon } from "./WarmerGlobe";
+import { GREEN, INK, RED, YELLOW, heatWord, toonHeat } from "./toon";
 
 // Approximate country centroids (lat, lon) for the teaser round.
 const POOL: (LatLon & { name: string })[] = [
@@ -31,33 +32,28 @@ function km(a: LatLon, b: LatLon) {
   return 2 * 6371 * Math.asin(Math.sqrt(h));
 }
 
-function word(t: number) {
-  if (t === 0) return "Found it";
-  if (t < 0.1) return "Hot";
-  if (t < 0.22) return "Warm";
-  if (t < 0.42) return "Cool";
-  return "Cold";
-}
-
 type Guess = { name: string; dist: number; t: number };
-
 type Round = { choices: number[]; target: number };
 
-// Deterministic first render (no target shown until hydrated); a random round is dealt on mount.
+// Deterministic first render; the hidden country is picked after hydration.
 const FIRST: Round = { choices: [0, 1, 2, 3, 4, 5], target: -1 };
 
 function deal(): Round {
-  const idx = POOL.map((_, i) => i).sort(() => Math.random() - 0.5).slice(0, CHOICES);
+  const idx = POOL.map((_, i) => i)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, CHOICES);
   return { choices: idx, target: idx[Math.floor(Math.random() * CHOICES)] };
 }
 
+const roundKm = (d: number) => (Math.round(d / 100) * 100).toLocaleString("en-US");
+
+/** The globe sticker: a six-country warmer/colder round on the cartoon globe. */
 export function WarmerTeaser({ href }: { href: string }) {
   const [round, setRound] = useState<Round>(FIRST);
   const [guesses, setGuesses] = useState<Guess[]>([]);
   const [announce, setAnnounce] = useState("");
 
   useEffect(() => {
-    // pick the hidden country after hydration so server and client markup match
     setRound((r) => ({ ...r, target: r.choices[Math.floor(Math.random() * r.choices.length)] }));
   }, []);
 
@@ -73,6 +69,8 @@ export function WarmerTeaser({ href }: { href: string }) {
     [guesses],
   );
   const lastGuess = globeGuesses[globeGuesses.length - 1] ?? null;
+  const last = guesses[guesses.length - 1];
+  const bleed = last ? toonHeat(last.t, last.t === 0) : null;
 
   const guess = (i: number) => {
     if (!target || solved) return;
@@ -87,7 +85,7 @@ export function WarmerTeaser({ href }: { href: string }) {
     setAnnounce(
       isHit
         ? `${c.name} is correct. Found it in ${next.length} ${next.length === 1 ? "guess" : "guesses"}.`
-        : `${c.name}: ${word(t).toLowerCase()}, about ${Math.round(dist / 100) * 100} kilometres away.`,
+        : `${c.name}: ${heatWord(t).toLowerCase()}, about ${roundKm(dist)} kilometres away.`,
     );
   };
 
@@ -98,24 +96,39 @@ export function WarmerTeaser({ href }: { href: string }) {
   };
 
   return (
-    <div>
-      <WarmerGlobe guesses={globeGuesses} reveal={solved && target ? target : null} focus={solved && target ? target : lastGuess} />
-
-      <div className="mx-auto mt-3 flex max-w-[360px] items-center gap-3" aria-hidden>
-        <span className="hud-label !text-[10px]">Hot</span>
-        <span className="h-1 flex-1" style={{ background: "linear-gradient(to right, #ff5c5c, #ff9a3c, #f2b418, #8a97a6, #4c8dff)" }} />
-        <span className="hud-label !text-[10px]">Cold</span>
+    <div
+      data-cursor-box=""
+      className="wr-sticker wr-wobble p-5 transition-[background-color] duration-700 md:p-6"
+      style={{ background: bleed ? `color-mix(in oklab, ${bleed} 16%, #ffffff)` : "#ffffff" }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="wr-display text-lg font-semibold">Try a mini round</p>
+        <p className="text-xs font-bold opacity-70">{guesses.length} {guesses.length === 1 ? "guess" : "guesses"}</p>
       </div>
 
-      <fieldset className="mx-auto mt-5 max-w-[420px]">
-        <legend className="hud-label mb-2 !text-[10px]" style={{ color: "var(--dusk-glow)" }}>
-          Mini round · which country is hidden? (distances in km)
-        </legend>
-        <ul className="grid auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="mt-3">
+        <WarmerGlobe guesses={globeGuesses} reveal={solved && target ? target : null} focus={solved && target ? target : lastGuess} />
+      </div>
+
+      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-bold" aria-hidden>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-full border-2" style={{ background: YELLOW, borderColor: INK }} /> far
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-full border-2" style={{ background: RED, borderColor: INK }} /> close
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-full border-2" style={{ background: GREEN, borderColor: INK }} /> got it
+        </span>
+      </p>
+
+      <fieldset className="mt-4">
+        <legend className="mb-2 text-sm font-bold">Which country is hidden? Distances in km.</legend>
+        <ul className="grid auto-rows-fr grid-cols-2 gap-2.5 sm:grid-cols-3">
           {round.choices.map((i) => {
             const c = POOL[i];
             const g = guesses.find((x) => x.name === c.name);
-            const color = g ? `rgb(${heatRGB(g.t)})` : undefined;
+            const color = g ? toonHeat(g.t, g.t === 0) : undefined;
             return (
               <li key={c.name}>
                 <button
@@ -123,21 +136,17 @@ export function WarmerTeaser({ href }: { href: string }) {
                   onClick={() => guess(i)}
                   disabled={!target}
                   aria-disabled={Boolean(g) || solved}
-                  aria-label={g ? `${c.name}, guessed: ${word(g.t)}` : `Guess ${c.name}`}
-                  className={`flex h-full min-h-[3.25rem] w-full cursor-pointer flex-col items-start justify-center border px-3 py-1.5 text-left transition-colors duration-200 ${
-                    g ? "" : "border-line-hi hover:border-[var(--dusk-glow)]"
-                  } ${solved && !g ? "opacity-50" : ""}`}
-                  style={
-                    g
-                      ? { borderColor: color, background: `color-mix(in oklab, ${color} 14%, transparent)` }
-                      : { background: "color-mix(in oklab, #140d0a 70%, transparent)" }
-                  }
+                  aria-label={g ? `${c.name}, guessed: ${heatWord(g.t, g.t === 0)}` : `Guess ${c.name}`}
+                  className={`wr-pill wr-press flex h-full min-h-[3.1rem] w-full cursor-pointer flex-col items-center justify-center !rounded-2xl px-2 py-1.5 text-center ${
+                    solved && !g ? "opacity-45" : ""
+                  }`}
+                  style={{ background: color ?? "#ffffff" }}
                 >
-                  <span className="text-sm text-text">{c.name}</span>
+                  <span className="text-sm font-extrabold leading-tight">{c.name}</span>
                   {g && (
-                    <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.08em]" style={{ color }}>
-                      {word(g.t)}
-                      {g.t > 0 && ` ~${(Math.round(g.dist / 100) * 100).toLocaleString("en-US")}`}
+                    <span className="whitespace-nowrap text-[11px] font-bold leading-tight">
+                      {heatWord(g.t, g.t === 0)}
+                      {g.t > 0 && ` · ${roundKm(g.dist)}`}
                     </span>
                   )}
                 </button>
@@ -147,32 +156,25 @@ export function WarmerTeaser({ href }: { href: string }) {
         </ul>
       </fieldset>
 
-      <div className="mx-auto mt-4 flex min-h-11 max-w-[420px] flex-wrap items-center justify-between gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-dim">
-          {solved ? (
-            <span className="text-[var(--dusk-glow)]">
-              Found in {guesses.length} {guesses.length === 1 ? "guess" : "guesses"}
-            </span>
-          ) : guesses.length ? (
-            `Guesses ${guesses.length}`
-          ) : (
-            "Pick a country"
-          )}
+      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-bold">
+          {solved
+            ? `Found it in ${guesses.length} ${guesses.length === 1 ? "guess" : "guesses"}!`
+            : guesses.length
+              ? "Warmer or colder? Keep going."
+              : "Pick a country to start."}
         </p>
         {solved && (
-          <div className="flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex min-h-8 cursor-pointer items-center py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-dim hover:text-text"
-            >
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="button" onClick={reset} className="min-h-8 cursor-pointer py-2 text-sm font-bold underline underline-offset-4">
               New round
             </button>
             <a
               href={href}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-8 items-center py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--dusk-glow)] underline decoration-[color-mix(in_oklab,var(--dusk-glow)_45%,transparent)] underline-offset-4"
+              className="wr-pill wr-press inline-flex min-h-10 items-center px-4 py-1.5 text-sm font-extrabold"
+              style={{ background: GREEN }}
             >
               Play the real one daily →
             </a>

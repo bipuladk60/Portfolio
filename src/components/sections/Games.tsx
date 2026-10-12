@@ -1,72 +1,106 @@
+import { Fredoka, Nunito } from "next/font/google";
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
-import { Chip, Panel } from "@/components/hud/Panel";
 import { games } from "@/data/content";
-import { DuskBackdrop } from "./games/DuskBackdrop";
+import { SkyWorld } from "./games/SkyWorld";
 import { WarmerTeaser } from "./games/WarmerTeaser";
+import { WarmerStats } from "./games/WarmerStats";
+import { GREEN, INK, ORANGE, WARMER_CSS, YELLOW } from "./games/toon";
 import { Reveal } from "./shared/Reveal";
 
-const GLOW = "var(--dusk-glow)";
-const DUSK_PANEL = { background: "color-mix(in oklab, #140d0a 84%, transparent)" };
+// Warmer's own rounded, friendly type, scoped to this section.
+const fredoka = Fredoka({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-fredoka", display: "swap" });
+const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700", "800"], variable: "--font-nunito", display: "swap" });
+
+const CHIP_COLORS = [YELLOW, "#a8d8ff", GREEN];
+const TILTS = ["-1.5deg", "1deg", "-0.6deg"];
 
 export function Games() {
   const warmer = games[0];
-  return (
-    <CampSection campId="games" className="overflow-hidden">
-      <DuskBackdrop />
-      <div className="relative">
-        <SectionHeader
-          campId="games"
-          title="Game Room"
-          kicker="The light goes warm for a minute. This is the game I make on the side, and you can play a round right here."
-        />
+  // the last bullet (SEO + visitors) is told by the analytics sticker; the rest become feature stickers
+  const features = warmer.bullets.slice(0, -1);
+  const distribution = warmer.bullets[warmer.bullets.length - 1];
 
-        <Reveal>
-          <Panel as="article" label="Featured game" accent={GLOW} className="p-5 md:p-8" style={DUSK_PANEL}>
-            <div className="grid items-start gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-10">
-              <div className="md:order-2">
-                <p className="hud-label flex items-center gap-2" style={{ color: "var(--water)" }}>
-                  <span className="led inline-block h-1.5 w-1.5 rounded-full bg-water" />
-                  {warmer.status} · warmergames.com
-                </p>
-                <h3 className="mt-3 font-display text-4xl font-bold uppercase leading-none tracking-tight text-text md:text-6xl">
-                  {warmer.title}
-                </h3>
-                <p className="mt-3 text-lg leading-snug text-text">{warmer.tagline}</p>
-                <p className="mt-3 text-dim">{warmer.howItWorks}</p>
-                <ul className="mt-5 space-y-2">
-                  {warmer.bullets.map((b) => (
-                    <li key={b} className="flex gap-3 text-sm leading-relaxed text-dim">
-                      <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: GLOW }} />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {warmer.stack.map((s) => (
-                    <Chip key={s} color={GLOW}>
-                      {s}
-                    </Chip>
-                  ))}
-                </div>
+  return (
+    <CampSection campId="games" className={`overflow-hidden ${fredoka.variable} ${nunito.variable}`}>
+      <style>{WARMER_CSS}</style>
+      <SectionHeader
+        campId="games"
+        title="Game Room"
+        kicker="Step out of the console for a minute. This is Warmer, the game I build and run, and you can play a round right here."
+      />
+
+      <SkyWorld>
+        <div className="grid items-start gap-6 lg:grid-cols-12 lg:gap-8">
+          {/* hero sticker */}
+          <Reveal className="lg:col-span-7">
+            <article data-cursor-box="" className="wr-sticker p-6 md:p-8">
+              <p className="wr-pill inline-flex items-center gap-2 bg-white px-3 py-1 text-xs font-extrabold uppercase tracking-wider">
+                <span className="relative inline-flex h-2.5 w-2.5">
+                  <span className="led absolute inset-0 rounded-full" style={{ background: GREEN }} />
+                  <span className="relative inline-block h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: INK }} />
+                </span>
+                {warmer.title} · {warmer.status}
+              </p>
+              <h3 className="wr-display mt-4 text-5xl font-bold leading-[0.95] md:text-7xl" style={{ color: INK }}>
+                {warmer.title}
+                <span aria-hidden style={{ color: ORANGE }}>
+                  .
+                </span>
+              </h3>
+              <p className="mt-3 text-xl font-bold leading-snug md:text-2xl">{warmer.tagline}</p>
+              <p className="mt-3 text-base leading-relaxed opacity-85">{warmer.howItWorks}</p>
+              <div className="mt-6 flex flex-wrap items-center gap-4">
                 <a
                   href={warmer.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group/cta mt-7 inline-flex min-h-12 items-center gap-3 border border-[var(--dusk-glow)] bg-[var(--dusk-glow)] px-6 py-3 font-display text-base font-bold uppercase tracking-[0.12em] text-bg transition-colors duration-300 hover:bg-transparent hover:text-[var(--dusk-glow)]"
+                  className="wr-pill wr-press wr-display inline-flex min-h-14 items-center gap-3 !rounded-2xl px-6 py-3 text-lg font-bold md:text-xl"
+                  style={{ background: YELLOW, borderWidth: 3, boxShadow: `5px 5px 0 ${INK}` }}
                 >
                   Play at warmergames.com
-                  <span aria-hidden className="transition-transform duration-300 group-hover/cta:translate-x-1">
-                    ↗
-                  </span>
+                  <span aria-hidden>→</span>
                 </a>
+                <span className="text-sm font-bold opacity-70">Free · no sign-up · new country daily</span>
               </div>
-              <div className="md:order-1">
-                <WarmerTeaser href={warmer.href} />
+            </article>
+          </Reveal>
+
+          {/* globe sticker + feature stickers */}
+          <div className="flex flex-col gap-6 lg:col-span-5 lg:row-span-2">
+            <Reveal delay={0.08}>
+              <WarmerTeaser href={warmer.href} />
+            </Reveal>
+            <Reveal delay={0.12}>
+              <div data-cursor-box="" className="wr-sticker p-5">
+                <ul className="flex flex-col gap-3">
+                  {features.map((f, i) => (
+                    <li
+                      key={f}
+                      className="wr-pill !rounded-2xl px-3.5 py-2 text-sm font-bold leading-snug"
+                      style={{ background: CHIP_COLORS[i % CHIP_COLORS.length], rotate: TILTS[i % TILTS.length] }}
+                    >
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <ul className="mt-4 flex flex-wrap gap-2" aria-label="Stack">
+                  {warmer.stack.map((s) => (
+                    <li key={s} className="rounded-full border-2 px-2.5 py-0.5 text-xs font-extrabold" style={{ borderColor: INK }}>
+                      {s}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-          </Panel>
-        </Reveal>
-      </div>
+            </Reveal>
+          </div>
+
+          {/* analytics sticker */}
+          <Reveal className="lg:col-span-7" delay={0.05}>
+            <WarmerStats />
+            <p className="mt-4 px-1 text-sm font-bold leading-snug">{distribution}</p>
+          </Reveal>
+        </div>
+      </SkyWorld>
     </CampSection>
   );
 }

@@ -1,8 +1,6 @@
 import { CampSection } from "@/components/hud/SectionHeader";
 import { Panel } from "@/components/hud/Panel";
-import { campById, formatAltitude } from "@/data/camps";
 import { profile } from "@/data/content";
-import { HudFrame } from "./hero/HudFrame";
 import { HeroName } from "./hero/HeroName";
 import { RouteMap } from "./hero/RouteMap";
 import { DualClock } from "./hero/DualClock";
@@ -11,7 +9,6 @@ import { Reveal } from "./hero/Reveal";
 import { ARC_KM } from "./hero/geo";
 import { NEPAL_BBOX, NEPAL_PATH, USA_BBOX, USA_PATH } from "./hero/countryPaths";
 
-const camp = campById("base");
 const [firstName, ...rest] = profile.name.split(" ");
 const lastName = rest.join(" ");
 
@@ -23,35 +20,12 @@ function Arrow() {
   );
 }
 
-/** Camp 00, Ground Station. Full-viewport HUD: name, live clocks, Nepal -> Mississippi route telemetry. */
+/** Camp 00, Ground Station. Full-viewport, deliberately calm: name, live clocks, Nepal -> Mississippi route telemetry. */
 export function Hero() {
   return (
     <CampSection campId="base" className="min-h-svh overflow-hidden py-0!">
-      <HudFrame />
-      {/* Faint coordinate grid, vignetted so it never competes with the type */}
-      <div
-        aria-hidden
-        className="hud-grid pointer-events-none absolute inset-0 opacity-50"
-        style={{
-          maskImage: "radial-gradient(ellipse 70% 60% at 50% 45%, black 20%, transparent 75%)",
-          WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 45%, black 20%, transparent 75%)",
-        }}
-      />
-
-      <div className="relative z-10 flex min-h-svh flex-col pb-32 pt-14 md:pb-28 md:pt-20">
-        {/* Status strip */}
-        <Reveal delay={0.5} y={-6} className="hud-label flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="flex items-center gap-2 text-signal">
-            <span aria-hidden className="led inline-block h-1.5 w-1.5 rounded-full bg-signal" />
-            Signal acquired
-          </span>
-          <span aria-hidden className="hidden h-px w-8 bg-line-hi sm:block" />
-          <span>Camp 00 · {camp.name}</span>
-          <span aria-hidden className="hidden h-px w-8 bg-line-hi sm:block" />
-          <span className="text-text">ALT {formatAltitude(camp.altitude)}</span>
-        </Reveal>
-
-        <div className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-12 lg:gap-8 lg:py-12">
+      <div className="relative z-10 flex min-h-svh flex-col pb-32 pt-24 md:pb-32 md:pt-28">
+        <div className="grid flex-1 items-center gap-14 lg:grid-cols-12 lg:gap-12">
           {/* Identity */}
           <div className="min-w-0 lg:col-span-7">
             <Reveal delay={0.25} className="mb-5 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-signal">

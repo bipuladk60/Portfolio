@@ -53,16 +53,16 @@ function NameLine({ word, delay, reduce }: { word: string; delay: number; reduce
       <span className="invisible whitespace-nowrap">{word}</span>
       {/* Chromatic fringe: two offset colour copies behind the main glyphs */}
       <motion.span
-        className={`${base} text-fire/60 mix-blend-screen`}
-        animate={reduce ? { x: 0 } : { x: [-2, -1, -3, -2] }}
-        transition={{ duration: 3.2, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+        className={`${base} text-fire/20 mix-blend-screen`}
+        animate={{ x: -1 }}
+        transition={{ duration: 0 }}
       >
         {shown}
       </motion.span>
       <motion.span
-        className={`${base} text-sky/60 mix-blend-screen`}
-        animate={reduce ? { x: 0 } : { x: [2, 1, 3, 2] }}
-        transition={{ duration: 2.7, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+        className={`${base} text-sky/20 mix-blend-screen`}
+        animate={{ x: 1 }}
+        transition={{ duration: 0 }}
       >
         {shown}
       </motion.span>
@@ -77,7 +77,7 @@ function NameLine({ word, delay, reduce }: { word: string; delay: number; reduce
         }}
         initial={{ backgroundPosition: "100% 0" }}
         animate={reduce ? { backgroundPosition: "100% 0" } : { backgroundPosition: ["100% 0", "-50% 0"] }}
-        transition={{ duration: 2.4, delay: delay / 1000 + 1, repeat: Infinity, repeatDelay: 6, ease: "easeInOut" }}
+        transition={{ duration: 2.4, delay: delay / 1000 + 1, repeat: Infinity, repeatDelay: 10, ease: "easeInOut" }}
       >
         {shown}
       </motion.span>
@@ -85,7 +85,7 @@ function NameLine({ word, delay, reduce }: { word: string; delay: number; reduce
       <span
         className={`${base} bg-clip-text text-transparent`}
         style={{
-          backgroundImage: "repeating-linear-gradient(to bottom, transparent 0 3px, rgba(10,13,18,0.55) 3px 4px)",
+          backgroundImage: "repeating-linear-gradient(to bottom, transparent 0 3px, rgba(10,13,18,0.18) 3px 4px)",
           WebkitBackgroundClip: "text",
         }}
       >
