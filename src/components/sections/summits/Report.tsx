@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import type { Hackathon } from "@/data/content";
 import { ResultGlyph } from "./Markers";
 import { EASE } from "./motion";
@@ -24,13 +26,15 @@ export function Report({
 }) {
   const isWin = h.result === "win";
   const color = isWin ? "var(--signal)" : "var(--sky)";
+  const ref = useRef<HTMLElement>(null);
+  const shown = useReveal(ref, "-10% 0px");
   const t = (d = 0) => (reduce ? { duration: 0 } : { delay: d, duration: 0.4, ease: EASE });
 
   return (
     <motion.article
+      ref={ref}
       initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10% 0px" }}
+      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
       transition={reduce ? { duration: 0 } : { delay: 0.35, duration: 0.6, ease: EASE }}
       className="relative overflow-hidden border p-6 transition-[border-color,background-color,color] duration-500 sm:p-8 lg:min-h-[540px]"
       style={{

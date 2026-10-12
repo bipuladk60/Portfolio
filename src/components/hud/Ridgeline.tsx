@@ -136,7 +136,7 @@ export function Ridgeline({ className = "", accent = "var(--signal)" }: { classN
               fill={FILLS[i]}
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.9, delay: 0.4 + i * 0.15, ease: EASE }}
+              transition={{ duration: 0.6, delay: 0.2 + i * 0.1, ease: EASE }}
             />
             {i === 0 && <path d={l.fill} fill="var(--text)" opacity={0.07} clipPath={`url(#snow-${id})`} />}
             <motion.path
@@ -148,7 +148,7 @@ export function Ridgeline({ className = "", accent = "var(--signal)" }: { classN
               opacity={i === 1 ? 0.7 : 1}
               initial={reduce ? false : { pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ duration: 1.8, delay: 0.2 + i * 0.2, ease: EASE }}
+              transition={{ duration: 0.9, delay: 0.1 + i * 0.1, ease: EASE }}
             />
           </motion.g>
         ))}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { animate, motion, useInView, useReducedMotion } from "motion/react";
+import { animate, motion, useReducedMotion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import { games } from "@/data/content";
 import { GREEN, INK, ORANGE, RED, YELLOW } from "@/components/toon/toon";
 import type { SearchDay, WarmerSearchLive } from "@/lib/server/searchConsole";
@@ -111,7 +112,7 @@ function Stat({ label, value, growth, start }: { label: string; value: number; g
 /** Analytics sticker: real Vercel Analytics totals + an approximate daily visitors chart that draws on scroll. */
 export function WarmerStats({ footnote, live = null }: { footnote?: string; live?: WarmerSearchLive | null }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const inView = useReveal(ref, "-10% 0px");
   const reduce = useReducedMotion();
   const [active, setActive] = useState<number | null>(null);
   const gradId = useId().replace(/[^a-zA-Z0-9]/g, "");
@@ -188,7 +189,7 @@ export function WarmerStats({ footnote, live = null }: { footnote?: string; live
         role="tabpanel"
         id={`${tabBase}-search`}
         aria-labelledby={`${tabBase}-search-tab`}
-        className={`[grid-area:1/1] ${tab === "search" ? "" : "invisible"}`}
+        className={`[grid-area:1/1] flex flex-col ${tab === "search" ? "" : "invisible"}`}
         inert={tab !== "search"}
       >
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
@@ -217,25 +218,27 @@ export function WarmerStats({ footnote, live = null }: { footnote?: string; live
             )}
           </p>
         </div>
-        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* The panel shares its height with Traffic: live mode gives the spare height to the clicks chart,
+            snapshot mode (no chart) to the metric tiles as a 2x2 block, so neither leaves an empty band. */}
+        <dl className={`mt-3 grid grid-cols-2 gap-3 ${liveLine ? "sm:grid-cols-4" : "flex-1 auto-rows-fr"}`}>
           {metrics.map((m, i) => (
             <div
               key={m.label}
-              className="wr-pill !rounded-2xl px-3 py-2.5"
+              className="wr-pill flex flex-col justify-between gap-2 !rounded-2xl px-3 py-2.5"
               style={{ background: [YELLOW, "#a8d8ff", GREEN, "#ffffff"][i] }}
             >
               <dt className="text-[11px] font-extrabold uppercase tracking-wide opacity-75">{m.label}</dt>
-              <dd className="wr-display mt-0.5 text-3xl font-bold leading-none">{m.value}</dd>
+              <dd className={`wr-display mt-0.5 font-bold leading-none ${liveLine ? "text-3xl" : "text-3xl md:text-[2.6rem]"}`}>{m.value}</dd>
             </div>
           ))}
         </dl>
         {live && liveLine ? (
-          <div className="mt-4">
-            <div className="relative">
+          <div className="mt-4 flex flex-1 flex-col">
+            <div className="relative min-h-16 flex-1 md:min-h-20">
               <svg
                 viewBox={`0 0 ${SW} ${SH}`}
                 preserveAspectRatio="none"
-                className="block h-16 w-full overflow-visible md:h-20"
+                className="absolute inset-0 block h-full w-full overflow-visible"
                 role="img"
                 aria-label={`Daily Google clicks from ${isoDay(live.startDate)} to ${isoDay(live.dataThrough)}, best day ${isoDay(live.daily[liveLine.peak].date)} with ${live.daily[liveLine.peak].clicks} clicks.`}
               >
@@ -382,6 +385,7 @@ export function WarmerStats({ footnote, live = null }: { footnote?: string; live
         {/* labels as HTML so they stay readable when the chart scales down */}
         <motion.span
           aria-hidden
+          data-noscript-fade=""
           className="wr-display pointer-events-none absolute whitespace-nowrap text-[13px] font-bold leading-none md:text-[15px]"
           style={{
             left: `${((xs[PEAK_I] - 76) / W) * 100}%`,

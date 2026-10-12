@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import { degree, games, hackathons, stats } from "@/data/content";
 import { Surface } from "@/components/hud/Surface";
 
@@ -38,14 +39,19 @@ function yearMarks() {
 }
 
 function CountUp({ value, run, delay, reduce }: { value: number; run: boolean; delay: number; reduce: boolean }) {
-  const count = useMotionValue(reduce ? value : 0);
+  // The server renders the real number (no-JS readers see it); on mount it drops to 0 behind the
+  // still-closed Assemble clip and counts up once the cluster is revealed.
+  const count = useMotionValue(value);
   const shown = useTransform(count, (v) => Math.round(v).toLocaleString("en-US"));
   useEffect(() => {
     if (reduce) {
       count.set(value);
       return;
     }
-    if (!run) return;
+    if (!run) {
+      count.set(0);
+      return;
+    }
     const c = animate(count, value, { duration: 1.3, delay, ease: EASE });
     return () => c.stop();
   }, [run, reduce, value, delay, count]);
@@ -276,6 +282,7 @@ function Dial({ run, delay, reduce, progress }: { run: boolean; delay: number; r
         d={arc}
         stroke="var(--water)"
         strokeWidth={6}
+        data-noscript-keep=""
         initial={{ pathLength: reduce ? progress : 0 }}
         animate={{ pathLength: run || reduce ? progress : 0 }}
         transition={{ duration: reduce ? 0 : 1.3, delay: reduce ? 0 : delay + 0.15, ease: EASE }}
@@ -312,7 +319,7 @@ function Dial({ run, delay, reduce, progress }: { run: boolean; delay: number; r
  */
 export function InstrumentCluster() {
   const ref = useRef<HTMLUListElement>(null);
-  const run = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
+  const run = useReveal(ref, "0px 0px -15% 0px");
   const reduce = useReducedMotion() ?? false;
   // 0 on the server and during hydration, the live value right after
   const progress = useSyncExternalStore(noop, degreeProgress, () => 0);

@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import type { Hackathon } from "@/data/content";
 import { backRidge, buildRidge, H, pct, W } from "./geometry";
 import { BaseBeacon, PlantedFlag } from "./Markers";
@@ -51,7 +52,7 @@ export function Ridge({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotionSafe();
-  const inView = useInView(ref, { once: true, margin: "-15% 0px" });
+  const inView = useReveal(ref, "-15% 0px");
   const { line, fill, markers } = buildRidge(items);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });

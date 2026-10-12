@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MotionConfig, motion } from "motion/react";
 import { hackathons } from "@/data/content";
 import { Ridge } from "./Ridge";
 import { Report } from "./Report";
 import { Patch } from "./Patch";
 import { EASE, useReducedMotionSafe } from "./motion";
+import { useReveal } from "@/lib/reveal";
 
 export type Filter = "all" | "win" | "participant";
 
@@ -127,15 +128,17 @@ export function Expedition() {
 }
 
 function Count({ value, color, reduce, delay }: { value: number; color: string; reduce: boolean; delay: number }) {
+  // The digit starts translated out of its overflow-hidden slot (zero visible area): observe the slot.
+  const slot = useRef<HTMLSpanElement>(null);
+  const shown = useReveal(slot, "0px");
   return (
-    <span className="inline-flex overflow-hidden text-4xl font-bold leading-none sm:text-5xl" style={{ color }}>
+    <span ref={slot} className="inline-flex overflow-hidden text-4xl font-bold leading-none sm:text-5xl" style={{ color }}>
       <span className="sr-only">{value}</span>
       <motion.span
         aria-hidden
         className="inline-block"
         initial={{ y: "100%" }}
-        whileInView={{ y: "0%" }}
-        viewport={{ once: true }}
+        animate={{ y: shown ? "0%" : "100%" }}
         transition={reduce ? { duration: 0 } : { delay, duration: 0.6, ease: EASE }}
       >
         {value}

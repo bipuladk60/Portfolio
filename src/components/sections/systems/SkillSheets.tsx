@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef, type ReactNode } from "react";
 import { MotionConfig, motion, type Variants } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import { skills } from "@/data/content";
 import { GREEN, INK, ORANGE, YELLOW } from "@/components/toon/toon";
 
@@ -23,6 +25,17 @@ const pill: Variants = {
   show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 520, damping: 15 } },
 };
 
+/** One sheet: reveals when it scrolls in, or at once if the visitor landed below it. */
+function Sheet({ index, children }: { index: number; children: ReactNode }) {
+  const ref = useRef<HTMLLIElement>(null);
+  const shown = useReveal(ref, "-8% 0px");
+  return (
+    <motion.li ref={ref} custom={index} variants={sheet} initial="hidden" animate={shown ? "show" : "hidden"}>
+      {children}
+    </motion.li>
+  );
+}
+
 export function SkillSheets() {
   // reducedMotion="user": under reduced motion the pop/tilt transforms snap, only opacity fades
   return (
@@ -31,14 +44,7 @@ export function SkillSheets() {
       {skills.map((g, gi) => {
         const color = SHEET_COLORS[gi % SHEET_COLORS.length];
         return (
-          <motion.li
-            key={g.group}
-            custom={gi}
-            variants={sheet}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-8% 0px" }}
-          >
+          <Sheet key={g.group} index={gi}>
             <article data-cursor-box="" className="wr-sticker wr-wobble h-full overflow-hidden">
               <div className="flex items-center justify-between gap-3 border-b-[3px] px-4 py-2.5" style={{ background: color, borderColor: INK }}>
                 <h3 className="wr-display text-xl font-bold leading-none" style={{ color: INK }}>
@@ -65,7 +71,7 @@ export function SkillSheets() {
                 ))}
               </ul>
             </article>
-          </motion.li>
+          </Sheet>
         );
       })}
     </ul>
