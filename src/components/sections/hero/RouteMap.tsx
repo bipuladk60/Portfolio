@@ -12,9 +12,14 @@ const EASE = [0.2, 0.8, 0.2, 1] as const;
 const NP_XY = project(NEPAL.lon, NEPAL.lat);
 const MS_XY = project(HBG.lon, HBG.lat);
 const LAST = ARC_POINTS.length - 1;
-const FULL: VB = { x: 0, y: 0, w: MAP_W, h: MAP_H };
+// The great circle crosses near the pole, so its top runs almost along the map's upper edge.
+// The view gets a band of headroom above latitude 90 so the arc never kisses the frame.
+const PAD_TOP = 26;
+const TOP = -PAD_TOP;
+const VIEW_H = MAP_H + PAD_TOP;
+const FULL: VB = { x: 0, y: TOP, w: MAP_W, h: VIEW_H };
 const MAX_ZOOM = 12;
-const ASPECT = MAP_H / MAP_W;
+const ASPECT = VIEW_H / MAP_W;
 
 function sample(p: number, axis: 0 | 1) {
   const f = Math.max(0, Math.min(1, p)) * LAST;
@@ -34,7 +39,7 @@ function clampVB(v: VB): VB {
     x = v.x + v.w / 2 - w / 2;
     y = v.y + (v.w * ASPECT) / 2 - h / 2;
   }
-  return { w, h, x: clamp(x, 0, MAP_W - w), y: clamp(y, 0, MAP_H - h) };
+  return { w, h, x: clamp(x, 0, MAP_W - w), y: clamp(y, TOP, MAP_H - h) };
 }
 
 /** Fractions of the map box covered by controls: left column, top row, bottom row. */
@@ -52,7 +57,7 @@ function fit([x0, y0, x1, y1]: BBox, pad: number, ins: Insets): VB {
   // Usable area spans [x + l*w, x + w] and [y + t*h, y + (1 - b)*h]; put the bbox centre in its middle.
   const x = cx - (w * (1 + ins.l)) / 2;
   const y = cy - (h * (1 + ins.t - ins.b)) / 2;
-  return { w, h, x: clamp(x, 0, MAP_W - w), y: clamp(y, 0, MAP_H - h) };
+  return { w, h, x: clamp(x, 0, MAP_W - w), y: clamp(y, TOP, MAP_H - h) };
 }
 
 type RouteMapProps = {
@@ -64,6 +69,10 @@ type RouteMapProps = {
 
 const ctrl =
   "grid h-8 min-w-8 place-items-center md:h-6 md:min-w-6 border border-line-hi bg-bg/85 px-1.5 font-mono text-[10px] leading-none tracking-[0.12em] text-text transition-colors hover:border-signal hover:text-signal focus-visible:border-signal";
+
+/** Quick-fly chips: compact on phones, same size as the zoom buttons from md up. */
+const chip =
+  "grid h-6 place-items-center border border-line-hi bg-bg/85 px-1.5 font-mono text-[9px] leading-none tracking-[0.12em] text-text transition-colors hover:border-signal hover:text-signal focus-visible:border-signal md:min-w-6 md:text-[10px]";
 
 /**
  * Dotted world map with real USA and Nepal outlines and the great-circle route between them.
@@ -84,8 +93,10 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
   /** Measures how much of the map the control clusters cover, so quick-fly targets centre in the clear area. */
   const insets = (): Insets => {
     const box = boxRef.current?.getBoundingClientRect();
-    const z = zoomCtrlRef.current?.getBoundingClientRect();
-    const f = flyCtrlRef.current?.getBoundingClientRect();
+    // Hidden clusters (the zoom buttons below md) measure 0x0 and cover nothing.
+    const shown = (r?: DOMRect) => (r && r.width && r.height ? r : undefined);
+    const z = shown(zoomCtrlRef.current?.getBoundingClientRect());
+    const f = shown(flyCtrlRef.current?.getBoundingClientRect());
     if (!box || !box.width || !box.height) return { l: 0, t: 0, b: 0 };
     const column = z ? z.height > z.width : false;
     return {
@@ -309,7 +320,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
       aria-roledescription="zoomable map"
       aria-label="Route map, zoomable. Plus and minus keys zoom, arrow keys pan, 0 resets."
       className="relative w-full cursor-grab touch-pan-y select-none overflow-hidden outline-none active:cursor-grabbing"
-      style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}
+      style={{ aspectRatio: `${MAP_W} / ${VIEW_H}` }}
       onPointerEnter={(e) => {
         if (e.pointerType === "mouse") {
           hover.current = true;
@@ -343,7 +354,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
       }}
       onKeyDown={onKeyDown}
     >
-      <svg ref={svgRef} aria-hidden viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="absolute inset-0 h-full w-full" fill="none">
+      <svg ref={svgRef} aria-hidden viewBox={`0 ${TOP} ${MAP_W} ${VIEW_H}`} className="absolute inset-0 h-full w-full" fill="none">
         <defs>
           <linearGradient id="hero-arc" x1="0" x2="1" y1="0" y2="0">
             <stop offset="0" stopColor="var(--sky)" />
@@ -438,7 +449,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
       </svg>
 
       {/* Endpoint anchors: HTML so markers and labels keep their size at every zoom level */}
-      <div ref={npRef} aria-hidden className="pointer-events-none absolute h-0 w-0" style={{ left: `${(NP_XY[0] / MAP_W) * 100}%`, top: `${(NP_XY[1] / MAP_H) * 100}%` }}>
+      <div ref={npRef} aria-hidden className="pointer-events-none absolute h-0 w-0" style={{ left: `${(NP_XY[0] / MAP_W) * 100}%`, top: `${((NP_XY[1] - TOP) / VIEW_H) * 100}%` }}>
         <div
           ref={radarRef}
           className="absolute h-[clamp(48px,12vw,84px)] w-[clamp(48px,12vw,84px)] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300"
@@ -467,7 +478,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
           NEPAL
         </span>
       </div>
-      <div ref={msRef} aria-hidden className="pointer-events-none absolute h-0 w-0" style={{ left: `${(MS_XY[0] / MAP_W) * 100}%`, top: `${(MS_XY[1] / MAP_H) * 100}%` }}>
+      <div ref={msRef} aria-hidden className="pointer-events-none absolute h-0 w-0" style={{ left: `${(MS_XY[0] / MAP_W) * 100}%`, top: `${((MS_XY[1] - TOP) / VIEW_H) * 100}%` }}>
         <Marker color="bg-sky" ping={!reduce} />
         <span className="absolute left-0 top-2.5 -translate-x-1/2 whitespace-nowrap bg-bg/80 px-1 font-mono text-[10px] leading-none tracking-widest text-sky sm:text-[11px]">
           MS
@@ -485,7 +496,8 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
       />
 
       {/* Controls */}
-      <div ref={zoomCtrlRef} className="absolute left-1.5 top-1.5 flex gap-1 md:flex-col" onPointerDown={stop} onDoubleClick={stop}>
+      {/* Zoom buttons are desktop-only; on phones pinch zooms and the map stays uncluttered. */}
+      <div ref={zoomCtrlRef} className="absolute left-1.5 top-1.5 hidden gap-1 md:flex md:flex-col" onPointerDown={stop} onDoubleClick={stop}>
         <button type="button" className={ctrl} aria-label="Zoom in" onClick={() => zoomAt(1.6)}>
           +
         </button>
@@ -499,10 +511,10 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
         </button>
       </div>
       <div ref={flyCtrlRef} className="absolute bottom-1.5 left-1.5 flex gap-1" onPointerDown={stop} onDoubleClick={stop}>
-        <button type="button" className={ctrl} aria-label="Fly to Nepal" onClick={() => setTarget(fit(nepalBox, 1.5, insets()))}>
+        <button type="button" className={chip} aria-label="Fly to Nepal" onClick={() => setTarget(fit(nepalBox, 1.5, insets()))}>
           NEPAL
         </button>
-        <button type="button" className={ctrl} aria-label="Fly to the USA" onClick={() => setTarget(fit(usaBox, 1.15, insets()))}>
+        <button type="button" className={chip} aria-label="Fly to the USA" onClick={() => setTarget(fit(usaBox, 1.15, insets()))}>
           USA
         </button>
       </div>

@@ -60,12 +60,15 @@ function fitCanvas(canvas: HTMLCanvasElement) {
 function drawField(canvas: HTMLCanvasElement, sim: Sim, t: number) {
   const { ctx, w } = fitCanvas(canvas);
   if (!ctx || w === 0) return;
-  const k = w / P.size;
   ctx.clearRect(0, 0, w, w);
-  const r = Math.max(2, 1.8 * k);
+  const r = Math.max(2, (1.8 * w) / P.size);
+  // Draw-only inset: the model's 0..size box maps into [pad, w - pad] so dots at the walls stay whole
+  // (largest dot is an infected one at 1.1 r). The model itself is untouched.
+  const pad = r * 1.1 + 2;
+  const k = (w - 2 * pad) / P.size;
   const pos = (i: number) => [
-    (sim.px[i] + (sim.x[i] - sim.px[i]) * t) * k,
-    w - (sim.py[i] + (sim.y[i] - sim.py[i]) * t) * k, // y up, like the matplotlib axes
+    pad + (sim.px[i] + (sim.x[i] - sim.px[i]) * t) * k,
+    w - pad - (sim.py[i] + (sim.y[i] - sim.py[i]) * t) * k, // y up, like the matplotlib axes
   ];
 
   // halos first: radius ~ 2 x viral load (world units), where exp(-d/VL) has fallen to ~14%
