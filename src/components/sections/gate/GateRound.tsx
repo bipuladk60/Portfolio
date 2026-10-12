@@ -63,7 +63,7 @@ export function GateRound() {
 
   const results = useMemo(() => search(query), [query]);
   const wrong = guesses.filter((g) => g.t > 0).length;
-  const globeGuesses: HudGuess[] = guesses.map((g) => ({ lat: g.lat, lon: g.lon, t: g.t }));
+  const globeGuesses: HudGuess[] = guesses.map((g) => ({ code: g.code, lat: g.lat, lon: g.lon, t: g.t }));
   const latest = guesses[guesses.length - 1];
 
   const finish = (count: number | null) => {
