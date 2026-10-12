@@ -109,9 +109,9 @@ export function WarmerTeaser({ href }: { href: string }) {
 
       <fieldset className="mx-auto mt-5 max-w-[420px]">
         <legend className="hud-label mb-2 !text-[10px]" style={{ color: "var(--dusk-glow)" }}>
-          Mini round · which country is hidden?
+          Mini round · which country is hidden? (distances in km)
         </legend>
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <ul className="grid auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3">
           {round.choices.map((i) => {
             const c = POOL[i];
             const g = guesses.find((x) => x.name === c.name);
@@ -124,7 +124,7 @@ export function WarmerTeaser({ href }: { href: string }) {
                   disabled={!target}
                   aria-disabled={Boolean(g) || solved}
                   aria-label={g ? `${c.name}, guessed: ${word(g.t)}` : `Guess ${c.name}`}
-                  className={`flex min-h-11 w-full cursor-pointer flex-col items-start justify-center border px-3 py-1.5 text-left transition-colors duration-200 ${
+                  className={`flex h-full min-h-[3.25rem] w-full cursor-pointer flex-col items-start justify-center border px-3 py-1.5 text-left transition-colors duration-200 ${
                     g ? "" : "border-line-hi hover:border-[var(--dusk-glow)]"
                   } ${solved && !g ? "opacity-50" : ""}`}
                   style={
@@ -135,9 +135,9 @@ export function WarmerTeaser({ href }: { href: string }) {
                 >
                   <span className="text-sm text-text">{c.name}</span>
                   {g && (
-                    <span className="font-mono text-[10px] uppercase tracking-[0.12em]" style={{ color }}>
+                    <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.08em]" style={{ color }}>
                       {word(g.t)}
-                      {g.t > 0 && ` · ~${(Math.round(g.dist / 100) * 100).toLocaleString("en-US")} km`}
+                      {g.t > 0 && ` ~${(Math.round(g.dist / 100) * 100).toLocaleString("en-US")}`}
                     </span>
                   )}
                 </button>

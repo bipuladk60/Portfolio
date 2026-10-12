@@ -191,7 +191,8 @@ export function Crosshair() {
           readout.current.textContent = label;
         }
         const rx = kind === "box" ? box.x + 2 : box.x + box.w + 8;
-        const ry = kind === "box" ? Math.max(2, box.y - 14) : box.y + box.h + 4;
+        // Box readout sits just outside the bottom-left corner, clear of Panel labels on the top edge.
+        const ry = kind === "box" ? Math.min(window.innerHeight - 14, box.y + box.h + 4) : box.y + box.h + 4;
         readout.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
         if (colorChanged) readout.current.style.color = color;
       }

@@ -68,11 +68,11 @@ export function RadarSweep() {
       <dl className="min-w-0 space-y-2 font-mono text-[10px] uppercase tracking-[0.12em]">
         <div>
           <dt className="text-dim/70">Polling</dt>
-          <dd className="text-text">~636 boards</dd>
+          <dd className="text-text">Company boards</dd>
         </div>
         <div>
-          <dt className="text-dim/70">Threshold</dt>
-          <dd className="text-signal">Score 80</dd>
+          <dt className="text-dim/70">Filter</dt>
+          <dd className="text-signal">Resume match</dd>
         </div>
       </dl>
     </div>

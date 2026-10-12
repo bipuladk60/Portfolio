@@ -23,7 +23,7 @@ export function Chautari() {
             title="The Chautari"
             kicker="Where the climb stops for the evening. The light goes warm, and these are the games I make on the side."
           />
-          <Reveal delay={0.1} className="hidden lg:block lg:-mb-4">
+          <Reveal delay={0.1} className="hidden pb-6 lg:block">
             <PeepalTree />
           </Reveal>
         </div>
@@ -78,7 +78,7 @@ export function Chautari() {
 
         {/* Secondary: Chautari Ludo, not deployed */}
         <Reveal className="mt-10 md:mt-12">
-          <Panel as="article" label="On the workbench" accent="var(--line-hi)" className="p-5 md:p-6" style={DUSK_PANEL}>
+          <Panel as="article" label="On the workbench" accent={GLOW} className="p-5 md:p-6" style={DUSK_PANEL}>
             <div className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:gap-10">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">

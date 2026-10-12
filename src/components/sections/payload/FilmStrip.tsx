@@ -78,7 +78,7 @@ export function FilmStrip() {
     { label: "Full", bits: view.query },
     { label: "Mirror", bits: mirror(view.query) },
     { label: "Crop", bits: view.query, crop: true },
-    { label: "9:16", bits: view.query, narrow: true },
+    { label: "Caption", bits: view.query, narrow: true },
   ];
 
   return (
@@ -101,13 +101,12 @@ export function FilmStrip() {
                     className="absolute inset-0"
                     style={{
                       transform: v.crop ? "scale(1.5)" : undefined,
-                      clipPath: v.narrow ? "inset(0 32% 0 32%)" : undefined,
+                      
                     }}
                   >
                     <HashGrid bits={v.bits} tone="color-mix(in oklab, var(--signal) 70%, transparent)" />
                   </span>
-                  {v.narrow && <span className="absolute inset-y-0 left-0 w-[32%] bg-signal/10 blur-[2px]" />}
-                  {v.narrow && <span className="absolute inset-y-0 right-0 w-[32%] bg-signal/10 blur-[2px]" />}
+                  {v.narrow && <span className="absolute inset-x-[10%] bottom-[12%] h-[16%] bg-text/80" />}
                 </span>
                 <span className="text-center font-mono text-[8px] uppercase tracking-[0.12em] text-dim/70">{v.label}</span>
               </span>
