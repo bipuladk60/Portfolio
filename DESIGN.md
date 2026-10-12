@@ -101,7 +101,7 @@ cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, n
 - Chapter 1 = the dark expedition HUD: base → telemetry → route → summits → lab.
 - `gate` (Checkpoint, `sections/Gate.tsx`): a full Warmer round in the HUD style that the visitor must solve to continue.
   The answer is ALWAYS Nepal. Type-ahead country input over `src/data/countryList.ts` (215 countries, label points),
-  each guess shows distance + warm/cold heat colour + direction arrow; escalating hints (after 4 guesses: a clue;
+  each guess shows distance + warm/cold heat colour + direction arrow; escalating hints (after 2 guesses: a clue; after 4: "highest point on Earth";
   after 6: a "reveal" button) so nobody gets stuck. On solve call `unlockChapterTwo()` from `@/lib/chapter` and play a
   big transition: the dark HUD world transforms into Warmer's day-sky world (e.g. heat bloom from Nepal floods the
   screen into sky + clouds), then scroll continues into chapter 2.

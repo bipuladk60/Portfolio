@@ -97,7 +97,7 @@ export function SkyWorld({ children }: { children: ReactNode }) {
       {/* full-bleed backdrop (the section clips the overhang) */}
       <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-[100vw] -translate-x-1/2">
         <div
-          className="absolute inset-x-0 bottom-0 top-[26px] md:top-[35px]"
+          className="absolute inset-x-0 bottom-0 top-0"
           style={{ background: `linear-gradient(to bottom, ${SKY_TOP}, ${SKY_BOTTOM})` }}
         />
         {/* sun */}

@@ -1,11 +1,11 @@
 "use client";
 
-import { useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Panel } from "@/components/hud/Panel";
 import { SectionHeader } from "@/components/hud/SectionHeader";
 import { countries, NEPAL, type Country } from "@/data/countryList";
-import { relockGate, unlockChapterTwo } from "@/lib/chapter";
+import { relockGate, unlockChapterTwo, useChapter } from "@/lib/chapter";
 import { playBlip } from "@/lib/sound";
 import { useStore } from "@/lib/store";
 import { heatWord, toonHeat } from "@/components/toon/toon";
@@ -121,16 +121,57 @@ export function GateRound() {
     }
   };
 
-  const playAgain = () => {
-    relockGate();
+  const reset = useCallback(() => {
     rememberGuesses(null);
     setGuesses([]);
     setSolved(false);
+    setQuery("");
+    setOpen(false);
+    setTransition(null);
     setAnnounce("");
+  }, []);
+
+  const playAgain = () => {
+    relockGate();
+    reset();
     requestAnimationFrame(() => {
       document.getElementById("gate")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
       inputRef.current?.focus({ preventScroll: true });
     });
+  };
+
+  // Relocked from elsewhere (e.g. the command palette): make the round playable again.
+  const chapter = useChapter();
+  const wasTwo = useRef(false);
+  useEffect(() => {
+    if (chapter === 2) wasTwo.current = true;
+    else if (wasTwo.current) {
+      wasTwo.current = false;
+      reset();
+    }
+  }, [chapter, reset]);
+  useEffect(() => {
+    const onChapter = (e: Event) => {
+      if ((e as CustomEvent<number>).detail === 1) reset();
+    };
+    window.addEventListener("xc:chapter", onChapter);
+    return () => window.removeEventListener("xc:chapter", onChapter);
+  }, [reset]);
+
+  const [lift, setLift] = useState(false);
+  const focusInput = () => {
+    setOpen(true);
+    // On phones, lift the input near the top so suggestions stay above the keyboard. The gate is the
+    // last thing on the page in chapter 1, so add temporary room below it to make that scroll possible.
+    if (window.innerWidth < 768 && inputRef.current) {
+      setLift(true);
+      requestAnimationFrame(() => {
+        const el = inputRef.current;
+        if (!el) return;
+        const top = el.getBoundingClientRect().top + window.scrollY - 56;
+        window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+      });
+    }
   };
 
   const count = solved ? guesses.length : stored;
@@ -162,16 +203,18 @@ export function GateRound() {
         />
         <Panel label="Warmer round · find the hidden country" accent={GLOW} className="p-4 md:p-7">
           <div className="grid items-start gap-6 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:gap-10">
-            <div ref={globeRef}>
-              <HudGlobe guesses={globeGuesses} focus={latest ? { lat: latest.lat, lon: latest.lon } : null} bloom={solved ? NEPAL : null} />
-              <div className="mx-auto mt-3 flex max-w-[380px] items-center gap-3" aria-hidden>
+            <div ref={globeRef} className="order-2 md:order-1">
+              <div className="mx-auto w-[160px] md:w-auto">
+                <HudGlobe guesses={globeGuesses} focus={latest ? { lat: latest.lat, lon: latest.lon } : null} bloom={solved ? NEPAL : null} />
+              </div>
+              <div className="mx-auto mt-3 hidden max-w-[380px] items-center gap-3 md:flex" aria-hidden>
                 <span className="hud-label !text-[10px]">Close</span>
                 <span className="h-1 flex-1" style={{ background: "linear-gradient(to right, #ef3b2c, #ff9f1c, #ffd23f)" }} />
                 <span className="hud-label !text-[10px]">Far</span>
               </div>
             </div>
 
-            <div className="min-w-0">
+            <div className="order-1 min-w-0 md:order-2">
               <label htmlFor={`${listId}-input`} className="hud-label" style={{ color: GLOW }}>
                 Type a country
               </label>
@@ -195,7 +238,7 @@ export function GateRound() {
                     setActive(0);
                     setOpen(true);
                   }}
-                  onFocus={() => setOpen(true)}
+                  onFocus={focusInput}
                   onBlur={() => window.setTimeout(() => setOpen(false), 120)}
                   onKeyDown={onKeyDown}
                   className="w-full border border-line-hi bg-bg/80 px-4 py-3 font-mono text-base text-text outline-none placeholder:text-dim/60 focus:border-[var(--dusk-glow)]"
@@ -232,12 +275,13 @@ export function GateRound() {
                 )}
               </div>
 
-              {/* guesses, newest first */}
-              <ol className="mt-4 max-h-[232px] space-y-1.5 overflow-y-auto pr-1" aria-label="Your guesses">
+              {/* guesses, closest first (like Warmer); the newest is highlighted */}
+              <ol className="mt-4 space-y-1.5" aria-label="Your guesses, closest first">
                 <AnimatePresence initial={false}>
-                  {[...guesses].reverse().map((g) => {
+                  {[...guesses].sort((a, b) => a.dist - b.dist).map((g) => {
                     const found = g.t === 0;
                     const col = toonHeat(g.t, found);
+                    const isNew = g.code === latest?.code;
                     return (
                       <motion.li
                         key={g.code}
@@ -245,9 +289,21 @@ export function GateRound() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: reduce ? 0 : 0.3 }}
                         className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-3 border px-3 py-2 font-mono text-[12px]"
-                        style={{ borderColor: `color-mix(in oklab, ${col} 50%, transparent)`, background: `color-mix(in oklab, ${col} 9%, transparent)` }}
+                        layout={!reduce}
+                        style={{
+                          borderColor: isNew ? col : `color-mix(in oklab, ${col} 45%, transparent)`,
+                          background: `color-mix(in oklab, ${col} ${isNew ? 16 : 8}%, transparent)`,
+                          boxShadow: isNew ? `0 0 0 1px ${col}` : undefined,
+                        }}
                       >
-                        <span className="truncate font-sans text-sm text-text">{g.name}</span>
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="truncate font-sans text-sm text-text">{g.name}</span>
+                          {isNew && guesses.length > 1 && (
+                            <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color: col }}>
+                              latest
+                            </span>
+                          )}
+                        </span>
                         <span className="tabular-nums text-dim">{found ? "0 km" : `${roundKm(g.dist)} km`}</span>
                         <span className="w-14 text-right uppercase tracking-[0.1em]" style={{ color: col }}>
                           {heatWord(g.t, found)}
@@ -298,6 +354,7 @@ export function GateRound() {
             </div>
           </div>
         </Panel>
+        {lift && !solved && <div aria-hidden className="h-[60vh] md:hidden" />}
       </div>
 
       <p role="status" aria-live="polite" className="sr-only">

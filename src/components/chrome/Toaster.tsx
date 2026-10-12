@@ -3,7 +3,18 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { EASE_HUD } from "@/lib/motion";
-import { onToast, type ToastItem } from "@/lib/toast";
+import { onToast, type ToastItem, type ToastTone } from "@/lib/toast";
+import { GREEN, INK, PAPER, RED, SKY_TOP, YELLOW } from "@/components/toon/toon";
+import { useHudMode } from "@/lib/hud-mode";
+
+const TOON_TONE: Record<ToastTone, string> = {
+  signal: YELLOW,
+  water: GREEN,
+  fire: RED,
+  sky: SKY_TOP,
+  air: PAPER,
+};
+const FREDOKA = "var(--font-fredoka), var(--font-nunito), system-ui, sans-serif";
 
 const MAX = 4;
 
@@ -11,6 +22,7 @@ const MAX = 4;
 export function Toaster() {
   const [items, setItems] = useState<ToastItem[]>([]);
   const reduce = useReducedMotion();
+  const toon = useHudMode() === "toon";
 
   useEffect(() => {
     const timers = new Map<number, number>();
@@ -39,6 +51,44 @@ export function Toaster() {
       <AnimatePresence initial={false}>
         {items.map((t) => {
           const color = `var(--${t.tone})`;
+          if (toon) {
+            // Warmer sticker: white card, ink outline, offset ink shadow, Fredoka title pill.
+            return (
+              <motion.div
+                key={t.id}
+                layout={!reduce}
+                initial={reduce ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.92, rotate: -1.5 }}
+                animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1, rotate: 0 }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.96 }}
+                transition={reduce ? { duration: 0.2 } : { type: "spring", stiffness: 520, damping: 30 }}
+                className="relative max-w-[min(420px,100%)] overflow-hidden px-4 py-2.5"
+                style={{
+                  background: PAPER,
+                  color: INK,
+                  border: `2.5px solid ${INK}`,
+                  borderRadius: 18,
+                  boxShadow: `4px 4px 0 ${INK}`,
+                  fontFamily: "var(--font-nunito), system-ui, sans-serif",
+                }}
+              >
+                <span
+                  className="inline-flex items-center rounded-full px-2 py-[1px] text-[11px] font-semibold"
+                  style={{ fontFamily: FREDOKA, background: TOON_TONE[t.tone], border: `2px solid ${INK}` }}
+                >
+                  {t.title}
+                </span>
+                <div className="mt-1 text-[14px] font-bold leading-snug">{t.message}</div>
+                <motion.span
+                  aria-hidden
+                  className="absolute bottom-0 left-0 h-[3px] w-full origin-left"
+                  style={{ background: TOON_TONE[t.tone] }}
+                  initial={{ scaleX: 1 }}
+                  animate={{ scaleX: 0 }}
+                  transition={{ duration: t.duration / 1000, ease: "linear" }}
+                />
+              </motion.div>
+            );
+          }
           return (
             <motion.div
               key={t.id}

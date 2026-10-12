@@ -86,6 +86,11 @@ export function ChapterTransition({ origin, onCovered, onDone }: Props) {
     return () => list.forEach((t) => window.clearTimeout(t));
   }, [reduce]);
 
+  const born = useRef(0);
+  useEffect(() => {
+    born.current = performance.now();
+  }, []);
+
   const skip = () => {
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
@@ -98,8 +103,10 @@ export function ChapterTransition({ origin, onCovered, onDone }: Props) {
   };
 
   useEffect(() => {
+    // Only Escape skips (Enter is how the answer gets submitted), and ignore keys right after mount.
+    const mountedAt = performance.now();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "Enter" || e.key === " ") skip();
+      if (e.key === "Escape" && performance.now() - mountedAt > 600) skip();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -121,7 +128,10 @@ export function ChapterTransition({ origin, onCovered, onDone }: Props) {
   const node = (
     <motion.div
       className="fixed inset-0 z-[90] cursor-pointer overflow-hidden"
-      onClick={skip}
+      onClick={() => {
+        // the click that submitted the answer can land here; ignore clicks in the first moments
+        if (performance.now() - born.current > 600) skip();
+      }}
       initial={{ opacity: 1 }}
       animate={{ opacity: out ? 0 : 1 }}
       transition={{ duration: reduce ? 0.3 : 0.6, ease: [0.2, 0.8, 0.2, 1], delay: out && !reduce ? 0.25 : 0 }}

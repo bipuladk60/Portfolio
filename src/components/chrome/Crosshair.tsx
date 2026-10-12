@@ -76,8 +76,12 @@ export function Crosshair() {
       dot.current?.style.setProperty("--xc-dot", toon ? INK : "var(--signal)");
       lastColor = "";
       if (readout.current) {
-        readout.current.style.fontWeight = toon ? "700" : "400";
-        readout.current.dataset.skin = toon ? "toon" : "hud";
+        const st = readout.current.style;
+        st.fontWeight = toon ? "600" : "400";
+        st.fontFamily = toon ? "var(--font-fredoka), var(--font-nunito), system-ui, sans-serif" : "";
+        st.fontSize = toon ? "11px" : "";
+        st.letterSpacing = toon ? "0.04em" : "";
+        st.color = toon ? INK : "";
       }
       styleReadout();
     };
@@ -85,9 +89,10 @@ export function Crosshair() {
       const el = readout.current;
       if (!el) return;
       const st = el.style;
-      if (readoutInside) {
+      if (readoutInside || toon) {
         st.background = toon ? PAPER : "color-mix(in oklab, var(--bg) 88%, transparent)";
-        st.padding = "2px 5px";
+        st.padding = toon ? "1px 7px" : "2px 5px";
+        st.boxShadow = toon ? `2px 2px 0 ${INK}` : "none";
         st.border = toon ? `2px solid ${INK}` : "1px solid var(--line)";
         st.borderRadius = toon ? "999px" : "0";
       } else {
@@ -95,6 +100,7 @@ export function Crosshair() {
         st.padding = "0";
         st.border = "0";
         st.borderRadius = "0";
+        st.boxShadow = "none";
       }
     };
     const unsubMode = hudMode.subscribe(() => {
@@ -263,7 +269,7 @@ export function Crosshair() {
         rx = Math.max(2, Math.min(vw - 130, rx));
         ry = Math.max(2, Math.min(vh - 18, ry));
         readout.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
-        if (colorChanged) readout.current.style.color = color;
+        if (colorChanged) readout.current.style.color = toon ? INK : color;
       }
     };
 
