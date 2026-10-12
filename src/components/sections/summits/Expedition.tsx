@@ -52,8 +52,9 @@ export function Expedition() {
             <Score label="Summits" value={SUMMITS} color="var(--signal)" reduce={reduce} delay={0} />
             <span aria-hidden className="h-10 w-px bg-line" />
             <Score label="Attempts" value={ATTEMPTS} color="var(--text)" reduce={reduce} delay={0.12} />
-            <p className="hidden max-w-[16ch] font-mono text-[10px] uppercase leading-relaxed tracking-[0.12em] text-dim md:block">
-              {pad(SUMMITS)} hackathon wins · {pad(COMPETED)} competed
+            <p className="hidden whitespace-nowrap font-mono text-[10px] uppercase leading-relaxed tracking-[0.12em] text-dim md:block">
+              <span className="block text-signal">{pad(SUMMITS)} wins</span>
+              <span className="block text-sky">{pad(COMPETED)} competed</span>
             </p>
           </div>
           <div

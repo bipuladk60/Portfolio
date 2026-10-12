@@ -25,17 +25,34 @@ function sample(p: number, axis: 0 | 1) {
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
+/** Keeps the view inside the map; if the width has to be clamped, re-centres on the requested centre. */
 function clampVB(v: VB): VB {
   const w = clamp(v.w, MAP_W / MAX_ZOOM, MAP_W);
   const h = w * ASPECT;
-  return { w, h, x: clamp(v.x, 0, MAP_W - w), y: clamp(v.y, 0, MAP_H - h) };
+  let { x, y } = v;
+  if (w !== v.w) {
+    x = v.x + v.w / 2 - w / 2;
+    y = v.y + (v.w * ASPECT) / 2 - h / 2;
+  }
+  return { w, h, x: clamp(x, 0, MAP_W - w), y: clamp(y, 0, MAP_H - h) };
 }
 
-function fit([x0, y0, x1, y1]: BBox, pad = 1.35): VB {
-  const w = Math.max((x1 - x0) * pad, ((y1 - y0) * pad) / ASPECT);
+/** Fractions of the map box covered by controls: left column, top row, bottom row. */
+type Insets = { l: number; t: number; b: number };
+
+/** Frames a bbox centred in the part of the map not covered by controls. */
+function fit([x0, y0, x1, y1]: BBox, pad: number, ins: Insets): VB {
+  const usableW = Math.max(0.3, 1 - ins.l);
+  const usableH = Math.max(0.3, 1 - ins.t - ins.b);
+  const want = Math.max(((x1 - x0) * pad) / usableW, ((y1 - y0) * pad) / (usableH * ASPECT));
+  const w = clamp(want, MAP_W / MAX_ZOOM, MAP_W);
+  const h = w * ASPECT;
   const cx = (x0 + x1) / 2;
   const cy = (y0 + y1) / 2;
-  return clampVB({ x: cx - w / 2, y: cy - (w * ASPECT) / 2, w, h: w * ASPECT });
+  // Usable area spans [x + l*w, x + w] and [y + t*h, y + (1 - b)*h]; put the bbox centre in its middle.
+  const x = cx - (w * (1 + ins.l)) / 2;
+  const y = cy - (h * (1 + ins.t - ins.b)) / 2;
+  return { w, h, x: clamp(x, 0, MAP_W - w), y: clamp(y, 0, MAP_H - h) };
 }
 
 type RouteMapProps = {
@@ -46,7 +63,7 @@ type RouteMapProps = {
 };
 
 const ctrl =
-  "grid h-6 min-w-6 place-items-center border border-line-hi bg-bg/85 px-1.5 font-mono text-[10px] leading-none tracking-[0.12em] text-text transition-colors hover:border-signal hover:text-signal focus-visible:border-signal";
+  "grid h-8 min-w-8 place-items-center md:h-6 md:min-w-6 border border-line-hi bg-bg/85 px-1.5 font-mono text-[10px] leading-none tracking-[0.12em] text-text transition-colors hover:border-signal hover:text-signal focus-visible:border-signal";
 
 /**
  * Dotted world map with real USA and Nepal outlines and the great-circle route between them.
@@ -61,6 +78,22 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
   const msRef = useRef<HTMLDivElement>(null);
   const radarRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLSpanElement>(null);
+  const zoomCtrlRef = useRef<HTMLDivElement>(null);
+  const flyCtrlRef = useRef<HTMLDivElement>(null);
+
+  /** Measures how much of the map the control clusters cover, so quick-fly targets centre in the clear area. */
+  const insets = (): Insets => {
+    const box = boxRef.current?.getBoundingClientRect();
+    const z = zoomCtrlRef.current?.getBoundingClientRect();
+    const f = flyCtrlRef.current?.getBoundingClientRect();
+    if (!box || !box.width || !box.height) return { l: 0, t: 0, b: 0 };
+    const column = z ? z.height > z.width : false;
+    return {
+      l: z && column ? (z.right - box.left + 4) / box.width : 0,
+      t: z && !column ? (z.bottom - box.top + 4) / box.height : 0,
+      b: f ? (box.bottom - f.top + 4) / box.height : 0,
+    };
+  };
 
   const cur = useRef<VB>({ ...FULL });
   const tgt = useRef<VB>({ ...FULL });
@@ -452,7 +485,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
       />
 
       {/* Controls */}
-      <div className="absolute left-1.5 top-1.5 flex flex-col gap-1" onPointerDown={stop} onDoubleClick={stop}>
+      <div ref={zoomCtrlRef} className="absolute left-1.5 top-1.5 flex gap-1 md:flex-col" onPointerDown={stop} onDoubleClick={stop}>
         <button type="button" className={ctrl} aria-label="Zoom in" onClick={() => zoomAt(1.6)}>
           +
         </button>
@@ -465,11 +498,11 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
           </svg>
         </button>
       </div>
-      <div className="absolute bottom-1.5 left-1.5 flex gap-1" onPointerDown={stop} onDoubleClick={stop}>
-        <button type="button" className={ctrl} aria-label="Fly to Nepal" onClick={() => setTarget(fit(nepalBox, 1.5))}>
+      <div ref={flyCtrlRef} className="absolute bottom-1.5 left-1.5 flex gap-1" onPointerDown={stop} onDoubleClick={stop}>
+        <button type="button" className={ctrl} aria-label="Fly to Nepal" onClick={() => setTarget(fit(nepalBox, 1.5, insets()))}>
           NEPAL
         </button>
-        <button type="button" className={ctrl} aria-label="Fly to the USA" onClick={() => setTarget(fit(usaBox, 1.15))}>
+        <button type="button" className={ctrl} aria-label="Fly to the USA" onClick={() => setTarget(fit(usaBox, 1.15, insets()))}>
           USA
         </button>
       </div>
