@@ -96,7 +96,7 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
   const tipLeft = tipX > W * 0.75;
 
   return (
-    <div ref={ref} data-cursor-box="" className="wr-sticker p-5 md:p-6">
+    <div ref={ref} data-cursor-box="lock" className="wr-sticker p-5 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="wr-display text-lg font-semibold">How it&apos;s doing</p>
         <div role="tablist" aria-label="Warmer analytics" className="wr-pill inline-flex bg-white p-1">

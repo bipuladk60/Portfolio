@@ -303,7 +303,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
   return (
     <div
       ref={boxRef}
-      data-cursor-box=""
+      data-cursor-box="lock"
       tabIndex={0}
       role="application"
       aria-roledescription="zoomable map"
@@ -509,7 +509,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
       <span
         ref={readoutRef}
         aria-hidden
-        className={`pointer-events-none absolute bottom-2 right-2 font-mono text-[10px] tracking-[0.14em] transition-colors ${active ? "text-signal" : "text-dim"}`}
+        className={`pointer-events-none absolute bottom-2 right-2 font-mono text-[10px] tracking-[0.14em] text-signal transition-opacity duration-300 ${active ? "opacity-100" : "opacity-0"}`}
       >
         ZOOM 1.0×
       </span>

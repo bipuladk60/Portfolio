@@ -13,7 +13,7 @@ const POINT = { lat: NEPAL.lat, lon: NEPAL.lon };
 export function FoundSticker({ href }: { href: string }) {
   const n = useStore(gateGuesses);
   return (
-    <div data-cursor-box="" className="wr-sticker wr-wobble p-5 md:p-6" style={{ background: `color-mix(in oklab, ${GREEN} 14%, #ffffff)` }}>
+    <div data-cursor-box="lock" className="wr-sticker wr-wobble p-5 md:p-6" style={{ background: `color-mix(in oklab, ${GREEN} 14%, #ffffff)` }}>
       <p className="wr-pill inline-flex items-center gap-2 bg-white px-3 py-1 text-xs font-extrabold uppercase tracking-wider">
         <span className="inline-block h-2.5 w-2.5 rounded-full border-2" style={{ background: GREEN, borderColor: INK }} />
         Checkpoint cleared

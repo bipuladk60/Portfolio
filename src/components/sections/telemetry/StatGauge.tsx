@@ -52,6 +52,12 @@ export function StatGauge({ value, suffix, label, index, accent = "var(--signal)
   const shown = useTransform(count, (v) => Math.round(v).toLocaleString("en-US"));
   const fill = suffix.trim() === "%" ? value / 100 : 1;
   const delay = index * 0.08;
+  // "Users · MHD Connect + Warmer": the part after the dot is a quieter second line.
+  const [main, ...rest] = label.split(" · ");
+  const detail = rest.join(" · ");
+  // Longer readouts ("2,600+") step down a size so they sit inside the dial instead of touching it.
+  const chars = value.toLocaleString("en-US").length + suffix.trim().length;
+  const numberSize = chars >= 5 ? "text-2xl" : chars >= 3 ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl";
 
   useEffect(() => {
     if (reduce) {
@@ -104,26 +110,25 @@ export function StatGauge({ value, suffix, label, index, accent = "var(--signal)
             animate={{ opacity: inView || reduce ? 1 : 0 }}
             transition={{ duration: reduce ? 0 : 0.3, delay: reduce ? 0 : delay + 1.5 }}
           />
-          <circle cx={CX} cy={CY} r={R - 12} stroke="var(--line)" strokeWidth={0.6} strokeDasharray="1 3" />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
           <span className="sr-only">
-            {value}
+            {value.toLocaleString("en-US")}
             {suffix} {label}
           </span>
-          <span aria-hidden className="font-display text-3xl font-bold leading-none tabular-nums text-text sm:text-4xl">
+          <span aria-hidden className={`font-display font-bold leading-none tabular-nums text-text ${numberSize}`}>
             <motion.span>{shown}</motion.span>
-            <span className="ml-0.5 text-base font-semibold" style={{ color: accent }}>
-              {suffix.trim()}
-            </span>
-          </span>
-          <span aria-hidden className="mt-1.5 font-mono text-[9px] tracking-[0.2em] text-dim/80">
-            CH-{String(index + 1).padStart(2, "0")}
+            {suffix.trim() && (
+              <span className="ml-0.5 text-[0.6em] font-semibold" style={{ color: accent }}>
+                {suffix.trim()}
+              </span>
+            )}
           </span>
         </div>
       </div>
-      <p aria-hidden className="hud-label mt-2 max-w-[22ch] text-center leading-snug tracking-[0.06em]!">
-        {label}
+      <p aria-hidden className="mt-3 max-w-[20ch] text-center text-[13px] leading-snug text-dim sm:text-sm">
+        {main}
+        {detail && <span className="block text-xs text-dim/75">{detail}</span>}
       </p>
     </div>
   );

@@ -2,17 +2,17 @@
 
 import { motion } from "motion/react";
 import { research } from "@/data/content";
-import { EASE, useReducedMotionSafe } from "../summits/motion";
+import { EASE, useReducedMotionSafe } from "./motion";
 
 const models = research.models;
 const best = Math.max(...models.map((m) => m.accuracy));
 const TICKS = [0, 25, 50, 75, 100];
 
-/** Horizontal accuracy bars on a true 0-100% axis; the best model is lit. Unboxed: sits inside the results panel. */
+/** Horizontal accuracy bars on a true 0-100% axis; the best model is lit. Unboxed. */
 export function ModelChart() {
   const reduce = useReducedMotionSafe();
   return (
-    <figure data-cursor-box="" className="flex h-full flex-col">
+    <figure className="flex h-full flex-col">
       <figcaption className="hud-label mb-3">
         Model comparison · accuracy, %
         <span className="sr-only">

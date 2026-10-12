@@ -1,82 +1,46 @@
 "use client";
 
-import { motion } from "motion/react";
 import type { Hackathon } from "@/data/content";
-import { EASE } from "./motion";
 
-/** Small embroidered expedition patch: hexagon for summits, shield for competed. */
+/** One row in the plain list under the ridge: event name and Win / Competed. Same selection as the ridge markers. */
 export function Patch({
   h,
-  index,
   active,
   dim,
-  reduce,
   onSelect,
 }: {
   h: Hackathon;
-  index: number;
   active: boolean;
   dim: boolean;
-  reduce: boolean;
   onSelect: () => void;
 }) {
   const isWin = h.result === "win";
   const color = isWin ? "var(--signal)" : "var(--sky)";
-  const outline = isWin
-    ? "M40 3 L73 22 L73 60 L40 79 L7 60 L7 22 Z"
-    : "M40 4 L72 14 L72 44 C72 62 58 73 40 80 C22 73 8 62 8 44 L8 14 Z";
-  const inner = isWin
-    ? "M40 10 L67 25.5 L67 56.5 L40 72 L13 56.5 L13 25.5 Z"
-    : "M40 10 L66 18.5 L66 44 C66 58 55 67 40 73 C25 67 14 58 14 44 L14 18.5 Z";
 
   return (
-    <motion.li
-      className="w-[104px] shrink-0 snap-start sm:w-auto"
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-5% 0px" }}
-      transition={reduce ? { duration: 0 } : { delay: index * 0.05, duration: 0.4, ease: EASE }}
-    >
+    <li>
       <button
         type="button"
         onClick={onSelect}
         aria-pressed={active}
-        aria-label={`${h.event}: ${isWin ? h.award : "competed, data gathered"}. Show expedition report.`}
-        className="group flex h-full w-full cursor-pointer flex-col items-center gap-1.5 border px-1.5 pb-2 pt-2.5 text-center transition-[opacity,border-color,background-color] duration-300"
-        style={{
-          opacity: dim ? 0.3 : 1,
-          borderColor: active ? color : "var(--line)",
-          background: active ? `color-mix(in oklab, ${color} 8%, var(--panel))` : "var(--panel)",
-        }}
+        aria-label={`${h.event}: ${isWin ? `win, ${h.award}` : "competed"}. Show details.`}
+        className="group flex w-full cursor-pointer items-start gap-2.5 border-t py-3 text-left transition-[opacity,border-color] duration-300"
+        style={{ opacity: dim ? 0.35 : 1, borderColor: active ? color : "var(--line)" }}
       >
-        <svg
-          viewBox="0 0 80 84"
-          className="h-9 w-9 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110"
+        <span
           aria-hidden
-        >
-          <path d={outline} fill={`color-mix(in oklab, ${color} 16%, var(--bg))`} stroke={color} strokeWidth="3" strokeLinejoin="round" />
-          <path d={inner} fill="none" stroke={color} strokeWidth="1.4" strokeDasharray="2.6 2.6" opacity="0.75" />
-          {isWin ? (
-            <g>
-              <path d="M22 60 L36 36 L44 48 L50 40 L60 60 Z" fill="var(--panel-2)" stroke="var(--text)" strokeWidth="1.8" strokeLinejoin="round" />
-              <line x1="36" y1="36" x2="36" y2="18" stroke="var(--text)" strokeWidth="2" />
-              <path d="M36 18 L50 22 L36 26 Z" fill={color} />
-            </g>
-          ) : (
-            <g>
-              <path d="M22 60 L36 36 L44 48 L50 40 L60 60 Z" fill="var(--panel-2)" stroke="var(--text-dim)" strokeWidth="1.8" strokeLinejoin="round" />
-              <path d="M28 49 L36 36" stroke={color} strokeWidth="2" strokeDasharray="2.5 2.5" />
-              <circle cx="36" cy="24" r="5" fill="none" stroke={color} strokeWidth="2" />
-            </g>
-          )}
-        </svg>
-        <span className="line-clamp-2 font-display text-[11px] font-semibold uppercase leading-tight tracking-wide text-text">
-          {h.event}
-        </span>
-        <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color }}>
-          {isWin ? "Summit" : "Competed"}
+          className={`mt-[7px] inline-block h-1.5 w-1.5 shrink-0 ${isWin ? "rounded-full" : "rotate-45"}`}
+          style={{ background: color }}
+        />
+        <span className="min-w-0">
+          <span className={`block text-sm leading-snug transition-colors ${active ? "text-text" : "text-text/75 group-hover:text-text"}`}>
+            {h.event}
+          </span>
+          <span className="mt-0.5 block font-mono text-[11px] tracking-[0.06em]" style={{ color }}>
+            {isWin ? "Win" : "Competed"}
+          </span>
         </span>
       </button>
-    </motion.li>
+    </li>
   );
 }

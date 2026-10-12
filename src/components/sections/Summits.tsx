@@ -1,13 +1,13 @@
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
 import { Expedition } from "./summits/Expedition";
 
+/** Hackathons: the ridge of six events, wins as gold flags, the rest as blue markers. */
 export function Summits() {
   return (
-    <CampSection campId="summits" className="pb-8 md:pb-10">
+    <CampSection campId="summits" className="md:py-28!">
       <SectionHeader
         campId="summits"
-        title="Summit Attempts"
-        kicker="Gold flags came home with an award; blue markers competed and came back with data. Pick one for the report."
+        kicker="Gold flags are wins; blue markers are hackathons I competed in. Pick one to read about it."
       />
       <Expedition />
     </CampSection>

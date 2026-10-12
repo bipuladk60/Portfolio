@@ -1,5 +1,4 @@
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
-import { Panel } from "@/components/hud/Panel";
 import { education, profile, stats } from "@/data/content";
 import { Reveal } from "./hero/Reveal";
 import { StatGauge } from "./telemetry/StatGauge";
@@ -17,80 +16,56 @@ function parseDetail(detail: string) {
 }
 
 /**
- * Camp 01, Telemetry. Compact by design: one strip of gauges, then the dossier beside the
- * training record. Role, status, origin and base live in the hero, so they are not repeated here.
+ * About. One row of gauges, then the short bio beside education. No boxes: whitespace and a single
+ * hairline do the separating. Role, status, origin and base live in the hero, so they are not repeated.
  */
 export function Telemetry() {
   return (
-    <CampSection campId="telemetry">
-      <SectionHeader campId="telemetry" title="Telemetry" />
+    <CampSection campId="telemetry" className="md:py-28!">
+      <SectionHeader campId="telemetry" />
 
-      <Reveal trigger="view" className="mb-10">
-        <Panel label="Instrument cluster" accent="var(--signal)" className="px-3 pb-5 pt-7 sm:px-6">
-          <ul className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4">
-            {stats.map((s, i) => (
-              <li key={s.label}>
-                <StatGauge value={s.value} suffix={s.suffix} label={s.label} index={i} />
-              </li>
-            ))}
-          </ul>
-        </Panel>
+      <Reveal trigger="view">
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-4" aria-label="At a glance">
+          {stats.map((s, i) => (
+            <li key={s.label}>
+              <StatGauge value={s.value} suffix={s.suffix} label={s.label} index={i} />
+            </li>
+          ))}
+        </ul>
       </Reveal>
 
-      <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
+      <div className="mt-16 grid gap-12 border-t border-line pt-12 md:mt-20 md:pt-16 lg:grid-cols-12 lg:gap-16">
         <Reveal trigger="view" delay={0.05} className="min-w-0 lg:col-span-7">
-          <Panel as="article" label="Pilot dossier" accent="var(--signal)" className="h-full p-5 pt-7 sm:p-7 sm:pt-8">
-            <header className="flex items-start justify-between gap-4 border-b border-line pb-4">
-              <div className="min-w-0">
-                <p className="hud-label">Subject · Callsign {profile.handle}</p>
-                <h3 className="mt-1 font-display text-2xl font-bold uppercase leading-none tracking-tight text-text sm:text-3xl">
-                  {profile.name}
-                </h3>
-              </div>
-              <span
-                aria-hidden
-                className="shrink-0 -rotate-6 border-2 border-signal/60 px-2 py-1 text-center font-display text-[10px] font-bold uppercase leading-tight tracking-[0.18em] text-signal/80"
-              >
-                Cleared
-                <br />
-                for ascent
-              </span>
-            </header>
-            <ol className="mt-4 space-y-3">
-              {profile.about.map((para, i) => (
-                <li key={i} className="grid grid-cols-[2rem_1fr] gap-2">
-                  <span aria-hidden className="pt-1 font-mono text-[11px] tracking-widest text-dim/70">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <p className="leading-relaxed text-text/90">{para}</p>
-                </li>
-              ))}
-            </ol>
-          </Panel>
+          <div className="max-w-[60ch] space-y-5">
+            {profile.about.map((para, i) => (
+              <p key={i} className={i === 0 ? "text-lg leading-relaxed text-text md:text-xl" : "leading-relaxed text-text/80 md:text-lg"}>
+                {para}
+              </p>
+            ))}
+          </div>
         </Reveal>
 
         <Reveal trigger="view" delay={0.1} className="min-w-0 lg:col-span-5">
-          <Panel label="Training record" accent="var(--text-dim)" className="h-full p-5 pt-7 sm:p-6 sm:pt-8">
-            <ol className="space-y-4">
-              {education.map((e, i) => {
-                const d = parseDetail(e.detail);
-                return (
-                  <li key={e.school} className={i > 0 ? "border-t border-dashed border-line-hi pt-4" : ""}>
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                      <h3 className="font-display text-base font-semibold leading-tight text-text">{e.school}</h3>
-                      <span className="font-mono text-xs text-signal">{e.when}</span>
-                    </div>
-                    <p className="mt-1 text-sm text-text/85">{e.degree}</p>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
-                      {e.where}
-                      {d.gpa && <span className="text-text"> · GPA {d.gpa}</span>}
-                    </p>
-                    {d.notes && <p className="mt-2 text-[13px] leading-snug text-dim">{d.notes}</p>}
-                  </li>
-                );
-              })}
-            </ol>
-          </Panel>
+          <h3 className="hud-label">Education</h3>
+          <ol className="mt-5 space-y-7">
+            {education.map((e) => {
+              const d = parseDetail(e.detail);
+              return (
+                <li key={e.school}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                    <h4 className="font-display text-lg font-semibold leading-tight text-text">{e.school}</h4>
+                    <span className="font-mono text-xs text-dim">{e.when}</span>
+                  </div>
+                  <p className="mt-1.5 text-[15px] text-text/85">{e.degree}</p>
+                  <p className="mt-1 font-mono text-xs text-dim">
+                    {e.where}
+                    {d.gpa && <span className="text-text"> · GPA {d.gpa}</span>}
+                  </p>
+                  {d.notes && <p className="mt-2 text-sm leading-relaxed text-dim">{d.notes}</p>}
+                </li>
+              );
+            })}
+          </ol>
         </Reveal>
       </div>
     </CampSection>

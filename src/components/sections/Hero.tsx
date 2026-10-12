@@ -1,5 +1,4 @@
 import { CampSection } from "@/components/hud/SectionHeader";
-import { Panel } from "@/components/hud/Panel";
 import { profile } from "@/data/content";
 import { HeroName } from "./hero/HeroName";
 import { RouteMap } from "./hero/RouteMap";
@@ -59,11 +58,10 @@ export function Hero() {
                 <Arrow />
               </a>
               <a
-                href="#uplink"
+                href={`mailto:${profile.email}`}
                 className="group inline-flex items-center gap-3 border border-line-hi px-5 py-3 font-display text-sm font-semibold uppercase tracking-[0.14em] text-text transition-colors hover:border-air hover:text-air"
               >
-                Uplink
-                <span aria-hidden className="led inline-block h-1.5 w-1.5 rounded-full bg-air" />
+                Contact
               </a>
             </Reveal>
           </div>
@@ -71,21 +69,13 @@ export function Hero() {
           {/* Route telemetry */}
           <div className="min-w-0 lg:col-span-5">
             <Reveal delay={0.55} y={18}>
-              <Panel label="Route · NP → MS" accent="var(--signal)" className="p-3 pt-5 sm:p-4 sm:pt-6">
+              <figure className="min-w-0">
                 <RouteMap usaPath={USA_PATH} nepalPath={NEPAL_PATH} usaBox={USA_BBOX} nepalBox={NEPAL_BBOX} />
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line pt-3 font-mono text-[10px] uppercase tracking-widest text-dim">
-                  <span>Great circle · {ARC_KM.toLocaleString("en-US")} km</span>
-                  <span>Via Arctic</span>
-                  <span className="text-dim/70">Equirect.</span>
-                </div>
-              </Panel>
-              <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 font-mono text-xs">
-                <dt className="hud-label leading-5">Origin</dt>
-                <dd className="leading-5 text-text">{profile.origin}</dd>
-                <dt className="hud-label leading-5">Base</dt>
-                <dd className="leading-5 text-text">{profile.base}</dd>
-              </dl>
-              <div className="mt-4">
+                <figcaption className="mt-3 font-mono text-[11px] tracking-[0.08em] text-dim">
+                  Nepal <span className="text-signal">→</span> Mississippi · {ARC_KM.toLocaleString("en-US")} km great circle
+                </figcaption>
+              </figure>
+              <div className="mt-8">
                 <DualClock />
               </div>
             </Reveal>

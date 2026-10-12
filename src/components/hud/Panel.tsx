@@ -3,27 +3,29 @@ import type { CSSProperties, ReactNode } from "react";
 type PanelProps = {
   children: ReactNode;
   label?: string;
-  accent?: string; // any CSS colour, defaults to the hairline colour
+  accent?: string; // any CSS colour, drives the label (and brackets when on)
   className?: string;
   as?: "div" | "article" | "li" | "section";
   style?: CSSProperties;
+  /** Corner brackets are opt-in: the default panel is a single quiet hairline. */
+  brackets?: boolean;
 };
 
 /**
- * The basic HUD container: hairline border, corner brackets, optional mono label tab.
- * Accent colour drives the brackets and label so each section can carry its flag colour.
+ * The basic HUD container. Quiet by default: one faint hairline, no fill change, no brackets.
+ * An optional label sits above the box as a plain small caption, not a tab cut into the border.
+ * Panels do not opt into the cursor box-lock; only explicit top-level visuals do (data-cursor-box="lock").
  */
-export function Panel({ children, label, accent = "var(--line-hi)", className = "", as = "div", style }: PanelProps) {
+export function Panel({ children, label, accent = "var(--line-hi)", className = "", as = "div", style, brackets = false }: PanelProps) {
   const Tag = as;
   return (
     <Tag
-      data-cursor-box=""
-      className={`relative border border-line bg-panel/80 ${className}`}
+      className={`relative border border-line/80 bg-panel/40 ${label ? "mt-7" : ""} ${className}`}
       style={{ ["--accent" as string]: accent, ...style }}
     >
-      <Brackets />
+      {brackets && <Brackets />}
       {label && (
-        <span className="hud-label absolute -top-[9px] left-4 bg-bg px-2" style={{ color: accent }}>
+        <span className="hud-label pointer-events-none absolute -top-6 left-0" style={{ color: accent }}>
           {label}
         </span>
       )}

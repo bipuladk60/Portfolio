@@ -84,7 +84,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
     const desktop = box.width >= 768;
     const R = desktop ? RAIL.desktop : RAIL.mobile;
     const h = box.height;
-    const ys = itemRefs.current.map((li) => (li ? li.getBoundingClientRect().top - box.top + 34 : 0));
+    const ys = itemRefs.current.map((li) => (li ? li.getBoundingClientRect().top - box.top + 8 : 0));
     const lastEnd = Math.max(...spans.map((s) => s.end ?? 0));
 
     const anchors: Anchor[] = [];
@@ -127,7 +127,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
       for (let m = firstStart; m <= lastEnd; m++) {
         const mon = m % 12;
         const isYear = mon === 0;
-        if (m === firstStart || m === lastEnd || isYear || mon % 3 === 0) {
+        if (m === firstStart || m === lastEnd || isYear) {
           ticks.push({
             y: scale(m),
             major: isYear || m === firstStart || m === lastEnd,
@@ -306,25 +306,10 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
                 </span>
               ))}
 
-          {/* Rope label, set vertically beside the rope */}
-          {geo.desktop && rope && (
-            <span
-              className="absolute font-mono text-[10px] uppercase tracking-[0.18em] text-signal"
-              style={{
-                left: R.rope + 9,
-                top: geo.ropeTop + 40,
-                writingMode: "vertical-rl",
-                maxHeight: Math.max(0, geo.ropeBottom - geo.ropeTop - 60),
-                overflow: "hidden",
-              }}
-            >
-              {rope.company.split(" ").slice(0, 2).join(" ")} · {rope.when} · continuous
-            </span>
-          )}
         </div>
       )}
 
-      <ol className="relative space-y-8 pl-[4.5rem] md:space-y-10 md:pl-[12.5rem]">
+      <ol className="relative space-y-16 pl-[4.5rem] md:space-y-20 md:pl-[12.5rem]">
         {entries.map((entry, i) => (
           <li
             key={entry.id}
@@ -332,7 +317,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
               itemRefs.current[i] = el;
             }}
           >
-            <RouteCard entry={entry} index={i} />
+            <RouteCard entry={entry} />
           </li>
         ))}
       </ol>

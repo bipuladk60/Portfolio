@@ -223,7 +223,7 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
   }, [inView, reduce]);
 
   return (
-    <div ref={wrap} aria-hidden data-cursor-box="" className="relative mx-auto aspect-square w-full max-w-[380px]">
+    <div ref={wrap} aria-hidden data-cursor-box="lock" className="relative mx-auto aspect-square w-full max-w-[380px]">
       <canvas ref={canvasRef} className="block h-full w-full" />
     </div>
   );

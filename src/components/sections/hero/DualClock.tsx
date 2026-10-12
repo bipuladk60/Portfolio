@@ -6,7 +6,7 @@ type Station = { code: string; city: string; zone: string; fallbackAbbr: string 
 
 const STATIONS: Station[] = [
   { code: "NP", city: "Nepal", zone: "Asia/Kathmandu", fallbackAbbr: "NPT" },
-  { code: "MS", city: "Hattiesburg", zone: "America/Chicago", fallbackAbbr: "CT" },
+  { code: "MS", city: "Hattiesburg, MS", zone: "America/Chicago", fallbackAbbr: "CT" },
 ];
 
 type Reading = { time: string; abbr: string; offset: string };
@@ -52,16 +52,15 @@ export function DualClock() {
   }, []);
 
   return (
-    <dl data-cursor-box="" className="grid grid-cols-2 divide-x divide-line border border-line bg-panel/70">
+    <dl className="grid grid-cols-2 gap-6 border-t border-line pt-4">
       {STATIONS.map((s, i) => {
         const r = now ? read(now, s) : null;
         const accent = i === 0 ? "text-signal" : "text-sky";
         return (
-          <div key={s.code} className="min-w-0 px-3 py-3 sm:px-4">
+          <div key={s.code} className="min-w-0">
             <dt className="hud-label flex items-center gap-2">
-              <span className={`led inline-block h-1.5 w-1.5 rounded-full ${i === 0 ? "bg-signal" : "bg-sky"}`} aria-hidden />
-              <span className={accent}>{s.code}</span>
-              <span className="truncate">{s.city}</span>
+              <span className={`inline-block h-1.5 w-1.5 rounded-full ${i === 0 ? "bg-signal" : "bg-sky"}`} aria-hidden />
+              <span className={`truncate ${accent}`}>{s.city}</span>
             </dt>
             <dd className="mt-1.5">
               <time

@@ -55,6 +55,8 @@ export function GateRound() {
   const [solved, setSolved] = useState(false);
   const [transition, setTransition] = useState<{ x: number; y: number } | null>(null);
   const globeRef = useRef<HTMLDivElement>(null);
+  const startTimer = useRef(0);
+  useEffect(() => () => window.clearTimeout(startTimer.current), []);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const optId = (i: number) => `${listId}-opt-${i}`;
@@ -69,8 +71,12 @@ export function GateRound() {
     setOpen(false);
     rememberGuesses(count);
     playBlip("unlock");
-    const r = globeRef.current?.getBoundingClientRect();
-    setTransition(r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    // Let the winning row land and the globe start turning to Nepal before the sky moves.
+    window.clearTimeout(startTimer.current);
+    startTimer.current = window.setTimeout(() => {
+      const r = globeRef.current?.getBoundingClientRect();
+      setTransition(r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    }, reduce ? 0 : 180);
   };
 
   const submit = (c: Country) => {
@@ -122,6 +128,7 @@ export function GateRound() {
   };
 
   const reset = useCallback(() => {
+    window.clearTimeout(startTimer.current);
     rememberGuesses(null);
     setGuesses([]);
     setSolved(false);
@@ -285,11 +292,13 @@ export function GateRound() {
                     return (
                       <motion.li
                         key={g.code}
-                        initial={{ opacity: 0, y: -8 }}
+                        // The winning row lands at the top in place: it fades in without sliding, and the
+                        // rows below jump down instantly, so nothing slides over anything.
+                        initial={{ opacity: 0, y: found ? 0 : -8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: reduce ? 0 : 0.3 }}
+                        transition={{ duration: reduce ? 0 : found ? 0.2 : 0.3 }}
                         className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-3 border px-3 py-2 font-mono text-[12px]"
-                        layout={!reduce}
+                        layout={!reduce && !solved}
                         style={{
                           borderColor: isNew ? col : `color-mix(in oklab, ${col} 45%, transparent)`,
                           background: `color-mix(in oklab, ${col} ${isNew ? 16 : 8}%, transparent)`,

@@ -1,33 +1,28 @@
 import { campById, formatAltitude } from "@/data/camps";
-import { camps } from "@/data/camps";
 import { DecodeText } from "./DecodeText";
 
 type SectionHeaderProps = {
   campId: string;
-  title: string;
+  /** Defaults to the camp's plain name from camps.ts (About, Experience, Hackathons...). */
+  title?: string;
   kicker?: string;
 };
 
-/** Standard section opener: camp index, altitude, decoded title, optional kicker line. */
+/** Standard section opener: one quiet altitude mark in the section colour, the title, an optional line of copy. */
 export function SectionHeader({ campId, title, kicker }: SectionHeaderProps) {
   const camp = campById(campId);
-  const index = camps.findIndex((c) => c.id === campId);
   return (
     <header className="mb-12 md:mb-16">
-      <div className="hud-label flex flex-wrap items-center gap-3" style={{ color: camp.color }}>
-        <span className="led inline-block h-1.5 w-1.5 rounded-full" style={{ background: camp.color }} />
-        <span>Camp {String(index).padStart(2, "0")}</span>
-        <span className="h-px w-8 bg-line-hi" />
-        <span>{camp.name}</span>
-        <span className="h-px w-8 bg-line-hi" />
-        <span className="text-dim">ALT {formatAltitude(camp.altitude)}</span>
-      </div>
+      <p className="hud-label flex items-center gap-3">
+        <span aria-hidden className="h-px w-8" style={{ background: camp.color }} />
+        <span>{formatAltitude(camp.altitude).toLowerCase()}</span>
+      </p>
       <DecodeText
         as="h2"
-        text={title}
+        text={title ?? camp.name}
         className="mt-4 block font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-text md:text-6xl"
       />
-      {kicker && <p className="mt-4 max-w-2xl text-base text-dim md:text-lg">{kicker}</p>}
+      {kicker && <p className="mt-5 max-w-2xl text-base leading-relaxed text-dim md:text-lg">{kicker}</p>}
     </header>
   );
 }

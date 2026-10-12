@@ -8,7 +8,7 @@ const FLAG_B = "M7 5 C14 8.5 21 1.5 31 5 L31 18 C21 14.5 14 21.5 7 18 Z";
 const FLAG_C = "M7 5 C14 3 21 6 31 4 L31 17 C21 19 14 16 7 18 Z";
 
 /**
- * A gold summit flag. The pole rises, then the flag unfurls from the pole and flutters
+ * A gold flag for a win. The pole rises, then the flag unfurls from the pole and flutters
  * with an SMIL path morph (the flutter is skipped under reduced motion).
  */
 export function PlantedFlag({
@@ -78,7 +78,7 @@ export function PlantedFlag({
   );
 }
 
-/** Blue base marker: competed, data gathered. */
+/** Blue marker: competed. */
 export function BaseBeacon({
   shown,
   delay = 0,
@@ -98,7 +98,7 @@ export function BaseBeacon({
         animate={{ opacity: show ? 1 : 0, y: show ? 0 : 6 }}
         transition={reduce ? { duration: 0 } : { delay, duration: 0.45, ease: EASE }}
       >
-        {/* pulse ring: a slow sonar ping, the "data gathered" signal */}
+        {/* pulse ring: a slow sonar ping */}
         {!reduce && (
           <circle cx="20" cy="50" r="6" fill="none" stroke="var(--sky)" strokeWidth="1">
             <animate attributeName="r" values="5;15" dur="2.4s" repeatCount="indefinite" />
@@ -108,7 +108,7 @@ export function BaseBeacon({
         {/* tent / base marker */}
         <path d="M11 58 L20 41 L29 58 Z" fill="color-mix(in oklab, var(--sky) 22%, var(--bg))" stroke="var(--sky)" strokeWidth="1.5" strokeLinejoin="round" />
         <path d="M20 41 L20 58" stroke="var(--sky)" strokeWidth="1" opacity="0.7" />
-        {/* turn-back chevron */}
+        {/* chevrons */}
         <path d="M14 30 L20 36 L26 30" fill="none" stroke="var(--sky)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M14 23 L20 29 L26 23" fill="none" stroke="var(--sky)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
       </motion.g>

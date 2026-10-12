@@ -35,7 +35,7 @@ export function Ridge({
   const matches = (r: Hackathon["result"]) => filter === "all" || filter === r;
 
   return (
-    <div ref={ref} className="relative pt-10" data-cursor-box="">
+    <div ref={ref} className="relative pt-10" data-cursor-box="lock">
       <div className="relative aspect-[3/2] w-full sm:aspect-[2/1]">
         <svg
           viewBox={`0 0 ${W} ${H}`}
@@ -55,11 +55,6 @@ export function Ridge({
               <path d={fill} />
             </clipPath>
           </defs>
-
-          {/* elevation guides */}
-          {[100, 200, 300].map((y) => (
-            <line key={y} x1="0" x2={W} y1={y} y2={y} stroke="var(--line)" strokeDasharray="2 8" vectorEffect="non-scaling-stroke" />
-          ))}
 
           <motion.g style={{ y: farY }}>
             <path d={FAR.fill} fill="var(--bg)" opacity="0.9" />
@@ -100,7 +95,7 @@ export function Ridge({
             transition={reduce ? { duration: 0 } : { duration: 1.6, ease: EASE }}
           />
 
-          {/* unclimbed routes above the turn-back points */}
+          {/* dotted line from each competed marker up to its peak */}
           {markers
             .filter((m) => m.route)
             .map((m) => (
@@ -159,7 +154,7 @@ export function Ridge({
                   type="button"
                   onClick={() => onSelect(h.id)}
                   aria-pressed={active}
-                  aria-label={`${h.event}, ${h.when}: ${isWin ? `summit, ${h.award}` : "competed, data gathered"}. Show expedition report.`}
+                  aria-label={`${h.event}, ${h.when}: ${isWin ? `win, ${h.award}` : "competed"}. Show details.`}
                   className="group relative flex h-14 w-10 cursor-pointer items-end justify-center transition-opacity duration-300 sm:h-[72px] sm:w-12"
                   style={{ opacity: dim ? 0.22 : 1, filter: dim ? "grayscale(0.8)" : undefined }}
                 >
@@ -192,29 +187,10 @@ export function Ridge({
                     />
                   )}
                 </button>
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute left-1/2 top-full mt-2.5 -translate-x-1/2 whitespace-nowrap border bg-bg px-1.5 py-0.5 text-center font-mono text-[10px] uppercase tracking-[0.12em] transition-opacity duration-300"
-                  style={{ color: active ? color : "var(--text-dim)", borderColor: active ? color : "var(--line)", opacity: dim ? 0.3 : 1 }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                  <span className="hidden md:inline"> · {h.when}</span>
-                </span>
               </li>
             );
           })}
         </ul>
-      </div>
-
-      <div className="hud-label mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 md:mt-9">
-        <span className="flex items-center gap-2">
-          <span aria-hidden className="inline-block h-2.5 w-3.5" style={{ background: "var(--signal)" }} />
-          Summit · flag planted
-        </span>
-        <span className="flex items-center gap-2">
-          <span aria-hidden className="inline-block h-2.5 w-2.5 rotate-45 border" style={{ borderColor: "var(--sky)" }} />
-          Competed · data gathered
-        </span>
       </div>
     </div>
   );
