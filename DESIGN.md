@@ -1,12 +1,12 @@
 # Expedition Control — design spec
 
-The portfolio of Bipul Adhikari (CS & Math, USM, from Kathmandu). One page, one ascent.
+The portfolio of Bipul Adhikari (CS & Math, USM, from Nepal). One page, one ascent.
 
 ## Concept
 A dark sci-fi mission-control HUD, warmed by Himalayan cartography and prayer-flag colour semantics.
-Scroll position is altitude. The visitor starts at the ground station (Kathmandu, 1,400 m) and climbs
+Scroll position is altitude. The visitor starts at the ground station (Nepal, 1,400 m) and climbs
 through camps to the 8,849 m summit, which is Contact. A persistent altimeter replaces the scrollbar.
-Telemetry tracks a route from Kathmandu (27.7172 N, 85.3240 E) to Hattiesburg, Mississippi (31.33 N, 89.29 W).
+Telemetry tracks a route from Nepal (28.39 N, 84.12 E, labelled NEPAL/NP, never a city) to Hattiesburg, Mississippi (31.33 N, 89.29 W).
 
 ## Camps (see `src/data/camps.ts`)
 | Alt | id | Section | Metaphor |
@@ -63,3 +63,17 @@ Utilities: `.hud-grid` background grid, `.led` blinking dot.
 Purple/blue aurora blobs, glassmorphism, gradient-mesh heroes, generic blue-on-black HUD, Orbitron,
 matrix rain, gibberish that hides real content, autoplay sound, unskippable intros, effects on every element,
 cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, not wallpaper).
+
+## Revision 2 rules (owner feedback)
+- Say "Nepal", never "Kathmandu" or "KTM", in any visible text (labels, boot lines, clocks, themes, toasts, hints).
+  The IANA zone id "Asia/Kathmandu" may stay in code only.
+- Modest claims: no "led a team", no commit counts, no dollar savings. Copy must come from content.ts.
+- Shorter page: the full scroll should feel quick. Prefer one strong visual + 2-3 lines over long lists.
+  Avoid tall sections, repeated info, and anything that makes the visitor wait.
+- Experience is chronological, oldest at the bottom of the climb: Gulf South (Aug 2024, continues alongside
+  everything as a parallel rope), then CadenceAI internship (Mar–Aug 2025), then Illumibot (Sept 2025–May 2026).
+- Games: Warmer (live at warmergames.com) is the featured game. Chautari Ludo is secondary and clearly
+  marked "In development · not deployed yet".
+- Cursor box-lock: the crosshair locks onto any element with `[data-cursor-box]` (every Panel has it) as well as
+  links/buttons — reticle brackets expand to hug the box. Add `data-cursor-box` to any other large card/visual
+  (e.g. hero map, ridge, globe, project cards).

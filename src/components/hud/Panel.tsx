@@ -17,6 +17,7 @@ export function Panel({ children, label, accent = "var(--line-hi)", className = 
   const Tag = as;
   return (
     <Tag
+      data-cursor-box=""
       className={`relative border border-line bg-panel/80 ${className}`}
       style={{ ["--accent" as string]: accent, ...style }}
     >
