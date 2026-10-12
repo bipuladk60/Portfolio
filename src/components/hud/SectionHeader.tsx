@@ -1,4 +1,4 @@
-import { campById, formatAltitude } from "@/data/camps";
+import { campById, camps, formatAltitude } from "@/data/camps";
 import { DecodeText } from "./DecodeText";
 
 type SectionHeaderProps = {
@@ -8,19 +8,32 @@ type SectionHeaderProps = {
   kicker?: string;
 };
 
-/** Standard section opener: one quiet altitude mark in the section colour, the title, an optional line of copy. */
+/**
+ * Standard section opener. A survey line runs across the top: the camp number, the altitude, a tick ruler
+ * and the climb from the previous camp. Then the title and an optional line of copy.
+ */
 export function SectionHeader({ campId, title, kicker }: SectionHeaderProps) {
   const camp = campById(campId);
+  const i = camps.findIndex((c) => c.id === camp.id);
+  const climb = i > 0 ? camp.altitude - camps[i - 1].altitude : 0;
   return (
     <header className="mb-12 md:mb-16">
-      <p className="hud-label flex items-center gap-3">
-        <span aria-hidden className="h-px w-8" style={{ background: camp.color }} />
+      <div className="hud-label flex items-center gap-3">
+        <span style={{ color: camp.color }}>{String(i).padStart(2, "0")}</span>
+        <span aria-hidden className="h-px w-6" style={{ background: camp.color }} />
         <span>{formatAltitude(camp.altitude).toLowerCase()}</span>
-      </p>
+        <span aria-hidden className="hud-ruler h-2.5 min-w-6 flex-1" />
+        {climb > 0 && (
+          <span className="shrink-0">
+            <span aria-hidden style={{ color: camp.color }}>▲ </span>+{climb.toLocaleString("en-US")} m
+          </span>
+        )}
+        <span aria-hidden className="font-mono text-[13px] leading-none text-line-hi">+</span>
+      </div>
       <DecodeText
         as="h2"
         text={title ?? camp.name}
-        className="mt-4 block font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-text md:text-6xl"
+        className="mt-5 block font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-text md:text-7xl"
       />
       {kicker && <p className="mt-5 max-w-2xl text-base leading-relaxed text-dim md:text-lg">{kicker}</p>}
     </header>

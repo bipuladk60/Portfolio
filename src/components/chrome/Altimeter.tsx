@@ -402,7 +402,7 @@ export function Altimeter() {
         <div
           className="relative flex h-full items-center gap-2 pl-4 pr-28 text-[11px] uppercase tracking-[0.12em] transition-colors duration-500"
           style={{
-            fontFamily: toon ? FREDOKA : "var(--font-jetbrains), ui-monospace, monospace",
+            fontFamily: toon ? FREDOKA : "var(--font-mono-face), ui-monospace, monospace",
             color: toon ? INK : undefined,
           }}
         >

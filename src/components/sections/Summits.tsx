@@ -7,10 +7,7 @@ export function Summits() {
     <CampSection campId="hackathons" className="md:py-28!">
       {/* Legacy anchor: keeps old #summits links landing here. */}
       <span id="summits" aria-hidden className="absolute top-0 block scroll-mt-16" />
-      <SectionHeader
-        campId="hackathons"
-        kicker="Gold flags are wins; blue markers are hackathons I competed in. Pick one to read about it."
-      />
+      <SectionHeader campId="hackathons" />
       <Expedition />
     </CampSection>
   );
