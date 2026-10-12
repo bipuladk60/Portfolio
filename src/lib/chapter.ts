@@ -1,5 +1,8 @@
 import { createStore, useStore } from "./store";
 import { readStore, writeStore } from "./storage";
+import { CHAPTER_KEY } from "./chapter-boot";
+
+export { CHAPTER_KEY, CHAPTER_BOOT_SCRIPT } from "./chapter-boot";
 
 // Two chapters. Chapter 1 is the dark expedition HUD; the Warmer gate sits between them.
 // Solving the gate (the answer is always Nepal) switches the whole page into chapter 2,
@@ -11,8 +14,6 @@ import { readStore, writeStore } from "./storage";
 // With no JS the attribute is never set and everything renders, so crawlers and no-JS users see all content.
 
 export type Chapter = 1 | 2;
-
-export const CHAPTER_KEY = "xc:chapter";
 
 const store = createStore<Chapter>(1, () => (readStore("local", CHAPTER_KEY) === "2" ? 2 : 1));
 
@@ -48,6 +49,3 @@ export function relockGate() {
 export function subscribeChapter(fn: () => void) {
   return store.subscribe(fn);
 }
-
-/** Inline, pre-paint: sets data-chapter from storage so there is no flash of the wrong chapter. */
-export const CHAPTER_BOOT_SCRIPT = `try{document.documentElement.dataset.chapter=localStorage.getItem("${CHAPTER_KEY}")==="2"?"2":"1"}catch(e){document.documentElement.dataset.chapter="1"}`;

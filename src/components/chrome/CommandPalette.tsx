@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { camps } from "@/data/camps";
+import { CHAPTER_TWO, camps } from "@/data/camps";
 import { profile } from "@/data/content";
 import { copyEmail } from "@/lib/clipboard";
 import { ACHIEVEMENTS, unlock, useAchievements } from "@/lib/achievements";
+import { relockGate, unlockChapterTwo, useChapter } from "@/lib/chapter";
+import { flagChapterSkip } from "@/lib/hud-mode";
 import { closePalette, openDevLog, togglePalette, useChromeUI } from "@/lib/chrome-ui";
 import { strictLabelMatch, tokenPrefixMatch } from "@/lib/fuzzy";
 import { EASE_HUD } from "@/lib/motion";
@@ -30,6 +32,7 @@ const CAMP_KEYWORDS: Record<string, string> = {
   route: "experience work jobs career",
   summits: "hackathons hackathon awards wins",
   lab: "research ml machine learning pfas copd",
+  gate: "checkpoint gate puzzle nepal",
   games: "games game room warmer play",
   payload: "projects work openbook",
   systems: "skills stack honors",
@@ -50,6 +53,7 @@ export function CommandPalette() {
   const sound = useSoundEnabled();
   const theme = useTheme();
   const unlocked = useAchievements();
+  const chapter = useChapter();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -88,14 +92,49 @@ export function CommandPalette() {
 
   const commands = useMemo<Command[]>(() => {
     const himalayaUnlocked = unlocked.includes("namaste");
-    const list: Command[] = camps.map((c, i) => ({
-      id: `goto-${c.id}`,
-      group: "Navigate",
-      label: `goto ${c.name.toLowerCase()}`,
-      hint: `CAMP ${String(i).padStart(2, "0")} · ${c.altitude.toLocaleString("en-US")} M`,
-      keywords: `${c.short} ${c.id} ${CAMP_KEYWORDS[c.id] ?? ""} camp section`,
-      run: () => scrollToCamp(c.id),
-    }));
+    const list: Command[] = camps.map((c, i) => {
+      const locked = chapter === 1 && CHAPTER_TWO.includes(c.id);
+      return {
+        id: `goto-${c.id}`,
+        group: "Navigate",
+        label: `goto ${c.name.toLowerCase()}${locked ? " (locked)" : ""}`,
+        hint: locked ? "LOCKED · via checkpoint" : `CAMP ${String(i).padStart(2, "0")} · ${c.altitude.toLocaleString("en-US")} M`,
+        keywords: `${c.short} ${c.id} ${CAMP_KEYWORDS[c.id] ?? ""} camp section`,
+        run: locked
+          ? () => {
+              scrollToCamp("gate");
+              toast("Solve the checkpoint to continue", { title: "Locked", tone: "signal", duration: 2600 });
+            }
+          : () => scrollToCamp(c.id),
+      };
+    });
+    list.push(
+      chapter === 1
+        ? {
+            id: "skip-checkpoint",
+            group: "Navigate",
+            label: "skip checkpoint",
+            hint: "unlock chapter 2",
+            keywords: "gate warmer bypass unlock chapter",
+            run: () => {
+              flagChapterSkip();
+              unlockChapterTwo();
+              // Chapter-2 content becomes visible on the attribute flip; scroll once it has laid out.
+              requestAnimationFrame(() => requestAnimationFrame(() => scrollToCamp("games")));
+            },
+          }
+        : {
+            id: "replay-checkpoint",
+            group: "Navigate",
+            label: "replay checkpoint",
+            hint: "lock chapter 2 again",
+            keywords: "gate warmer relock reset chapter",
+            run: () => {
+              relockGate();
+              requestAnimationFrame(() => requestAnimationFrame(() => scrollToCamp("gate")));
+            },
+          },
+    );
     list.push(
       {
         id: "warmer",
@@ -172,7 +211,7 @@ export function CommandPalette() {
       },
     );
     return list;
-  }, [sound, theme, unlocked]);
+  }, [sound, theme, unlocked, chapter]);
 
   const results = useMemo(() => {
     const scored = commands

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
-import { Chip, Panel } from "@/components/hud/Panel";
+import { useId, useState, type ReactNode } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import type { Project } from "@/data/content";
+import { GREEN, INK, ORANGE, RED, YELLOW } from "@/components/toon/toon";
 import { EASE } from "../shared/prng";
 
 type MissionCardProps = {
@@ -14,100 +14,63 @@ type MissionCardProps = {
   className?: string;
 };
 
-const MAX_TILT = 4;
-const FIRE = "var(--fire)";
+const TINTS = [YELLOW, "#a8d8ff", GREEN];
+const TILTS = [-1.2, 0.9, -0.6];
+const DOTS = [ORANGE, RED, GREEN];
 
+/** A project as a Warmer sticker: live toon visual on top, copy below, extra bullets behind a pill expander. */
 export function MissionCard({ project, index, visual, large = false, className = "" }: MissionCardProps) {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const extraId = useId();
-  const rx = useMotionValue(0);
-  const ry = useMotionValue(0);
-  const srx = useSpring(rx, { stiffness: 170, damping: 18 });
-  const sry = useSpring(ry, { stiffness: 170, damping: 18 });
-  const canTilt = useRef(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const update = () => {
-      canTilt.current = mq.matches && !reduce;
-    };
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, [reduce]);
-
-  const onMove = (e: React.PointerEvent<HTMLLIElement>) => {
-    if (!canTilt.current) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    ry.set(px * MAX_TILT * 2);
-    rx.set(-py * MAX_TILT * 2);
-  };
-  const onLeave = () => {
-    rx.set(0);
-    ry.set(0);
-  };
 
   const shown = project.bullets.slice(0, 2);
   const extra = project.bullets.slice(2);
+  const tint = TINTS[index % TINTS.length];
+
+  const bullet = (b: string, i: number) => (
+    <li key={b} className="flex gap-2.5 text-[14px] font-semibold leading-snug">
+      <span
+        aria-hidden
+        className="mt-[5px] inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2"
+        style={{ background: DOTS[i % DOTS.length], borderColor: INK }}
+      />
+      <span>{b}</span>
+    </li>
+  );
 
   return (
     <motion.li
-      className={`group relative list-none ${className}`}
-      style={{ rotateX: srx, rotateY: sry, transformPerspective: 1100 }}
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      className={`list-none ${className}`}
+      initial={{ opacity: 0, y: 30, rotate: 0 }}
+      whileInView={{ opacity: 1, y: 0, rotate: TILTS[index % TILTS.length] }}
       viewport={{ once: true, margin: "-8% 0px" }}
-      transition={reduce ? { duration: 0 } : { duration: 0.6, ease: EASE, delay: (index % 3) * 0.07 }}
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
+      transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 210, damping: 18, delay: index * 0.08 }}
     >
-      <Panel
-        as="article"
-        accent={FIRE}
-        className={`flex h-full flex-col ${large ? "lg:flex-row" : ""} transition-colors duration-300 group-focus-within:border-fire/60 group-hover:border-fire/60`}
-      >
-        {/* scanline sweep on hover / focus */}
-        <span aria-hidden className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
-          <span className="absolute inset-x-0 top-[-30%] h-24 border-b border-fire/70 bg-linear-to-b from-transparent to-fire/10 opacity-0 transition-[top,opacity] duration-[900ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] group-focus-within:top-[105%] group-focus-within:opacity-100 group-hover:top-[105%] group-hover:opacity-100" />
-        </span>
-
+      <article data-cursor-box="" className="wr-sticker wr-wobble flex h-full flex-col overflow-hidden">
         <div
           aria-hidden
-          className={`relative overflow-hidden border-b border-line bg-bg/70 ${
-            large ? "h-72 md:h-80 lg:h-auto lg:min-h-[26rem] lg:w-[56%] lg:shrink-0 lg:border-b-0 lg:border-r" : "h-36 lg:h-auto lg:min-h-36 lg:flex-1"
-          }`}
+          className={`relative shrink-0 overflow-hidden border-b-[3px] ${large ? "h-64" : "h-44"}`}
+          style={{ borderColor: INK, background: `color-mix(in oklab, ${tint} 22%, #ffffff)` }}
         >
           {visual}
         </div>
 
-        <div className={`flex min-w-0 flex-1 flex-col p-5 md:p-6 ${large ? "" : "lg:flex-none"}`}>
-          <p className="hud-label flex flex-wrap items-center gap-2" style={{ color: FIRE }}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <span className="h-px w-5 bg-line-hi" />
-            <span className="text-dim">{project.kind}</span>
-            <span aria-hidden className="ml-auto inline-flex items-center gap-1.5 text-dim/70">
-              <span className="led inline-block h-1 w-1 rounded-full bg-fire" />
-              Live
+        <div className="flex min-w-0 flex-1 flex-col p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="wr-pill inline-flex items-center px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider"
+              style={{ background: tint, boxShadow: `2px 2px 0 ${INK}`, borderWidth: 2 }}
+            >
+              {project.kind}
             </span>
-          </p>
-          <h3
-            className={`mt-3 font-display font-bold uppercase leading-none tracking-tight text-text ${large ? "text-3xl md:text-4xl" : "text-2xl"}`}
-          >
+          </div>
+          <h3 className={`wr-display mt-3 font-bold leading-none ${large ? "text-4xl" : "text-3xl"}`} style={{ color: INK }}>
             {project.title}
           </h3>
-          <p className="mt-3 text-text/90">{project.tagline}</p>
+          <p className="mt-2 text-base font-bold leading-snug">{project.tagline}</p>
 
-          <ul className="mt-4 space-y-2">
-            {shown.map((b) => (
-              <li key={b} className="flex gap-3 text-sm leading-relaxed text-dim">
-                <span aria-hidden className="mt-[8px] h-px w-3 shrink-0 bg-fire" />
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
+          <ul className="mt-3 space-y-1.5">{shown.map(bullet)}</ul>
 
           {extra.length > 0 && (
             <>
@@ -115,53 +78,50 @@ export function MissionCard({ project, index, visual, large = false, className =
                 id={extraId}
                 initial={false}
                 animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
-                transition={reduce ? { duration: 0 } : { duration: 0.35, ease: EASE }}
+                transition={reduce ? { duration: 0 } : { duration: 0.3, ease: EASE }}
                 className="overflow-hidden"
                 aria-hidden={!open}
                 inert={!open}
               >
-                <ul className="space-y-2 pt-2">
-                  {extra.map((b) => (
-                    <li key={b} className="flex gap-3 text-sm leading-relaxed text-dim">
-                      <span aria-hidden className="mt-[8px] h-px w-3 shrink-0 bg-fire" />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
+                <ul className="space-y-1.5 pt-1.5">{extra.map((b, i) => bullet(b, i + shown.length))}</ul>
               </motion.div>
               <button
                 type="button"
                 aria-expanded={open}
                 aria-controls={extraId}
                 onClick={() => setOpen((o) => !o)}
-                className="mt-1 inline-flex min-h-8 w-fit cursor-pointer items-center gap-2 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-dim transition-colors hover:text-fire focus-visible:text-fire"
+                className="wr-pill wr-press mt-3 inline-flex min-h-9 w-fit cursor-pointer items-center gap-2 bg-white px-3 py-1 text-[13px] font-extrabold"
+                style={{ boxShadow: `3px 3px 0 ${INK}` }}
               >
-                <span aria-hidden className="inline-block w-3 text-center">{open ? "−" : "+"}</span>
-                {open ? "Less detail" : `${extra.length} more ${extra.length === 1 ? "detail" : "details"}`}
+                <span aria-hidden className="wr-display inline-block w-3 text-center text-base leading-none">
+                  {open ? "−" : "+"}
+                </span>
+                {open ? "Less" : `${extra.length} more ${extra.length === 1 ? "detail" : "details"}`}
               </button>
             </>
           )}
 
-          <div className="mt-auto pt-5">
-            <div className="flex flex-wrap gap-2">
-              {project.stack.map((s) => (
-                <Chip key={s}>{s}</Chip>
-              ))}
-            </div>
+          <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-4">
+            {project.stack.map((s) => (
+              <span key={s} className="rounded-full border-2 px-2.5 py-0.5 text-xs font-extrabold" style={{ borderColor: INK }}>
+                {s}
+              </span>
+            ))}
             {project.href && (
               <a
                 href={project.href}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 inline-flex min-h-8 items-center gap-2 py-2 font-mono text-xs uppercase tracking-[0.14em] text-text transition-colors hover:text-fire"
+                className="wr-pill wr-press wr-display ml-auto inline-flex min-h-9 items-center gap-2 px-3.5 py-1 text-sm font-bold"
+                style={{ background: YELLOW }}
               >
-                Source on GitHub <span aria-hidden>↗</span>
-                <span className="sr-only">({project.title})</span>
+                Source <span aria-hidden>↗</span>
+                <span className="sr-only">for {project.title} on GitHub</span>
               </a>
             )}
           </div>
         </div>
-      </Panel>
+      </article>
     </motion.li>
   );
 }

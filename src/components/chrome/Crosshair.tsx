@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { INK, PAPER } from "@/components/toon/toon";
+import { hudMode } from "@/lib/hud-mode";
 import { playBlip } from "@/lib/sound";
 
 const INTERACTIVE = 'a[href], button, [role="button"], [data-cursor], summary, select, label[for], input[type="checkbox"], input[type="radio"]';
@@ -54,6 +56,55 @@ export function Crosshair() {
     let lastReadout = "";
     let lastColor = "";
     let readoutInside = false;
+    let toon = hudMode.get() === "toon";
+
+    /** HUD hairlines vs. Warmer ink: thicker strokes, rounded outer corners, ink colour. */
+    const RADII = ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomLeftRadius", "borderBottomRightRadius"] as const;
+    const applySkin = () => {
+      corners.current.forEach((el, i) => {
+        if (!el) return;
+        el.style.borderWidth = "0";
+        const w = toon ? "2px" : "1px";
+        if (i === 0 || i === 2) el.style.borderLeftWidth = w;
+        else el.style.borderRightWidth = w;
+        if (i < 2) el.style.borderTopWidth = w;
+        else el.style.borderBottomWidth = w;
+        el.style.borderStyle = "solid";
+        RADII.forEach((r) => (el.style[r] = "0"));
+        el.style[RADII[i]] = toon ? "5px" : "0";
+      });
+      dot.current?.style.setProperty("--xc-dot", toon ? INK : "var(--signal)");
+      lastColor = "";
+      if (readout.current) {
+        readout.current.style.fontWeight = toon ? "700" : "400";
+        readout.current.dataset.skin = toon ? "toon" : "hud";
+      }
+      styleReadout();
+    };
+    const styleReadout = () => {
+      const el = readout.current;
+      if (!el) return;
+      const st = el.style;
+      if (readoutInside) {
+        st.background = toon ? PAPER : "color-mix(in oklab, var(--bg) 88%, transparent)";
+        st.padding = "2px 5px";
+        st.border = toon ? `2px solid ${INK}` : "1px solid var(--line)";
+        st.borderRadius = toon ? "999px" : "0";
+      } else {
+        st.background = "transparent";
+        st.padding = "0";
+        st.border = "0";
+        st.borderRadius = "0";
+      }
+    };
+    const unsubMode = hudMode.subscribe(() => {
+      toon = hudMode.get() === "toon";
+      if (locked && kind === "box") {
+        const a = getComputedStyle(locked).getPropertyValue("--accent").trim();
+        accent = a || "var(--signal)";
+      }
+      applySkin();
+    });
     let raf = 0;
 
     /** Innermost interactive element wins; otherwise the innermost [data-cursor-box]. */
@@ -117,7 +168,8 @@ export function Crosshair() {
     };
 
     const tick = () => {
-      raf = requestAnimationFrame(tick);
+      applySkin();
+    raf = requestAnimationFrame(tick);
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       let tx: number, ty: number, tw: number, th: number;
@@ -162,7 +214,7 @@ export function Crosshair() {
         // Over links/buttons the native pointer shows, so the centre cross steps aside.
         dot.current.style.opacity = kind === "interactive" ? "0" : "1";
       }
-      const color = kind ? accent : "var(--text-dim)";
+      const color = toon ? INK : kind ? accent : "var(--text-dim)";
       const colorChanged = color !== lastColor;
       lastColor = color;
       const c = corners.current;
@@ -197,10 +249,7 @@ export function Crosshair() {
         const inside = kind === "box" && rh > 300;
         if (inside !== readoutInside) {
           readoutInside = inside;
-          const st = readout.current.style;
-          st.background = inside ? "color-mix(in oklab, var(--bg) 88%, transparent)" : "transparent";
-          st.padding = inside ? "2px 5px" : "0";
-          st.border = inside ? "1px solid var(--line)" : "0";
+          styleReadout();
         }
         let rx: number;
         let ry: number;
@@ -228,6 +277,7 @@ export function Crosshair() {
 
     return () => {
       cancelAnimationFrame(raf);
+      unsubMode();
       html.classList.remove("xc-cursor");
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerover", onOver);
@@ -255,14 +305,15 @@ html.xc-cursor :is(${TEXT_INPUT}) { cursor: text !important; }`}</style>
             corners.current[i] = el;
           }}
           className={`${corner} ${cls}`}
+          data-corner={i}
           style={{ width: 6, height: 6, borderColor: "var(--text-dim)" }}
         />
       ))}
       <div ref={dot} className="absolute left-0 top-0 will-change-transform">
-        <span className="absolute -left-[7px] top-0 h-px w-[5px] bg-signal" />
-        <span className="absolute left-[2px] top-0 h-px w-[5px] bg-signal" />
-        <span className="absolute -top-[7px] left-0 h-[5px] w-px bg-signal" />
-        <span className="absolute left-0 top-[2px] h-[5px] w-px bg-signal" />
+        <span className="absolute -left-[7px] top-0 h-px w-[5px] bg-[var(--xc-dot,var(--signal))]" />
+        <span className="absolute left-[2px] top-0 h-px w-[5px] bg-[var(--xc-dot,var(--signal))]" />
+        <span className="absolute -top-[7px] left-0 h-[5px] w-px bg-[var(--xc-dot,var(--signal))]" />
+        <span className="absolute left-0 top-[2px] h-[5px] w-px bg-[var(--xc-dot,var(--signal))]" />
       </div>
       <div
         ref={readout}

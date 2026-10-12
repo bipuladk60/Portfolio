@@ -1,28 +1,26 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Panel } from "@/components/hud/Panel";
+import { AnimatePresence, motion } from "motion/react";
 import { profile } from "@/data/content";
 import { copyEmail } from "@/lib/clipboard";
-import { EASE } from "../shared/prng";
-
-const AIR = "var(--air)";
+import { GREEN, INK, RED, YELLOW } from "@/components/toon/toon";
+import { useReducedMotionSafe } from "../summits/motion";
 
 const strip = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 const CHANNELS = [
-  { id: "CH-01", name: "Mail", value: profile.email, href: `mailto:${profile.email}`, external: false },
-  { id: "CH-02", name: "GitHub", value: strip(profile.links.github), href: profile.links.github, external: true },
-  { id: "CH-03", name: "LinkedIn", value: strip(profile.links.linkedin), href: profile.links.linkedin, external: true },
+  { name: "GitHub", value: strip(profile.links.github), href: profile.links.github, color: "#a8d8ff" },
+  { name: "LinkedIn", value: strip(profile.links.linkedin), href: profile.links.linkedin, color: GREEN },
 ];
 
 const [EMAIL_LOCAL, EMAIL_DOMAIN] = profile.email.split("@");
 
 type Status = "idle" | "sent" | "failed";
 
+/** The toon contact card: the email big and copyable, plus mail / GitHub / LinkedIn pills. */
 export function TransmitConsole() {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionSafe();
   const [status, setStatus] = useState<Status>("idle");
   const [pulse, setPulse] = useState(0);
   const timer = useRef(0);
@@ -38,96 +36,93 @@ export function TransmitConsole() {
   };
 
   return (
-    <Panel label="Contact" accent={AIR} className="p-5 md:p-8">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-12">
-        {/* primary transmit */}
+    <article data-cursor-box="" className="wr-sticker p-5 md:p-8">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-10">
         <div className="min-w-0">
-          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 font-mono text-[11px] uppercase tracking-[0.12em]">
-            <dt className="text-dim/70">Origin</dt>
-            <dd className="text-text">{profile.origin}</dd>
-            <dt className="text-dim/70">Base</dt>
-            <dd className="text-text">{profile.base}</dd>
-            <dt className="text-dim/70">Status</dt>
-            <dd className="normal-case tracking-normal text-text">{profile.status}</dd>
-          </dl>
+          <div className="flex flex-wrap gap-2">
+            {[profile.origin, profile.base].map((place, i) => (
+              <span
+                key={place}
+                className="rounded-full border-2 px-3 py-0.5 text-xs font-extrabold"
+                style={{ borderColor: INK, background: i === 0 ? YELLOW : "#ffffff" }}
+              >
+                {i === 0 ? "From" : "Based in"} {place}
+              </span>
+            ))}
+          </div>
+          <p className="mt-3 text-base font-bold leading-snug">{profile.status}</p>
 
-          <p className="hud-label mt-8">Email</p>
-          <p className="mt-2 font-mono text-[clamp(0.8rem,4.2vw,1.5rem)] leading-tight text-air">
+          <p className="wr-display mt-6 break-words text-[clamp(1.35rem,5.6vw,2.5rem)] font-bold leading-tight" style={{ color: INK }}>
             {EMAIL_LOCAL}
             <wbr />@{EMAIL_DOMAIN}
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-4">
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
             <div className="relative">
               <AnimatePresence>
                 {!reduce &&
                   pulse > 0 &&
-                  [0, 1, 2].map((k) => (
+                  [0, 1].map((k) => (
                     <motion.span
                       key={`${pulse}-${k}`}
                       aria-hidden
-                      className="pointer-events-none absolute inset-0 border"
-                      style={{ borderColor: status === "failed" ? "var(--fire)" : AIR }}
-                      initial={{ opacity: 0.7, scale: 1 }}
-                      animate={{ opacity: 0, scale: 1.9 }}
+                      className="pointer-events-none absolute inset-0 rounded-2xl border-[3px]"
+                      style={{ borderColor: status === "failed" ? RED : INK }}
+                      initial={{ opacity: 0.8, scale: 1 }}
+                      animate={{ opacity: 0, scale: 1.45 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 1.1, ease: EASE, delay: k * 0.18 }}
+                      transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1], delay: k * 0.15 }}
                     />
                   ))}
               </AnimatePresence>
               <button
                 type="button"
                 onClick={transmit}
-                className="relative inline-flex cursor-pointer items-center gap-3 border border-air bg-air px-6 py-3 font-display text-base font-bold uppercase tracking-[0.14em] text-bg transition-colors duration-300 hover:bg-transparent hover:text-air"
+                className="wr-pill wr-press wr-display relative inline-flex min-h-14 cursor-pointer items-center gap-3 !rounded-2xl px-6 py-3 text-xl font-bold"
+                style={{ background: status === "sent" ? GREEN : YELLOW, borderWidth: 3, boxShadow: `5px 5px 0 ${INK}` }}
               >
-                <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-current" />
-                Copy email
+                {status === "sent" ? "Copied!" : "Copy email"}
               </button>
             </div>
-            <p role="status" aria-live="polite" className="min-h-[1.25rem] font-mono text-[11px] uppercase tracking-[0.14em]">
-              {status === "sent" && <span className="text-water">Copied · email is on your clipboard</span>}
-              {status === "failed" && <span className="text-fire">Copy blocked · use the mail channel</span>}
-            </p>
-          </div>
-          <p className="mt-4 text-sm text-dim">
-            Prefer your own client?{" "}
-            <a href={`mailto:${profile.email}`} className="inline-flex min-h-8 items-center py-2 text-text underline decoration-line-hi underline-offset-4 hover:decoration-air">
-              Open a mail draft
+            <a
+              href={`mailto:${profile.email}`}
+              className="wr-pill wr-press inline-flex min-h-11 items-center gap-2 bg-white px-4 py-2 text-sm font-extrabold"
+            >
+              Open a mail draft <span aria-hidden>✉</span>
             </a>
-            .
+          </div>
+          <p role="status" aria-live="polite" className="mt-3 min-h-[1.5rem] text-sm font-extrabold">
+            {status === "sent" && <span>The email is on your clipboard.</span>}
+            {status === "failed" && <span style={{ color: RED }}>Copy was blocked. Use the mail draft instead.</span>}
           </p>
         </div>
 
-        {/* channels */}
         <div className="min-w-0">
-          <p className="hud-label">Elsewhere</p>
-          <ul className="mt-3 border-t border-line">
+          <p className="wr-display text-xl font-bold">Elsewhere</p>
+          <ul className="mt-3 flex flex-col gap-3">
             {CHANNELS.map((c) => (
-              <li key={c.id} className="border-b border-line">
+              <li key={c.name}>
                 <a
                   href={c.href}
-                  {...(c.external ? { target: "_blank", rel: "noreferrer" } : {})}
-                  className="group/ch grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 py-4 transition-colors"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="wr-pill wr-press group flex min-h-14 items-center gap-3 !rounded-2xl px-4 py-2.5"
+                  style={{ background: c.color }}
                 >
-                  <span className="font-mono text-[10px] tracking-[0.14em] text-dim/70">{c.id}</span>
-                  <span className="min-w-0">
-                    <span className="block font-display text-lg font-semibold uppercase tracking-wide text-text transition-colors group-hover/ch:text-air">
-                      {c.name}
-                    </span>
-                    <span className="block truncate font-mono text-xs text-dim">{c.value}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="wr-display block text-lg font-bold leading-tight">{c.name}</span>
+                    <span className="block truncate text-xs font-bold opacity-75">{c.value}</span>
                   </span>
-                  <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-dim transition-colors group-hover/ch:text-air">
-                    <span className="hidden sm:inline">Open</span>
-                    <span aria-hidden className="transition-transform duration-300 group-hover/ch:translate-x-1">
-                      →
-                    </span>
+                  <span aria-hidden className="wr-display text-xl transition-transform duration-200 group-hover:translate-x-1">
+                    →
                   </span>
+                  <span className="sr-only">(opens in a new tab)</span>
                 </a>
               </li>
             ))}
           </ul>
         </div>
       </div>
-    </Panel>
+    </article>
   );
 }

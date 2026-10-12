@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { playBlip } from "@/lib/sound";
+import { startHudModeSync } from "@/lib/hud-mode";
 import { restoreTheme } from "@/lib/theme";
 import { Altimeter } from "./Altimeter";
 import { BootSequence } from "./BootSequence";
@@ -65,6 +66,7 @@ function useTabTitle() {
 function useGlobalEffects() {
   useEffect(() => {
     restoreTheme();
+    const stopHudSync = startHudModeSync();
     // Click blip on any interactive element (no-op while sound is off).
     const onDown = (e: PointerEvent) => {
       const t = e.target;
@@ -73,6 +75,9 @@ function useGlobalEffects() {
       }
     };
     document.addEventListener("pointerdown", onDown, { passive: true });
-    return () => document.removeEventListener("pointerdown", onDown);
+    return () => {
+      stopHudSync();
+      document.removeEventListener("pointerdown", onDown);
+    };
   }, []);
 }

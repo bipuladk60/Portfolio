@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { EASE } from "../shared/prng";
+import { GREEN, INK, ORANGE } from "@/components/toon/toon";
 
 const WORDS = ["try", "trie", "tree", "type", "typo"];
 
@@ -76,13 +77,15 @@ export function TrieGrow() {
   const current = WORDS[frame.w].slice(0, frame.k);
 
   return (
-    <div ref={ref} className="relative flex h-full items-center px-3 py-2">
-      <p className="absolute left-3 top-2 font-mono text-[11px] text-text">
-        <span className="text-dim">&gt; </span>
+    <div ref={ref} className="relative flex h-full items-center px-3 pb-2 pt-9">
+      <p
+        className="wr-pill wr-display absolute left-3 top-2.5 inline-flex min-w-[64px] items-center bg-white px-2.5 py-0.5 text-[13px] font-bold"
+        style={{ color: INK, borderWidth: 2, boxShadow: `2px 2px 0 ${INK}` }}
+      >
         {current}
-        <span className="led ml-px inline-block h-[11px] w-[6px] translate-y-[2px] bg-fire" />
+        <span className="led ml-0.5 inline-block h-[13px] w-[3px] rounded-full" style={{ background: ORANGE }} />
       </p>
-      <svg viewBox="0 0 220 120" className="mx-auto h-full max-h-[130px] w-full max-w-[280px]">
+      <svg viewBox="0 0 220 132" className="mx-auto h-full max-h-[140px] w-full max-w-[300px]" overflow="visible">
         {NODES.filter((n) => n.parent !== null && visible.has(n.prefix)).map((n) => {
           const p = BY_PREFIX.get(n.parent!)!;
           return (
@@ -92,8 +95,9 @@ export function TrieGrow() {
               y1={p.y}
               x2={n.x}
               y2={n.y}
-              stroke="#2E4052"
-              strokeWidth="1"
+              stroke={INK}
+              strokeWidth="2.2"
+              strokeLinecap="round"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
               transition={{ duration: reduce ? 0 : 0.25, ease: EASE }}
@@ -102,29 +106,33 @@ export function TrieGrow() {
         })}
         {NODES.filter((n) => visible.has(n.prefix)).map((n) => {
           const active = n.prefix !== "" && current.startsWith(n.prefix);
+          const done = terminal.has(n.prefix);
           return (
             <motion.g
               key={`n-${n.prefix}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: reduce ? 0 : 0.25 }}
+              style={{ transformBox: "fill-box", transformOrigin: "50% 50%" }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 16 }}
             >
-              {terminal.has(n.prefix) && <circle cx={n.x} cy={n.y} r="9.5" fill="none" stroke="#FF5C5C" strokeWidth="0.8" />}
+              {n.prefix !== "" && <circle cx={n.x + 1.5} cy={n.y + 1.5} r="8" fill={INK} />}
               <circle
                 cx={n.x}
                 cy={n.y}
-                r={n.prefix === "" ? 3 : 7}
-                fill={active ? "#FF5C5C" : "#10151C"}
-                stroke={active ? "#FF5C5C" : "#2E4052"}
+                r={n.prefix === "" ? 4 : 8}
+                fill={n.prefix === "" ? INK : active ? ORANGE : done ? GREEN : "#ffffff"}
+                stroke={INK}
+                strokeWidth="2"
               />
               {n.ch && (
                 <text
                   x={n.x}
-                  y={n.y + 3}
+                  y={n.y + 3.3}
                   textAnchor="middle"
-                  fontSize="8.5"
-                  fontFamily="var(--font-jetbrains), monospace"
-                  fill={active ? "#0A0D12" : "#E9E5DA"}
+                  fontSize="9.5"
+                  fontWeight="700"
+                  fontFamily="var(--font-fredoka), sans-serif"
+                  fill={INK}
                 >
                   {n.ch}
                 </text>

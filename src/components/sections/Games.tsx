@@ -1,12 +1,20 @@
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
 import { games } from "@/data/content";
 import { SkyWorld } from "./games/SkyWorld";
-import { WarmerTeaser } from "./games/WarmerTeaser";
+import { FoundSticker } from "./games/FoundSticker";
 import { WarmerStats } from "./games/WarmerStats";
 import { GREEN, INK, ORANGE, WARMER_CSS, YELLOW } from "@/components/toon/toon";
 import { Reveal } from "./shared/Reveal";
 
-// Warmer's own rounded, friendly type, scoped to this section.
+// Header recoloured for the light sky (SectionHeader is built for the dark HUD).
+const HEAD_CSS = `
+.wr-head header { margin-bottom: 1.75rem; }
+.wr-head header > div:first-child { color: ${INK} !important; }
+.wr-head header h2 { color: ${INK}; }
+.wr-head header .text-dim { color: rgba(29, 35, 64, 0.6); }
+.wr-head header .bg-line-hi { background: rgba(29, 35, 64, 0.3); }
+.wr-head header p { color: rgba(29, 35, 64, 0.8); }
+`;
 
 const CHIP_COLORS = [YELLOW, "#a8d8ff", GREEN];
 const TILTS = ["-1.5deg", "1deg", "-0.6deg"];
@@ -17,15 +25,17 @@ export function Games() {
   const features = warmer.bullets.slice(0, -1);
 
   return (
-    <CampSection campId="games" className="overflow-hidden">
-      <style>{WARMER_CSS}</style>
-      <SectionHeader
-        campId="games"
-        title="Game Room"
-      />
-
-      <div className="-mb-16 -mt-8 md:-mb-20 md:-mt-10">
+    <CampSection campId="games" className="overflow-hidden !pb-0 !pt-0">
+      <style>{WARMER_CSS + HEAD_CSS}</style>
       <SkyWorld>
+        <div className="wr-head">
+          <p className="wr-pill mb-4 inline-flex bg-white px-3 py-1 text-xs font-extrabold uppercase tracking-[0.16em]">Chapter 2</p>
+          <SectionHeader
+            campId="games"
+            title="Welcome to Warmer"
+            kicker="You just played it. Warmer is the daily geography game I build and run; here is how it works and how it's doing."
+          />
+        </div>
         <div className="grid items-start gap-4 lg:grid-cols-12 lg:gap-6">
           {/* left column: intro + analytics */}
           <div className="flex flex-col gap-4 lg:col-span-7 lg:gap-5">
@@ -83,13 +93,12 @@ export function Games() {
             </Reveal>
           </div>
 
-          {/* right column: the mini round */}
+          {/* right column: the visitor's checkpoint result */}
           <Reveal delay={0.08} className="lg:col-span-5">
-            <WarmerTeaser href={warmer.href} />
+            <FoundSticker href={warmer.href} />
           </Reveal>
         </div>
       </SkyWorld>
-      </div>
     </CampSection>
   );
 }

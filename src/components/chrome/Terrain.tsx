@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createNoise3D } from "@/lib/noise";
+import { useHudMode } from "@/lib/hud-mode";
 import { prefersReducedMotion } from "@/lib/motion";
 
 // Marching-squares segment table. Edges: 0 top, 1 right, 2 bottom, 3 left.
@@ -24,6 +25,12 @@ const FRAME_MS = 1000 / 30;
  */
 export function Terrain() {
   const ref = useRef<HTMLCanvasElement>(null);
+  // In Warmer's world the sky sections paint their own background: fade out and stop drawing.
+  const toon = useHudMode() === "toon";
+  const toonRef = useRef(toon);
+  useEffect(() => {
+    toonRef.current = toon;
+  }, [toon]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -144,7 +151,7 @@ export function Terrain() {
 
     const frame = (t: number) => {
       raf = requestAnimationFrame(frame);
-      if (t - last < FRAME_MS) return;
+      if (t - last < FRAME_MS || toonRef.current) return;
       last = t;
       draw(t);
     };
@@ -210,7 +217,8 @@ export function Terrain() {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 h-full w-full"
       style={{
-        opacity: 0.85,
+        opacity: toon ? 0 : 0.85,
+        transition: "opacity 700ms cubic-bezier(0.2,0.8,0.2,1)",
         maskImage: "radial-gradient(ellipse 120% 90% at 50% 45%, #000 40%, rgba(0,0,0,0.55) 100%)",
         WebkitMaskImage: "radial-gradient(ellipse 120% 90% at 50% 45%, #000 40%, rgba(0,0,0,0.55) 100%)",
       }}

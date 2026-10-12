@@ -81,7 +81,7 @@ function Cloud({ className, style, dur }: { className: string; style?: React.CSS
 }
 
 /**
- * The portal: the dark HUD gives way to Warmer's day sky between two cloud banks.
+ * Chapter 2 opens here: a cloud bank on top, then Warmer's day sky that carries on into the next sections.
  * Clouds drift and parallax with scroll (paused offscreen, still under reduced motion).
  */
 export function SkyWorld({ children }: { children: ReactNode }) {
@@ -97,7 +97,7 @@ export function SkyWorld({ children }: { children: ReactNode }) {
       {/* full-bleed backdrop (the section clips the overhang) */}
       <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-[100vw] -translate-x-1/2">
         <div
-          className="absolute inset-x-0 top-[26px] bottom-[26px] md:top-[35px] md:bottom-[35px]"
+          className="absolute inset-x-0 bottom-0 top-[26px] md:top-[35px]"
           style={{ background: `linear-gradient(to bottom, ${SKY_TOP}, ${SKY_BOTTOM})` }}
         />
         {/* sun */}
@@ -119,11 +119,8 @@ export function SkyWorld({ children }: { children: ReactNode }) {
         <div className="absolute inset-x-0 top-0">
           <CloudBank flip />
         </div>
-        <div className="absolute inset-x-0 bottom-0">
-          <CloudBank />
-        </div>
       </div>
-      <div className="relative pb-[60px] pt-[56px] md:pb-[72px] md:pt-[64px]">{children}</div>
+      <div className="relative pb-12 pt-[72px] md:pb-16 md:pt-[96px]">{children}</div>
     </div>
   );
 }

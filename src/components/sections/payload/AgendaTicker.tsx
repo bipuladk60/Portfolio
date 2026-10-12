@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { EASE } from "../shared/prng";
+import { INK, ORANGE } from "@/components/toon/toon";
 
 // Generic placeholder sessions: this illustrates the live agenda UI, not the real programme.
 const SESSIONS = ["Registration", "Opening session", "Keynote", "Breakout sessions", "Speaker panel", "Poster hall", "Closing remarks"];
@@ -28,41 +29,45 @@ export function AgendaTicker() {
   });
 
   return (
-    <div ref={ref} className="flex h-full flex-col px-3 py-3 font-mono text-[10px]">
-      <div className="mb-2 flex items-center gap-2 uppercase tracking-[0.14em] text-dim">
-        <span className="led inline-block h-1.5 w-1.5 rounded-full bg-fire" />
-        <span className="text-text">Live agenda</span>
-        <span className="text-dim/60">· preview</span>
+    <div ref={ref} className="flex h-full flex-col px-3 py-3 text-[12px] font-extrabold" style={{ color: INK }}>
+      <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-wider">
+        <span className="led inline-block h-2 w-2 rounded-full border-2" style={{ background: ORANGE, borderColor: INK }} />
+        <span>Live agenda</span>
+        <span className="opacity-60">· preview</span>
       </div>
       <ul className="relative flex-1 overflow-hidden">
         <AnimatePresence initial={false} mode="popLayout">
-          {rows.map((r) => (
-            <motion.li
-              key={r.abs}
-              layout={!reduce}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={reduce ? { duration: 0 } : { duration: 0.4, ease: EASE }}
-              className={`relative mb-1 flex items-center gap-2 border px-2 py-[3px] ${r.status === "Now" ? "border-fire/50 bg-fire/5" : "border-line"}`}
-            >
-              <span
-                className={`w-9 shrink-0 uppercase tracking-[0.1em] ${r.status === "Now" ? "text-fire" : r.status === "Done" ? "text-dim/50" : "text-dim"}`}
+          {rows.map((r) => {
+            const now_ = r.status === "Now";
+            const done = r.status === "Done";
+            return (
+              <motion.li
+                key={r.abs}
+                layout={!reduce}
+                initial={{ opacity: 0, y: 14, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={reduce ? { duration: 0 } : { duration: 0.4, ease: EASE }}
+                className="relative mb-1.5 flex items-center gap-2 overflow-hidden rounded-xl border-2 bg-white px-2 py-[3px]"
+                style={{ borderColor: INK, boxShadow: now_ ? `3px 3px 0 ${INK}` : "none", opacity: done ? 0.55 : 1 }}
               >
-                {r.status}
-              </span>
-              <span className={`truncate ${r.status === "Done" ? "text-dim/60 line-through decoration-line-hi" : "text-text/90"}`}>
-                {r.title}
-              </span>
-              {r.status === "Now" && (
                 <span
-                  key={`bar-${now}`}
-                  className={`absolute bottom-0 left-0 h-px bg-fire ${reduce ? "w-1/2" : "pb-progress"}`}
-                  style={{ animationDuration: `${STEP_MS}ms`, animationPlayState: inView ? "running" : "paused" }}
-                />
-              )}
-            </motion.li>
-          ))}
+                  className="w-11 shrink-0 rounded-full border-2 text-center text-[9px] uppercase tracking-wider"
+                  style={{ borderColor: INK, background: now_ ? ORANGE : done ? "#e6ebf2" : "#a8d8ff" }}
+                >
+                  {r.status}
+                </span>
+                <span className={`truncate ${done ? "line-through" : ""}`}>{r.title}</span>
+                {now_ && (
+                  <span
+                    key={`bar-${now}`}
+                    className={`absolute bottom-0 left-0 h-[3px] ${reduce ? "w-1/2" : "pb-progress"}`}
+                    style={{ background: ORANGE, animationDuration: `${STEP_MS}ms`, animationPlayState: inView ? "running" : "paused" }}
+                  />
+                )}
+              </motion.li>
+            );
+          })}
         </AnimatePresence>
       </ul>
     </div>

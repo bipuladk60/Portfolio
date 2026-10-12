@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "motion/react";
 import { mulberry32 } from "../shared/prng";
+import { GREEN, INK, RED, YELLOW } from "@/components/toon/toon";
 
 /**
  * Tiny live limit order book: passive orders rest, aggressive orders walk the book,
@@ -21,7 +22,7 @@ type Snap = {
   tape: Trade[];
 };
 
-const ROWS = 6;
+const ROWS = 5;
 const TAPE = 9;
 const DEPTH = 9;
 
@@ -132,62 +133,62 @@ export function OrderBookSim() {
 
   const row = (side: "ask" | "bid", [price, size]: [number, number]) => {
     const traded = snap.trade && snap.trade.price === price;
-    const color = side === "ask" ? "var(--fire)" : "var(--water)";
+    const color = side === "ask" ? RED : GREEN;
     return (
       <div
         key={`${price}-${traded ? snap.trade?.id : "r"}`}
-        className={`relative grid grid-cols-[1fr_auto] items-center px-2 leading-[15px] lg:leading-[21px] ${traded ? "pb-flash" : ""}`}
+        className={`relative grid h-[17px] grid-cols-[52px_1fr_22px] items-center gap-1.5 lg:h-[21px] ${traded ? "pb-flash" : ""}`}
       >
-        <span
-          className="absolute inset-y-[1px] right-0 transition-[width] duration-300 ease-out"
-          style={{ width: `${(size / snap.max) * 100}%`, background: `color-mix(in oklab, ${color} 16%, transparent)` }}
-        />
-        <span className="relative" style={{ color }}>
+        <span className="tabular-nums" style={{ color: INK }}>
           {px(price)}
         </span>
-        <span className="relative text-text/80 tabular-nums">{size}</span>
+        <span className="relative h-full py-[2px]">
+          <span
+            className="block h-full rounded-full border-2 transition-[width] duration-300 ease-out"
+            style={{ width: `${Math.max(8, (size / snap.max) * 100)}%`, background: color, borderColor: INK }}
+          />
+        </span>
+        <span className="text-right tabular-nums">{size}</span>
       </div>
     );
   };
 
   return (
-    <div ref={ref} className="flex h-full gap-4 p-3 pr-4 font-mono text-[10px] md:text-[11px]">
-      <div className="flex min-w-0 flex-1 flex-col justify-center">
-        <div className="mb-1 grid grid-cols-[1fr_auto] px-2 text-[9px] uppercase tracking-[0.14em] text-dim/70">
-          <span>Price</span>
+    <div ref={ref} className="flex h-full gap-3 p-3 text-[11px] font-extrabold" style={{ color: INK }}>
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-[2px]">
+        <div className="mb-0.5 flex items-center justify-between text-[10px] uppercase tracking-wider opacity-70">
+          <span>Asks</span>
           <span>Size</span>
         </div>
         {[...snap.asks].reverse().map((l) => row("ask", l))}
-        <div className="my-1 flex items-center justify-between border-y border-line px-2 py-[3px] text-[9px] uppercase tracking-[0.12em] text-signal">
+        <div
+          className="wr-pill my-1 flex items-center justify-between px-2.5 py-0.5 text-[10px] uppercase tracking-wider"
+          style={{ background: YELLOW, borderWidth: 2, boxShadow: `2px 2px 0 ${INK}` }}
+        >
           <span>Spread {px(snap.spread)}</span>
-          <span className="hidden text-dim sm:inline">Mid {px(snap.mid)}</span>
+          <span className="hidden sm:inline">Mid {px(snap.mid)}</span>
         </div>
         {snap.bids.map((l) => row("bid", l))}
+        <div className="mt-0.5 text-[10px] uppercase tracking-wider opacity-70">Bids</div>
       </div>
-      <div className="hidden w-[40%] min-w-0 flex-col border-l border-line pl-3 sm:flex">
-        <p className="text-[9px] uppercase tracking-[0.14em] text-dim/70">Engine</p>
-        <p className="mt-1 text-text">Array-indexed levels</p>
-        <p className="text-dim">O(1) cancel</p>
-        <p className="mt-4 flex items-center justify-between text-[9px] uppercase tracking-[0.14em] text-dim/70">
-          <span>Fills tape</span>
-          <span>Qty @ px</span>
-        </p>
-        <ol className="mt-1 min-h-0 flex-1 overflow-hidden border-t border-line">
-          {snap.tape.length === 0 && <li className="py-1 text-dim">Waiting for an aggressive order</li>}
+      <div className="hidden w-[38%] min-w-0 flex-col sm:flex">
+        <p className="text-[10px] uppercase tracking-wider opacity-70">Fills</p>
+        <ol className="mt-1 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
+          {snap.tape.length === 0 && <li className="opacity-70">Waiting for a market order…</li>}
           {snap.tape.map((t, i) => (
             <li
               key={t.id}
-              className={`flex justify-between border-b border-line/60 py-[3px] lg:py-[5px] ${i === 0 ? "pb-flash" : ""}`}
-              style={{ opacity: 1 - i * 0.08 }}
+              className={`flex items-center justify-between rounded-full border-2 bg-white px-2 py-[1px] ${i === 0 ? "pb-flash" : ""}`}
+              style={{ borderColor: INK, opacity: 1 - i * 0.09 }}
             >
-              <span style={{ color: t.buy ? "var(--water)" : "var(--fire)" }}>{t.buy ? "BUY" : "SELL"}</span>
-              <span className="tabular-nums text-text/80">
+              <span style={{ color: t.buy ? "#159b74" : RED }}>{t.buy ? "BUY" : "SELL"}</span>
+              <span className="tabular-nums">
                 {t.qty} @ {px(t.price)}
               </span>
             </li>
           ))}
         </ol>
-        <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-dim/70">Sim · not market data</p>
+        <p className="mt-1.5 text-[10px] uppercase tracking-wider opacity-60">Simulated · not market data</p>
       </div>
     </div>
   );

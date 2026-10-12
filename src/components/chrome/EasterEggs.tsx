@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { unlock } from "@/lib/achievements";
 import { chromeUI, openDevLog } from "@/lib/chrome-ui";
+import { consumeChapterSkip } from "@/lib/hud-mode";
 import { playBlip } from "@/lib/sound";
 import { toast } from "@/lib/toast";
 import { DevLog } from "./DevLog";
@@ -63,6 +64,22 @@ export function EasterEggs() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Solving the checkpoint (not skipping it from the palette) awards "Found Nepal", quietly.
+  useEffect(() => {
+    const onChapter = (e: Event) => {
+      const detail = (e as CustomEvent<number>).detail;
+      if (detail !== 2) return;
+      if (consumeChapterSkip()) return;
+      unlock("nepal", {
+        toastDelay: 1200,
+        toastDuration: 2200,
+        toastTitle: "Checkpoint cleared",
+      });
+    };
+    window.addEventListener("xc:chapter", onChapter);
+    return () => window.removeEventListener("xc:chapter", onChapter);
   }, []);
 
   return (

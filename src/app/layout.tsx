@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Chakra_Petch, Fredoka, IBM_Plex_Sans, JetBrains_Mono, Nunito } from "next/font/google";
-import { CHAPTER_BOOT_SCRIPT } from "@/lib/chapter";
+import { CHAPTER_BOOT_SCRIPT } from "@/lib/chapter-boot";
 import "./globals.css";
 
 const chakra = Chakra_Petch({

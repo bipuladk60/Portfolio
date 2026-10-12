@@ -3,9 +3,15 @@ import { readLocal, writeLocal } from "./storage";
 import { toast } from "./toast";
 import { playBlip } from "./sound";
 
-export type AchievementId = "namaste" | "konami" | "palette";
+export type AchievementId = "namaste" | "konami" | "palette" | "nepal";
 
 export const ACHIEVEMENTS: { id: AchievementId; title: string; hint: string; detail: string }[] = [
+  {
+    id: "nepal",
+    title: "Found Nepal",
+    hint: "The checkpoint has exactly one right answer.",
+    detail: "Found Nepal at the checkpoint.",
+  },
   {
     id: "palette",
     title: "Mission console",
@@ -45,7 +51,13 @@ export const isUnlocked = (id: AchievementId) => achievementStore.get().includes
 /** Unlock a secret. Returns true only the first time; announces it with a toast and a chime. */
 export function unlock(
   id: AchievementId,
-  { silent = false, toastDelay = 0, toastDuration = 3200 }: { silent?: boolean; toastDelay?: number; toastDuration?: number } = {},
+  {
+    silent = false,
+    toastDelay = 0,
+    toastDuration = 3200,
+    toastTitle,
+    toastMessage,
+  }: { silent?: boolean; toastDelay?: number; toastDuration?: number; toastTitle?: string; toastMessage?: string } = {},
 ): boolean {
   if (isUnlocked(id)) return false;
   achievementStore.set((prev) => [...prev, id]);
@@ -54,8 +66,8 @@ export function unlock(
     const a = ACHIEVEMENTS.find((x) => x.id === id)!;
     const count = achievementStore.get().length;
     const announce = () => {
-      toast(`${a.title} · ${count}/${ACHIEVEMENTS.length} secrets`, {
-        title: "Achievement unlocked",
+      toast(toastMessage ?? `${a.title} · ${count}/${ACHIEVEMENTS.length} secrets`, {
+        title: toastTitle ?? "Achievement unlocked",
         tone: "water",
         duration: toastDuration,
       });
