@@ -194,10 +194,11 @@ export function Ridge({
                 </button>
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute left-1/2 top-full mt-2.5 hidden -translate-x-1/2 whitespace-nowrap border bg-bg px-1.5 py-0.5 text-center font-mono text-[10px] uppercase tracking-[0.12em] transition-opacity duration-300 md:block"
+                  className="pointer-events-none absolute left-1/2 top-full mt-2.5 -translate-x-1/2 whitespace-nowrap border bg-bg px-1.5 py-0.5 text-center font-mono text-[10px] uppercase tracking-[0.12em] transition-opacity duration-300"
                   style={{ color: active ? color : "var(--text-dim)", borderColor: active ? color : "var(--line)", opacity: dim ? 0.3 : 1 }}
                 >
-                  {String(i + 1).padStart(2, "0")} · {h.when}
+                  {String(i + 1).padStart(2, "0")}
+                  <span className="hidden md:inline"> · {h.when}</span>
                 </span>
               </li>
             );

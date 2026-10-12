@@ -85,7 +85,7 @@ export function Chautari() {
             <Reveal delay={0.1}>
               <PeepalTree />
             </Reveal>
-            <Reveal delay={0.2} className="-mt-2">
+            <Reveal delay={0.2} className="mt-6">
               <Panel label="Try a throw" accent={GLOW} className="p-5 md:p-6" style={DUSK_PANEL}>
                 <p className="mb-4 text-sm text-dim">
                   A taste of the board. Roll the die and the red goti hops that many squares along the track.

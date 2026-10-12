@@ -34,7 +34,7 @@ export function Toaster() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 top-11 z-[95] flex flex-col items-center gap-2 px-3 md:inset-x-auto md:bottom-5 md:left-5 md:top-auto md:items-start md:px-0"
+      className="pointer-events-none fixed inset-x-0 top-11 z-[95] flex flex-col items-center gap-2 px-3 md:inset-x-auto md:bottom-5 md:right-24 md:top-auto md:items-end md:px-0"
     >
       <AnimatePresence initial={false}>
         {items.map((t) => {

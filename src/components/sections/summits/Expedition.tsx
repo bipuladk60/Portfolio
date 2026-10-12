@@ -98,7 +98,7 @@ export function Expedition() {
         <div className="lg:col-span-7">
           <Report h={selected} index={index} total={ATTEMPTS} reduce={reduce} />
         </div>
-        <div className="min-w-0 lg:col-span-5">
+        <div className="min-w-0 lg:sticky lg:top-24 lg:col-span-5">
           <p className="hud-label mb-3">Expedition patches</p>
           <ul
             className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-2"
