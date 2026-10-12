@@ -134,3 +134,17 @@ cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, n
 - Links: only links verified working (swipedin.co and the openbook repo were removed).
 - Chapter transition: smooth and professional. One continuous, eased move from night HUD to day sky
   (no flashes, no jumpy stages, no long text cards), about 2–2.5 s, Escape/skip still works, reduced motion = quick fade.
+
+## Revision 7: in between (owner feedback)
+"I wanted it clean but not this clean, it's boring now, make something in between."
+Rev 6 stripped too much: About and Experience are floating text on a flat background with large dead gaps.
+Target: rich but calm. Keep the Rev 6 bans (no box inside a box inside a box, no meaningless serial/coordinate
+stamps, quiet cursor, plain section names, facts only from content.ts), but bring back character:
+- Surfaces: ONE level of containment is fine and wanted. Use soft tinted surfaces (panel fill, faint gradient, a
+  hairline, small corner accents in the section colour) to group content. Cards may hover-lift / tilt ≤ 3°.
+- Depth and atmosphere: section-colour glows behind headings or key visuals, layered ridge silhouettes / contour
+  parallax between sections, subtle grain. Each section should have one signature visual, not just text.
+- Meaningful decoration: small data-driven visuals that encode real facts (e.g. 4 flags for 4 wins, 6 pips for 6
+  hackathons, Warmer's daily sparkline for users, a timeline with year ticks) rather than generic stamps.
+- Motion: purposeful entry choreography (draw, stagger, count-up), hover micro-interactions; nothing loops loudly.
+- Density: no empty bands taller than ~25% of the viewport inside a section on desktop.
