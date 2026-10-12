@@ -77,3 +77,15 @@ cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, n
 - Cursor box-lock: the crosshair locks onto any element with `[data-cursor-box]` (every Panel has it) as well as
   links/buttons — reticle brackets expand to hug the box. Add `data-cursor-box` to any other large card/visual
   (e.g. hero map, ridge, globe, project cards).
+
+## Revision 3 rules (owner feedback)
+- No "Chautari" anywhere: no Chautari Ludo, no peepal tree / chautari scene, no "chautari" ids or file names.
+  The games camp is now id `games`, name "Game Room"; section component `Games` in `sections/Games.tsx`.
+  Warmer is the only game.
+- Projects: only openbook, MHD Connect and TypeTrie (clipfinder, PartySync and jobradar were removed: not the owner's work).
+- Hackathons: 6 hackathons, 4 wins (Hatchathon 2023, HackPrinceton 2024, Hatchathon 2025, ShellHacks 2026 3rd place GridLock),
+  2 competed (HackNYU 2025 SwipedIn, Hacklytics 2025). Golden Eagle Idea Pitch moved to honors (pitch, not a hackathon).
+- Contact must read plainly as contact. No "SUMMIT REACHED" headline and no summit achievement/toast; the altitude can
+  stay as a small label only.
+- Hero: no tick-ruler scales on the sides. The route map shows real outlines of the USA and Nepal
+  (`src/data/countries.ts`, Natural Earth 1:50m) and is zoomable/pannable while the map box is active.

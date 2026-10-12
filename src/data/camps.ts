@@ -15,10 +15,10 @@ export const camps: Camp[] = [
   { id: "route", name: "Route Log", short: "Experience", altitude: 3500, color: "var(--sky)" },
   { id: "summits", name: "Summit Attempts", short: "Hackathons", altitude: 5300, color: "var(--signal)" },
   { id: "lab", name: "Atmospheric Lab", short: "Research", altitude: 6100, color: "var(--water)" },
-  { id: "chautari", name: "The Chautari", short: "Games", altitude: 6800, color: "var(--dusk-glow)" },
+  { id: "games", name: "Game Room", short: "Games", altitude: 6800, color: "var(--dusk-glow)" },
   { id: "payload", name: "Payload Bay", short: "Projects", altitude: 7400, color: "var(--fire)" },
   { id: "systems", name: "Systems Check", short: "Skills", altitude: 8000, color: "var(--water)" },
-  { id: "uplink", name: "Summit Uplink", short: "Contact", altitude: 8849, color: "var(--air)" },
+  { id: "uplink", name: "Contact", short: "Contact", altitude: 8849, color: "var(--air)" },
 ];
 
 export const campById = (id: string) => camps.find((c) => c.id === id)!;

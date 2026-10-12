@@ -24,7 +24,7 @@ export const profile = {
 };
 
 export const stats = [
-  { value: 4, suffix: "", label: "Hackathon & pitch wins" },
+  { value: 4, suffix: "", label: "Hackathon wins" },
   { value: 6, suffix: "", label: "Hackathons competed" },
   { value: 400, suffix: "+", label: "Conference attendees served" },
   { value: 82, suffix: "%", label: "Best model accuracy (PFAS study)" },
@@ -138,18 +138,6 @@ export const hackathons: Hackathon[] = [
     stack: ["SwiftUI", "Vision", "Express.js", "PostgreSQL"],
   },
   {
-    id: "goldeneagle24",
-    event: "Golden Eagle Idea Pitch 2024",
-    host: "University of Southern Mississippi",
-    when: "2024",
-    result: "win",
-    award: "3rd Place · Pitch Competition",
-    project: "CleanLabel",
-    pitch: "Took CleanLabel from hackathon prototype to a business pitch.",
-    bullets: ["Pitched the market, users and roadmap for CleanLabel to a panel of judges."],
-    stack: ["Pitching", "Product"],
-  },
-  {
     id: "hackprinceton24",
     event: "HackPrinceton Fall 2024",
     host: "Princeton University",
@@ -164,6 +152,25 @@ export const hackathons: Hackathon[] = [
     ],
     stack: ["React", "OnChainKit", "Charts"],
     links: [{ label: "GitHub", href: "https://github.com/bipuladk60/chama" }],
+  },
+  {
+    id: "hacknyu25",
+    event: "HackNYU 2025",
+    host: "New York University",
+    when: "Feb 2025",
+    result: "participant",
+    award: "Competed",
+    project: "SwipedIn",
+    pitch: "Hiring as a swipe: job seekers and recruiters match when both swipe right, then an AI agent runs the first screen.",
+    bullets: [
+      "Built the login flow and the profile and settings pages.",
+      "React Native app on a Node.js/Express backend with MongoDB Atlas and the Gemini API.",
+    ],
+    stack: ["React Native", "Node.js", "Express", "MongoDB Atlas", "Gemini"],
+    links: [
+      { label: "GitHub", href: "https://github.com/rupaut98/swipedin" },
+      { label: "swipedin.co", href: "https://www.swipedin.co" },
+    ],
   },
   {
     id: "hacklytics25",
@@ -203,8 +210,8 @@ export const hackathons: Hackathon[] = [
     event: "ShellHacks 2026",
     host: "Florida International University",
     when: "Sept 2026",
-    result: "participant",
-    award: "Competed · Sperry Tech GridLock Challenge",
+    result: "win",
+    award: "3rd Place · Sperry Tech GridLock Challenge",
     project: "MrGridy",
     pitch: "See where two power companies' work collides, before they build and before the storm hits.",
     bullets: [
@@ -280,20 +287,6 @@ export const games = [
   },
 ];
 
-// Secondary: built and on GitHub, not deployed yet.
-export const indieGame = {
-  title: "Chautari Ludo",
-  status: "In development · not deployed yet",
-  tagline: "Ludo under a peepal tree in a Nepali village, drawn entirely in code.",
-  repo: "https://github.com/bipuladk60/Chautari-Ludo",
-  features: [
-    "Every pixel drawn with Canvas 2D, no image files.",
-    "Bots, a betting pot and tea-shop economy, synthesised sound.",
-    "Online rooms over WebSocket with a server that checks every move.",
-  ],
-  stack: ["TypeScript", "Canvas 2D", "Node.js", "WebSocket"],
-};
-
 export type Project = {
   id: string;
   title: string;
@@ -321,40 +314,28 @@ export const projects: Project[] = [
     accent: "systems",
   },
   {
-    id: "clipfinder",
-    title: "clipfinder",
-    kind: "Python · Computer Vision",
-    tagline: "Shazam for video: find which video a clip came from, and where.",
+    id: "mhd",
+    title: "MHD Connect",
+    kind: "PWA · Production",
+    tagline: "The conference app for Mississippi Health Disparities 2026.",
     bullets: [
-      "Visual-only, so a song pasted over a scene can't cause a false match.",
-      "Handles crops, mirroring, captions and speed changes.",
+      "Live agenda, speakers, attendee profiles and announcements for 400+ attendees.",
+      "Admin roles so staff edit the agenda live, plus automatic badge printing from Firestore.",
     ],
-    stack: ["Python", "ffmpeg", "NumPy"],
-    accent: "ml",
-  },
-  {
-    id: "jobradar",
-    title: "jobradar",
-    kind: "Python · Automation",
-    tagline: "Checks hundreds of company job boards directly and emails me what's worth applying to.",
-    bullets: [
-      "Queries Greenhouse, Lever, Ashby and Workday APIs directly, not aggregators.",
-      "Scores postings against my resume and filters out roles I can't apply to.",
-    ],
-    stack: ["Python", "REST APIs", "SMTP"],
-    accent: "tool",
-  },
-  {
-    id: "partysync",
-    title: "PartySync",
-    kind: "Node.js · Real-time",
-    tagline: "Turn a room full of phones into one speaker system.",
-    bullets: [
-      "NTP-style clock sync, then every phone schedules the song for the same instant with the Web Audio API.",
-      "Corrects drift by nudging playback speed.",
-    ],
-    stack: ["Node.js", "WebSocket", "Web Audio API"],
+    stack: ["Next.js", "Firebase", "Vercel", "Python"],
     accent: "web",
+  },
+  {
+    id: "typetrie",
+    title: "TypeTrie",
+    kind: "C++ · Data Structures",
+    tagline: "Popularity-aware autocomplete engine.",
+    bullets: [
+      "Trie with O(L) prefix search and insertion.",
+      "Frequency tracking with hash maps to rank suggestions by popularity.",
+    ],
+    stack: ["C++"],
+    accent: "systems",
   },
 ];
 
@@ -368,6 +349,7 @@ export const skills = [
 ];
 
 export const honors = [
+  { title: "3rd Place · Golden Eagle Idea Pitch (CleanLabel)", org: "University of Southern Mississippi", when: "2024" },
   { title: "Student Employee of the Year · Professionalism & Work Ethic", org: "University of Southern Mississippi", when: "Apr 2025" },
   { title: "2nd Place · Best Biomedical Research Presentation", org: "USM Undergraduate Symposium", when: "Apr 2025" },
   { title: "An Introduction to Python for Data Science", org: "National Institutes of Health (SCHARE)", when: "2025" },
