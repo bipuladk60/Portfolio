@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "motion/react";
-import { isUnlocked, unlock } from "@/lib/achievements";
+import { unlock } from "@/lib/achievements";
 import { chromeUI, openDevLog } from "@/lib/chrome-ui";
 import { playBlip } from "@/lib/sound";
 import { toast } from "@/lib/toast";
@@ -17,7 +17,7 @@ function isTyping(target: EventTarget | null): boolean {
   return target.isContentEditable || /^(input|textarea|select)$/i.test(target.tagName);
 }
 
-/** Global secrets: "namaste" prayer-flag cascade, Konami Dev Log, summit detection. */
+/** Global secrets: "namaste" prayer-flag cascade, Konami Dev Log. */
 export function EasterEggs() {
   const reduce = useReducedMotion() ?? false;
   const [cascade, setCascade] = useState<number | null>(null);
@@ -63,39 +63,6 @@ export function EasterEggs() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  // Summit: the uplink section comes into view.
-  useEffect(() => {
-    const el = document.getElementById("uplink");
-    if (!el) return;
-    if (isUnlocked("summit")) return;
-    // Announce only after lingering at the summit ~4s, or on the way back down,
-    // so the toast never lands while the visitor is reaching for the uplink links.
-    let timer = 0;
-    let arrived = false;
-    const award = () => {
-      window.clearTimeout(timer);
-      unlock("summit", { toastDuration: 2000 });
-      io.disconnect();
-    };
-    const io = new IntersectionObserver(
-      (entries) => {
-        const inside = entries.some((en) => en.isIntersecting);
-        if (inside && !arrived) {
-          arrived = true;
-          timer = window.setTimeout(award, 4000);
-        } else if (!inside && arrived) {
-          award();
-        }
-      },
-      { rootMargin: "0px 0px -45% 0px", threshold: 0 },
-    );
-    io.observe(el);
-    return () => {
-      window.clearTimeout(timer);
-      io.disconnect();
-    };
   }, []);
 
   return (

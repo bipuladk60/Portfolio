@@ -125,14 +125,12 @@ export function Altimeter() {
   }, []);
 
   const camp = camps[active];
-  const dim = camp.id === "chautari";
 
   return (
     <nav aria-label="Altitude">
       {/* Desktop: vertical altimeter rail on the right edge */}
       <div
-        className="fixed right-3 top-1/2 z-[70] hidden -translate-y-1/2 flex-col items-end transition-opacity duration-700 md:flex"
-        style={{ opacity: dim ? 0.45 : 1 }}
+        className="fixed right-3 top-1/2 z-[70] hidden -translate-y-1/2 flex-col items-end md:flex"
       >
         <div className="mb-5 w-14 text-right font-mono">
           <div className="hud-label !text-[10px]">ALT</div>
@@ -226,8 +224,7 @@ export function Altimeter() {
 
       {/* Mobile: thin top bar */}
       <div
-        className="fixed inset-x-0 top-0 z-[70] h-9 border-b border-line bg-bg/90 transition-opacity duration-700 md:hidden"
-        style={{ opacity: dim ? 0.7 : 1 }}
+        className="fixed inset-x-0 top-0 z-[70] h-9 border-b border-line bg-bg/90 md:hidden"
       >
         <div className="flex h-full items-center gap-2 pl-4 pr-28 font-mono text-[11px] uppercase tracking-[0.12em]">
           <span className="text-dim">ALT</span>

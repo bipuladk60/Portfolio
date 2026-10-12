@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import { Chip, Panel } from "@/components/hud/Panel";
 import type { Project } from "@/data/content";
-import { EASE } from "../chautari/prng";
+import { EASE } from "../shared/prng";
 
 type MissionCardProps = {
   project: Project;

@@ -2,7 +2,7 @@ import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
 import { Panel } from "@/components/hud/Panel";
 import { honors } from "@/data/content";
 import { LaunchChecklist } from "./systems/LaunchChecklist";
-import { Reveal } from "./chautari/Reveal";
+import { Reveal } from "./shared/Reveal";
 
 export function Systems() {
   return (
@@ -16,7 +16,7 @@ export function Systems() {
 
       <Reveal className="mt-6">
         <Panel label="Commendations" accent="var(--signal)" className="px-5 pb-4 pt-5">
-          <ol className="grid gap-4 md:grid-cols-3 md:gap-6">
+          <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {honors.map((h) => (
               <li key={h.title} className="min-w-0 border-l border-signal/40 pl-3">
                 <p className="text-sm leading-snug text-text">{h.title}</p>

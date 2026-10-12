@@ -53,6 +53,7 @@ export function Crosshair() {
     let overText = false;
     let lastReadout = "";
     let lastColor = "";
+    let readoutInside = false;
     let raf = 0;
 
     /** Innermost interactive element wins; otherwise the innermost [data-cursor-box]. */
@@ -190,9 +191,28 @@ export function Crosshair() {
           lastReadout = label;
           readout.current.textContent = label;
         }
-        const rx = kind === "box" ? box.x + 2 : box.x + box.w + 8;
-        // Box readout sits just outside the bottom-left corner, clear of Panel labels on the top edge.
-        const ry = kind === "box" ? Math.min(window.innerHeight - 14, box.y + box.h + 4) : box.y + box.h + 4;
+        // Small boxes: readout just outside the bottom-left corner (clear of Panel labels on the
+        // top edge). Tall boxes: inside the bottom-left corner on a pill, so it never lands on
+        // content below. Always clamped to the viewport.
+        const inside = kind === "box" && rh > 300;
+        if (inside !== readoutInside) {
+          readoutInside = inside;
+          const st = readout.current.style;
+          st.background = inside ? "color-mix(in oklab, var(--bg) 88%, transparent)" : "transparent";
+          st.padding = inside ? "2px 5px" : "0";
+          st.border = inside ? "1px solid var(--line)" : "0";
+        }
+        let rx: number;
+        let ry: number;
+        if (kind === "box") {
+          rx = box.x + (inside ? 12 : 2);
+          ry = inside ? box.y + box.h - 30 : box.y + box.h + 4;
+        } else {
+          rx = box.x + box.w + 8;
+          ry = box.y + box.h + 4;
+        }
+        rx = Math.max(2, Math.min(vw - 130, rx));
+        ry = Math.max(2, Math.min(vh - 18, ry));
         readout.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
         if (colorChanged) readout.current.style.color = color;
       }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "motion/react";
-import { mulberry32 } from "../chautari/prng";
+import { mulberry32 } from "../shared/prng";
 
 /**
  * Tiny live limit order book: passive orders rest, aggressive orders walk the book,

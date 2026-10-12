@@ -10,12 +10,12 @@ type Pt = { x: number; y: number };
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const toPath = (pts: Pt[]) => pts.map((p, i) => `${i ? "L" : "M"}${r1(p.x)} ${r1(p.y)}`).join(" ");
 
-// Summit heights in drawing units (lower y = higher peak). Wins stand taller than the
-// events the team competed in, and the line climbs over time.
-const PEAK_Y: Record<Hackathon["result"], number[]> = {
-  win: [176, 150, 118, 72],
-  participant: [158, 104],
-};
+// Summit height in drawing units (lower y = higher peak), derived from position and result:
+// the line climbs over time, and wins stand taller than the events the team competed in.
+function peakYFor(i: number, n: number, result: Hackathon["result"]) {
+  const base = 190 - (n > 1 ? i / (n - 1) : 0) * 100;
+  return result === "win" ? base - 20 : base + 20;
+}
 
 export type RidgeMarker = {
   id: string;
@@ -35,14 +35,13 @@ export function buildRidge(items: Hackathon[]) {
   const n = items.length;
   const left = 100;
   const step = (W - left * 2) / Math.max(1, n - 1);
-  const counters = { win: 0, participant: 0 };
 
   const pts: Pt[] = [{ x: 0, y: 300 }, { x: 40, y: 286 }];
   const markers: RidgeMarker[] = [];
 
   items.forEach((h, i) => {
     const x = left + i * step;
-    const peakY = PEAK_Y[h.result][counters[h.result]++ % PEAK_Y[h.result].length];
+    const peakY = peakYFor(i, n, h.result);
     // jagged shoulders, deterministic per index so server and client agree
     const jag = ((i * 37) % 11) - 5;
     const shoulderL: Pt = { x: x - step * 0.3, y: peakY + 62 + jag };

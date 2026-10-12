@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { camps } from "@/data/camps";
-import { indieGame, profile } from "@/data/content";
+import { profile } from "@/data/content";
 import { copyEmail } from "@/lib/clipboard";
 import { ACHIEVEMENTS, unlock, useAchievements } from "@/lib/achievements";
 import { closePalette, openDevLog, togglePalette, useChromeUI } from "@/lib/chrome-ui";
@@ -30,7 +30,7 @@ const CAMP_KEYWORDS: Record<string, string> = {
   route: "experience work jobs career",
   summits: "hackathons hackathon awards wins",
   lab: "research ml machine learning pfas copd",
-  chautari: "games ludo warmer",
+  games: "games game room warmer play",
   payload: "projects work openbook",
   systems: "skills stack honors",
   uplink: "contact email reach",
@@ -128,14 +128,6 @@ export function CommandPalette() {
         hint: "profile",
         keywords: "resume work",
         run: () => openExternal(profile.links.linkedin),
-      },
-      {
-        id: "ludo",
-        group: "Links",
-        label: "chautari ludo (in development) · repo",
-        hint: "github",
-        keywords: "game indie canvas github open",
-        run: () => openExternal(indieGame.repo),
       },
       {
         id: "sound",

@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { profile } from "@/data/content";
-import { togglePalette, useActiveCamp } from "@/lib/chrome-ui";
+import { togglePalette } from "@/lib/chrome-ui";
 import { toggleSound, useSoundEnabled } from "@/lib/sound";
 
 /** Top-left status strip and the top-right control cluster (palette trigger + sound toggle). */
 export function CornerHud() {
-  const camp = useActiveCamp();
-  const dim = camp === "chautari";
   return (
     <>
       {/* Scrim so the fixed HUD never sits directly on body text */}
@@ -18,8 +16,7 @@ export function CornerHud() {
         style={{ background: "linear-gradient(to bottom, var(--bg) 0%, color-mix(in oklab, var(--bg) 70%, transparent) 55%, transparent 100%)" }}
       />
       <div
-        className="pointer-events-none fixed left-4 top-4 z-[70] hidden items-center gap-1.5 border border-line bg-bg/85 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-dim transition-opacity duration-700 md:flex"
-        style={{ opacity: dim ? 0.45 : 1 }}
+        className="pointer-events-none fixed left-4 top-4 z-[70] hidden items-center gap-1.5 border border-line bg-bg/85 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-dim md:flex"
       >
         <span className="text-text">EXP-CTRL</span>
         <span className="text-line-hi">{"//"}</span>
@@ -31,8 +28,7 @@ export function CornerHud() {
       </div>
 
       <div
-        className="fixed right-2 top-[5px] z-[75] flex items-center gap-1.5 transition-opacity duration-700 md:right-[84px] md:top-4 md:gap-2"
-        style={{ opacity: dim ? 0.55 : 1 }}
+        className="fixed right-2 top-[5px] z-[75] flex items-center gap-1.5 md:right-[84px] md:top-4 md:gap-2"
       >
         <PaletteButton />
         <SoundButton />

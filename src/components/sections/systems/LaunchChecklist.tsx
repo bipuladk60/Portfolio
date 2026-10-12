@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { Panel } from "@/components/hud/Panel";
 import { skills } from "@/data/content";
-import { EASE } from "../chautari/prng";
+import { EASE } from "../shared/prng";
 
 const WATER = "var(--water)";
 const STEP_MS = 60;

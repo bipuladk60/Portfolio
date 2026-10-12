@@ -9,6 +9,7 @@ import { DualClock } from "./hero/DualClock";
 import { ScrollCue } from "./hero/ScrollCue";
 import { Reveal } from "./hero/Reveal";
 import { ARC_KM } from "./hero/geo";
+import { NEPAL_BBOX, NEPAL_PATH, USA_BBOX, USA_PATH } from "./hero/countryPaths";
 
 const camp = campById("base");
 const [firstName, ...rest] = profile.name.split(" ");
@@ -97,7 +98,7 @@ export function Hero() {
           <div className="min-w-0 lg:col-span-5">
             <Reveal delay={0.55} y={18}>
               <Panel label="Route · NP → MS" accent="var(--signal)" className="p-3 pt-5 sm:p-4 sm:pt-6">
-                <RouteMap />
+                <RouteMap usaPath={USA_PATH} nepalPath={NEPAL_PATH} usaBox={USA_BBOX} nepalBox={NEPAL_BBOX} />
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line pt-3 font-mono text-[10px] uppercase tracking-widest text-dim">
                   <span>Great circle · {ARC_KM.toLocaleString("en-US")} km</span>
                   <span>Via Arctic</span>

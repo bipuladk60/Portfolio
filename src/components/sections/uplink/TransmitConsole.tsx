@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Panel } from "@/components/hud/Panel";
 import { profile } from "@/data/content";
 import { copyEmail } from "@/lib/clipboard";
-import { EASE } from "../chautari/prng";
+import { EASE } from "../shared/prng";
 
 const AIR = "var(--air)";
 
@@ -38,7 +38,7 @@ export function TransmitConsole() {
   };
 
   return (
-    <Panel label="Transmit console" accent={AIR} className="p-5 md:p-8">
+    <Panel label="Contact" accent={AIR} className="p-5 md:p-8">
       <div className="grid gap-8 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-12">
         {/* primary transmit */}
         <div className="min-w-0">
@@ -51,7 +51,7 @@ export function TransmitConsole() {
             <dd className="normal-case tracking-normal text-text">{profile.status}</dd>
           </dl>
 
-          <p className="hud-label mt-8">Frequency</p>
+          <p className="hud-label mt-8">Email</p>
           <p className="mt-2 font-mono text-[clamp(0.8rem,4.2vw,1.5rem)] leading-tight text-air">
             {EMAIL_LOCAL}
             <wbr />@{EMAIL_DOMAIN}
@@ -81,12 +81,11 @@ export function TransmitConsole() {
                 className="relative inline-flex cursor-pointer items-center gap-3 border border-air bg-air px-6 py-3 font-display text-base font-bold uppercase tracking-[0.14em] text-bg transition-colors duration-300 hover:bg-transparent hover:text-air"
               >
                 <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-current" />
-                Transmit
-                <span className="sr-only">: copy my email address</span>
+                Copy email
               </button>
             </div>
             <p role="status" aria-live="polite" className="min-h-[1.25rem] font-mono text-[11px] uppercase tracking-[0.14em]">
-              {status === "sent" && <span className="text-water">Transmitted · address copied</span>}
+              {status === "sent" && <span className="text-water">Copied · email is on your clipboard</span>}
               {status === "failed" && <span className="text-fire">Copy blocked · use the mail channel</span>}
             </p>
           </div>
@@ -101,7 +100,7 @@ export function TransmitConsole() {
 
         {/* channels */}
         <div className="min-w-0">
-          <p className="hud-label">Uplink channels</p>
+          <p className="hud-label">Elsewhere</p>
           <ul className="mt-3 border-t border-line">
             {CHANNELS.map((c) => (
               <li key={c.id} className="border-b border-line">

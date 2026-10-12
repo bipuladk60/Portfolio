@@ -3,7 +3,7 @@ import { readLocal, writeLocal } from "./storage";
 import { toast } from "./toast";
 import { playBlip } from "./sound";
 
-export type AchievementId = "namaste" | "konami" | "palette" | "summit";
+export type AchievementId = "namaste" | "konami" | "palette";
 
 export const ACHIEVEMENTS: { id: AchievementId; title: string; hint: string; detail: string }[] = [
   {
@@ -11,12 +11,6 @@ export const ACHIEVEMENTS: { id: AchievementId; title: string; hint: string; det
     title: "Mission console",
     hint: "Every control room has a keyboard shortcut.",
     detail: "Opened the command palette.",
-  },
-  {
-    id: "summit",
-    title: "Summit reached",
-    hint: "Climb all the way up.",
-    detail: "Reached the 8,849 m uplink.",
   },
   {
     id: "namaste",
@@ -33,6 +27,7 @@ export const ACHIEVEMENTS: { id: AchievementId; title: string; hint: string; det
 ];
 
 const KEY = "xc:achievements";
+// Unknown ids from older versions (e.g. a removed "summit" entry) are dropped on load.
 const VALID = new Set<string>(ACHIEVEMENTS.map((a) => a.id));
 
 export const achievementStore = createStore<AchievementId[]>([], () => {

@@ -1,26 +1,25 @@
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
 import { profile } from "@/data/content";
-import { SummitScene, UPLINK_CSS } from "./uplink/SummitScene";
+import { FlagLine, UPLINK_CSS } from "./uplink/FlagLine";
 import { TransmitConsole } from "./uplink/TransmitConsole";
-import { Reveal } from "./chautari/Reveal";
+import { Reveal } from "./shared/Reveal";
 
 export function Uplink() {
   const year = new Date().getFullYear();
   return (
-    <CampSection campId="uplink" className="overflow-hidden">
+    <CampSection campId="uplink">
       <style>{UPLINK_CSS}</style>
       <SectionHeader
         campId="uplink"
-        title="Summit Uplink"
-        kicker="Top of the climb. If you're hiring for new-grad software roles, or just want to talk shop, the channel is open."
+        title="Get in touch"
+        kicker="Open to new-grad software engineering roles. The fastest way to reach me is email."
       />
 
       <Reveal>
-        <SummitScene />
-      </Reveal>
-
-      <Reveal delay={0.1} className="relative -mt-6 md:-mt-12">
-        <TransmitConsole />
+        <FlagLine />
+        <div className="mt-6">
+          <TransmitConsole />
+        </div>
       </Reveal>
 
       <footer className="mt-20 border-t border-line pt-8 md:mt-28">
