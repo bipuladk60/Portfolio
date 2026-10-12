@@ -26,7 +26,8 @@ export const profile = {
 export const stats = [
   { value: 4, suffix: "", label: "Hackathon wins" },
   { value: 6, suffix: "", label: "Hackathons competed" },
-  { value: 400, suffix: "+", label: "Conference attendees served" },
+  // 400+ MHD Connect attendees + 2,224 Warmer visitors (last 30 days only, so a floor, not a total).
+  { value: 2600, suffix: "+", label: "Users · MHD Connect + Warmer" },
   { value: 82, suffix: "%", label: "Best model accuracy (PFAS study)" },
 ];
 
@@ -69,13 +70,15 @@ export const experience: Experience[] = [
     role: "Full Stack Developer",
     when: "Aug 2024 – Aug 2026",
     where: "Hattiesburg, MS",
-    summary: "On-campus role that ran the whole way through: research websites, data tooling, and MHD Connect.",
+    summary: "On-campus role that ran the whole way through: the center's go-to for web, data and IT work, with MHD Connect as one of the projects.",
     bullets: [
-      "Proposed and built MHD Connect, a progressive web app for Mississippi Health Disparities 2026, the state's largest public health conference, used by 400+ attendees.",
-      "Shipped the live agenda, speaker lists, profiles and announcements on Next.js and Firebase, with admin roles so staff could edit the agenda without a separate CMS.",
-      "Wrote a Python script that pulls attendees from Firestore and prints name badges automatically.",
+      "Managed the center's two WordPress sites and helped staff with day-to-day IT work.",
+      "Cleaned and sanitized census data for the center's researchers.",
+      "Worked on the PFAS research project, which became my research presentation.",
+      "Proposed and built MHD Connect, the conference app for Mississippi Health Disparities 2026, used by 400+ attendees.",
+      "Took part in community outreach events with the center.",
     ],
-    stack: ["Next.js", "TypeScript", "Firebase", "Vercel", "Python", "Zod"],
+    stack: ["Next.js", "TypeScript", "Firebase", "WordPress", "Python", "pandas"],
     concurrent: true,
   },
   {
@@ -97,11 +100,12 @@ export const experience: Experience[] = [
     role: "Software Engineer Associate",
     when: "Sept 2025 – May 2026",
     where: "Remote",
-    summary: "Worked on an internal shipping and inventory platform and the company's Flutter mobile app.",
+    summary: "Worked on the company's Flutter app and an internal shipping and inventory platform, as part of a team that reviews each other's code.",
     bullets: [
-      "Helped build an internal shipping and inventory platform in TypeScript and Next.js that connects Shopify, Easyship, Square and Mailchimp for the operations team.",
-      "Worked on the fulfillment flow: syncing shipments back to Shopify and Square, and order emails with SPF, DKIM and DMARC set up.",
-      "Added schemas to a shared Zod package that keeps data types in sync between the web app, Firebase Cloud Functions and the Flutter app.",
+      "Worked on the Flutter mobile app and an internal shipping and inventory platform in Next.js that connects Shopify, Easyship and Square.",
+      "Talked with customers to collect feedback, turned it into tickets and fixed them.",
+      "Joined weekly stand-ups to share progress and blockers with the team.",
+      "Every PR was reviewed by a senior engineer and by teammates, and I reviewed theirs: where I learned the most.",
     ],
     stack: ["TypeScript", "Next.js", "Node.js", "Flutter", "Firebase", "Zod"],
   },
@@ -167,10 +171,7 @@ export const hackathons: Hackathon[] = [
       "React Native app on a Node.js/Express backend with MongoDB Atlas and the Gemini API.",
     ],
     stack: ["React Native", "Node.js", "Express", "MongoDB Atlas", "Gemini"],
-    links: [
-      { label: "GitHub", href: "https://github.com/rupaut98/swipedin" },
-      { label: "swipedin.co", href: "https://www.swipedin.co" },
-    ],
+    links: [{ label: "GitHub", href: "https://github.com/rupaut98/swipedin" }],
   },
   {
     id: "hacklytics25",
@@ -225,6 +226,8 @@ export const hackathons: Hackathon[] = [
 export const research = {
   title: "Predicting COPD Risk from PFAS Exposure Using Machine Learning",
   venue: "Undergraduate Symposium for Research & Creative Activity · USM",
+  // Done while working at Gulf South; owner calls it his own project there.
+  where: "Gulf South Center for Community Engaged Health Research",
   when: "Apr 2025",
   award: "2nd Place · Best Biomedical Research Presentation",
   question: "Do \"forever chemicals\" (PFAS) in the blood raise the risk of COPD, and can ML predict who is at risk?",
@@ -249,6 +252,33 @@ export const research = {
   thanks: "Mentored by Dr. Felix Twum, Dr. Jennifer Lemacks and Ms. Sermin Aras. Supported by Mississippi INBRE (NIGMS, NIH grant P20GM103476).",
 };
 
+// Stochastic, agent-based toy model. Source: github.com/bipuladk60/infectious-disease-simulation (simulation.ipynb).
+// The parameters below are copied from the notebook; the site re-runs the model live in the browser.
+export const diseaseSim = {
+  title: "Stochastic Disease Transmission",
+  when: "Apr 2024",
+  href: "https://github.com/bipuladk60/infectious-disease-simulation",
+  pitch: "An agent-based toy model of how an infection moves through a crowd: each dot has its own immunity, viral load and luck.",
+  bullets: [
+    "Recovery time drawn from a Beta(2, 5) distribution scaled to 14–28 days, so immunity varies person to person.",
+    "Viral load follows a discrete curve that peaks around days 6–7.",
+    "Transmission is a weighted coin flip: probability exp(−distance / viral load), so close contact with a high load spreads fastest.",
+    "Recovered people can be reinfected; anyone still sick after day 21 dies.",
+  ],
+  params: {
+    population: 100,
+    initialInfected: 5,
+    size: 250,
+    betaAlpha: 2,
+    betaBeta: 5,
+    recoveryMin: 14,
+    recoveryMax: 28,
+    deathAfterDay: 21,
+    viralLoad: [1, 3, 4, 5, 7, 9, 9, 8, 8, 7, 6, 5, 5, 4, 3, 3, 3, 3, 3, 2, 2],
+  },
+  stack: ["Python", "NumPy", "SciPy", "Matplotlib"],
+};
+
 export const mlWork = [
   {
     title: "Heart Disease Prediction",
@@ -266,6 +296,7 @@ export const mlWork = [
     detail: "LSTM model in TensorFlow/Keras that composes music in ABC notation.",
     metrics: [],
     stack: ["TensorFlow", "Keras"],
+    href: "https://github.com/bipuladk60/RNN_Music_Generator",
   },
 ];
 
@@ -335,7 +366,6 @@ export const projects: Project[] = [
       "Differential-tested on 40,000 randomized operations against a reference book.",
     ],
     stack: ["C++20", "CMake", "GoogleTest"],
-    href: "https://github.com/bipuladk60/openbook",
     accent: "systems",
   },
   {

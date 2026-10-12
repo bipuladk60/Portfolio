@@ -111,3 +111,20 @@ cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, n
   `.wr-world .wr-display .wr-sticker .wr-pill .wr-press .wr-wobble`). All chapter-2 sections use this theme.
 - `html[data-chapter]` is "1" (locked, chapter 2 hidden) or "2"; set pre-paint from localStorage. No JS → everything
   visible. `useChapter()` / `unlockChapterTwo()` / `relockGate()` in `@/lib/chapter`.
+
+## Revision 6 rules (owner feedback)
+- Clean first. Chapter 1 especially: fewer boxes, fewer labels, more whitespace. No box inside a box inside a box.
+  Prefer one hairline or none over a bracketed Panel; drop decorative mono stamps (coordinates, "LOCK", serials) that
+  carry no information. Each section: a heading, one strong visual or list, and plain text. Generous spacing.
+- Plain section names: About, Experience, Hackathons, Research & ML, Projects, Skills (see `camps.ts`). No "Summit
+  Attempts", "Atmospheric Lab", "Route Log", "Payload Bay", "Systems Check". Hackathon wording: "Win" / "Competed"
+  (no "summit", "flag planted", "data gathered", "expedition report", "attempts").
+- Cursor: subtle. The box-lock must NOT fire on nested containers. Only explicit top-level visuals opt in
+  (`data-cursor-box`, e.g. hero map, hackathon ridge, disease sim, Warmer globe), never every Panel. The lock
+  is quiet: thin corner ticks with soft easing, no size readout, low opacity. Links/buttons keep a light hug.
+- Stats: "2,600+ Users · MHD Connect + Warmer" replaces conference attendees.
+- Research: PFAS study was done at Gulf South (`research.where`). Add the stochastic disease transmission model
+  (`diseaseSim` in content.ts) with a live, faithful browser re-run of the notebook's model.
+- Links: only links verified working (swipedin.co and the openbook repo were removed).
+- Chapter transition: smooth and professional. One continuous, eased move from night HUD to day sky
+  (no flashes, no jumpy stages, no long text cards), about 2–2.5 s, Escape/skip still works, reduced motion = quick fade.
