@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import type { Hackathon } from "@/data/content";
 import { EASE } from "./motion";
 
-/** Embroidered expedition patch: hexagon for summits, shield for attempts. */
+/** Small embroidered expedition patch: hexagon for summits, shield for competed. */
 export function Patch({
   h,
   index,
@@ -31,52 +31,50 @@ export function Patch({
 
   return (
     <motion.li
-      className="w-[148px] shrink-0 snap-start sm:w-auto"
-      initial={{ opacity: 0, y: 14 }}
+      className="w-[104px] shrink-0 snap-start sm:w-auto"
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-5% 0px" }}
-      transition={reduce ? { duration: 0 } : { delay: index * 0.06, duration: 0.45, ease: EASE }}
+      transition={reduce ? { duration: 0 } : { delay: index * 0.05, duration: 0.4, ease: EASE }}
     >
       <button
         type="button"
         onClick={onSelect}
         aria-pressed={active}
         aria-label={`${h.event}: ${isWin ? h.award : "competed, data gathered"}. Show expedition report.`}
-        className="group relative flex h-full w-full cursor-pointer flex-col items-center gap-2 border px-3 pb-3 pt-4 text-center transition-[opacity,border-color,background-color] duration-300"
+        className="group flex h-full w-full cursor-pointer flex-col items-center gap-1.5 border px-1.5 pb-2 pt-2.5 text-center transition-[opacity,border-color,background-color] duration-300"
         style={{
           opacity: dim ? 0.3 : 1,
           borderColor: active ? color : "var(--line)",
-          background: active ? `color-mix(in oklab, ${color} 7%, var(--panel))` : "var(--panel)",
+          background: active ? `color-mix(in oklab, ${color} 8%, var(--panel))` : "var(--panel)",
         }}
       >
         <svg
           viewBox="0 0 80 84"
-          className="h-16 w-16 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105"
+          className="h-9 w-9 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110"
           aria-hidden
         >
-          <path d={outline} fill={`color-mix(in oklab, ${color} 16%, var(--bg))`} stroke={color} strokeWidth="2.5" strokeLinejoin="round" />
-          {/* stitching */}
-          <path d={inner} fill="none" stroke={color} strokeWidth="1" strokeDasharray="2.2 2.2" opacity="0.75" />
+          <path d={outline} fill={`color-mix(in oklab, ${color} 16%, var(--bg))`} stroke={color} strokeWidth="3" strokeLinejoin="round" />
+          <path d={inner} fill="none" stroke={color} strokeWidth="1.4" strokeDasharray="2.6 2.6" opacity="0.75" />
           {isWin ? (
             <g>
-              <path d="M22 58 L36 34 L44 46 L50 38 L60 58 Z" fill="var(--panel-2)" stroke="var(--text)" strokeWidth="1.2" strokeLinejoin="round" />
-              <line x1="36" y1="34" x2="36" y2="18" stroke="var(--text)" strokeWidth="1.4" />
-              <path d="M36 18 L48 21.5 L36 25 Z" fill={color} />
+              <path d="M22 60 L36 36 L44 48 L50 40 L60 60 Z" fill="var(--panel-2)" stroke="var(--text)" strokeWidth="1.8" strokeLinejoin="round" />
+              <line x1="36" y1="36" x2="36" y2="18" stroke="var(--text)" strokeWidth="2" />
+              <path d="M36 18 L50 22 L36 26 Z" fill={color} />
             </g>
           ) : (
             <g>
-              <path d="M22 58 L36 34 L44 46 L50 38 L60 58 Z" fill="var(--panel-2)" stroke="var(--text-dim)" strokeWidth="1.2" strokeLinejoin="round" />
-              <path d="M28 47 L36 34" stroke={color} strokeWidth="1.4" strokeDasharray="2 2" />
-              <path d="M24 26 L30 31 L36 26" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M22 60 L36 36 L44 48 L50 40 L60 60 Z" fill="var(--panel-2)" stroke="var(--text-dim)" strokeWidth="1.8" strokeLinejoin="round" />
+              <path d="M28 49 L36 36" stroke={color} strokeWidth="2" strokeDasharray="2.5 2.5" />
+              <circle cx="36" cy="24" r="5" fill="none" stroke={color} strokeWidth="2" />
             </g>
           )}
-          <text x="40" y="70" textAnchor="middle" fontSize="7" fontFamily="var(--font-jetbrains), monospace" fill={color} letterSpacing="1">
-            {String(index + 1).padStart(2, "0")}
-          </text>
         </svg>
-        <span className="font-display text-sm font-semibold uppercase leading-tight tracking-wide text-text">{h.event}</span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color }}>
-          {isWin ? "Summit" : "Competed"} · {h.when}
+        <span className="line-clamp-2 font-display text-[11px] font-semibold uppercase leading-tight tracking-wide text-text">
+          {h.event}
+        </span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.14em]" style={{ color }}>
+          {isWin ? "Summit" : "Competed"}
         </span>
       </button>
     </motion.li>

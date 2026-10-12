@@ -6,7 +6,7 @@ import {
   ARC_PATH,
   ARC_POINTS,
   HBG,
-  KTM,
+  NEPAL,
   LAND_DOTS,
   MAP_H,
   MAP_W,
@@ -16,7 +16,7 @@ import {
 } from "./geo";
 
 const EASE = [0.2, 0.8, 0.2, 1] as const;
-const KTM_XY = project(KTM.lon, KTM.lat);
+const NP_XY = project(NEPAL.lon, NEPAL.lat);
 const HBG_XY = project(HBG.lon, HBG.lat);
 const LAST = ARC_POINTS.length - 1;
 
@@ -57,7 +57,7 @@ function Endpoint({ xy, color, delay, reduce }: { xy: [number, number]; color: s
 }
 
 /**
- * Dotted world map (equirectangular) with the great-circle route from Kathmandu to Hattiesburg.
+ * Dotted world map (equirectangular) with the great-circle route from Nepal to Hattiesburg.
  * The arc draws in, then a probe dot loops along it; a radar sweep turns over the ground station.
  * Looping motion pauses when the map is offscreen.
  */
@@ -82,12 +82,12 @@ export function RouteMap() {
     return () => controls.stop();
   }, [reduce, inView, progress]);
 
-  const ktm = toPct(KTM_XY);
+  const np = toPct(NP_XY);
   const hbg = toPct(HBG_XY);
   const radarSize = `${(120 / MAP_W) * 100}%`;
 
   return (
-    <div ref={ref} className="relative w-full" style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
+    <div ref={ref} data-cursor-box="" className="relative w-full" style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
       <svg
         aria-hidden
         viewBox={`0 0 ${MAP_W} ${MAP_H}`}
@@ -152,7 +152,7 @@ export function RouteMap() {
           style={{ filter: "drop-shadow(0 0 3px color-mix(in oklab, var(--signal) 50%, transparent))" }}
         />
 
-        <Endpoint xy={KTM_XY} color="var(--signal)" delay={1.0} reduce={reduce} />
+        <Endpoint xy={NP_XY} color="var(--signal)" delay={1.0} reduce={reduce} />
         <Endpoint xy={HBG_XY} color="var(--sky)" delay={2.6} reduce={reduce} />
 
         {!reduce && (
@@ -167,7 +167,7 @@ export function RouteMap() {
       <div
         aria-hidden
         className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-        style={{ ...ktm, width: radarSize, aspectRatio: "1" }}
+        style={{ ...np, width: radarSize, aspectRatio: "1" }}
       >
         <motion.div
           className="absolute inset-0 rounded-full border border-signal/30"
@@ -195,12 +195,12 @@ export function RouteMap() {
       {/* Endpoint labels in HTML so they stay readable at any map size */}
       <motion.div
         className="absolute -translate-x-1/2 translate-y-3 font-mono text-[10px] leading-none tracking-widest text-signal sm:text-[11px]"
-        style={ktm}
+        style={np}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: reduce ? 0 : 0.4, delay: reduce ? 0 : 1.2 }}
       >
-        <span className="bg-bg/80 px-1">{KTM.code}</span>
+        <span className="bg-bg/80 px-1">{NEPAL.code}</span>
       </motion.div>
       <motion.div
         className="absolute -translate-x-1/2 translate-y-3 font-mono text-[10px] leading-none tracking-widest text-sky sm:text-[11px]"

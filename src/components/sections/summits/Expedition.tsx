@@ -45,20 +45,22 @@ export function Expedition() {
 
   return (
     <div>
-      {/* scoreboard + filter */}
-      <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
-        <Panel label="Scoreboard" accent="var(--signal)" className="lg:col-span-7">
-          <div className="grid grid-cols-2 divide-x divide-line">
-            <Score label="Summits" value={SUMMITS} color="var(--signal)" note="Awards won" reduce={reduce} delay={0} />
-            <Score label="Attempts" value={ATTEMPTS} color="var(--text)" note={`${pad(SUMMITS)} summits · ${pad(COMPETED)} competed`} reduce={reduce} delay={0.12} />
+      {/* one compact row: scoreboard + filter */}
+      <Panel label="Scoreboard" accent="var(--signal)">
+        <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="flex items-center gap-6 sm:gap-8">
+            <Score label="Summits" value={SUMMITS} color="var(--signal)" reduce={reduce} delay={0} />
+            <span aria-hidden className="h-10 w-px bg-line" />
+            <Score label="Attempts" value={ATTEMPTS} color="var(--text)" reduce={reduce} delay={0.12} />
+            <p className="hidden max-w-[16ch] font-mono text-[10px] uppercase leading-relaxed tracking-[0.12em] text-dim md:block">
+              {pad(SUMMITS)} awards · {pad(COMPETED)} competed
+            </p>
           </div>
-        </Panel>
-
-        <div className="lg:col-span-5">
-          <p id="summit-filter-label" className="hud-label mb-3">
-            Filter the ridge
-          </p>
-          <div role="group" aria-labelledby="summit-filter-label" className="grid grid-cols-3 border border-line bg-panel/60 p-1">
+          <div
+            role="group"
+            aria-label="Filter the ridge"
+            className="grid grid-cols-3 border border-line bg-bg/60 p-1 sm:w-[340px]"
+          >
             {FILTERS.map((f) => {
               const on = filter === f.id;
               const tone = f.id === "participant" ? "var(--sky)" : "var(--signal)";
@@ -68,7 +70,7 @@ export function Expedition() {
                   type="button"
                   aria-pressed={on}
                   onClick={() => changeFilter(f.id)}
-                  className="relative cursor-pointer px-2 py-2.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors sm:text-xs"
+                  className="relative cursor-pointer px-2 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors"
                   style={{ color: on ? "var(--bg)" : "var(--text-dim)" }}
                 >
                   {on && (
@@ -80,28 +82,20 @@ export function Expedition() {
                       transition={reduce ? { duration: 0 } : { duration: 0.35, ease: EASE }}
                     />
                   )}
-                  <span className="relative">
-                    {f.label}
-                  </span>
+                  <span className="relative">{f.label}</span>
                 </button>
               );
             })}
           </div>
         </div>
-      </div>
+      </Panel>
 
-      <div className="mt-6">
-        <Ridge items={hackathons} selectedId={selectedId} filter={filter} onSelect={setSelectedId} />
-      </div>
-
-      <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:items-start">
-        <div className="lg:col-span-7">
-          <Report h={selected} index={index} total={ATTEMPTS} reduce={reduce} />
-        </div>
-        <div className="min-w-0 lg:sticky lg:top-24 lg:col-span-5">
-          <p className="hud-label mb-3">Expedition patches</p>
+      {/* ridge (with patch strip) beside the report */}
+      <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:items-start">
+        <div className="min-w-0 lg:col-span-7">
+          <Ridge items={hackathons} selectedId={selectedId} filter={filter} onSelect={setSelectedId} />
           <ul
-            className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-2"
+            className="-mx-5 mt-5 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-6 sm:overflow-visible sm:px-0"
             aria-label="Expedition patches"
           >
             {hackathons.map((h, i) => (
@@ -117,6 +111,9 @@ export function Expedition() {
             ))}
           </ul>
         </div>
+        <div className="lg:col-span-5">
+          <Report h={selected} index={index} total={ATTEMPTS} reduce={reduce} />
+        </div>
       </div>
     </div>
   );
@@ -126,21 +123,19 @@ function Score({
   label,
   value,
   color,
-  note,
   reduce,
   delay,
 }: {
   label: string;
   value: number;
   color: string;
-  note: string;
   reduce: boolean;
   delay: number;
 }) {
   return (
-    <div className="px-5 py-5 sm:px-7 sm:py-6">
+    <div className="flex items-baseline gap-3">
       <p className="hud-label">{label}</p>
-      <p className="mt-2 flex items-baseline font-display text-6xl font-bold leading-none tracking-tight sm:text-7xl" style={{ color }}>
+      <p className="flex items-baseline font-display text-4xl font-bold leading-none tracking-tight sm:text-5xl" style={{ color }}>
         <span className="sr-only">{value}</span>
         {pad(value)
           .split("")
@@ -158,7 +153,6 @@ function Score({
             </span>
           ))}
       </p>
-      <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-dim">{note}</p>
     </div>
   );
 }

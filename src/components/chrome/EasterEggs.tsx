@@ -49,7 +49,7 @@ export function EasterEggs() {
           setCascade(Date.now());
           const first = unlock("namaste", { silent: true });
           playBlip(first ? "unlock" : "transmit");
-          toast(first ? "Kathmandu theme unlocked · ⌘K → theme" : "Namaste to you too", {
+          toast(first ? "Himalaya theme unlocked · ⌘K → theme" : "Namaste to you too", {
             title: first ? "Achievement unlocked" : "Greeting received",
             tone: "water",
             duration: 4200,

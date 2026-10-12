@@ -105,7 +105,7 @@ export function HudFrame() {
         animate={{ opacity: 1 }}
         transition={t(0.9)}
       >
-        27.7172° N · 85.3240° E
+        28.39° N · 84.12° E
       </motion.div>
       <motion.div
         className="absolute bottom-3 right-4 hidden font-mono text-[10px] tracking-widest text-dim/80 sm:block md:bottom-4 md:right-14"

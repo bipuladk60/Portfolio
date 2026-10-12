@@ -1,6 +1,6 @@
 // Lightweight geography for the Ground Station map.
 // A coarse hand-coded land mask (lon, lat polygons), an equirectangular projection,
-// a dot grid sampled against the mask, and the KTM -> MS great-circle route.
+// a dot grid sampled against the mask, and the Nepal -> Mississippi great-circle route.
 // Everything here is pure and deterministic, so server and client render identical markup.
 
 type LonLat = [number, number];
@@ -16,7 +16,7 @@ export const project = (lon: number, lat: number): [number, number] => [
   (LAT_TOP - lat) * K,
 ];
 
-export const KTM = { lat: 27.7172, lon: 85.324, code: "KTM" };
+export const NEPAL = { lat: 28.39, lon: 84.12, code: "NP" };
 export const HBG = { lat: 31.33, lon: -89.29, code: "MS" };
 
 const LAND: LonLat[][] = [
@@ -174,7 +174,7 @@ function buildArc(a: { lat: number; lon: number }, b: { lat: number; lon: number
 export const DOT_STEP = 3;
 export const LAND_DOTS = buildDots(DOT_STEP);
 export const OCEAN_GRID = buildGrid(DOT_STEP);
-const arc = buildArc(KTM, HBG, 180);
+const arc = buildArc(NEPAL, HBG, 180);
 export const ARC_POINTS = arc.pts;
 export const ARC_PATH = arc.pts
   .map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(2)} ${y.toFixed(2)}`)

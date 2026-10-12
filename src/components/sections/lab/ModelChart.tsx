@@ -2,23 +2,24 @@
 
 import { motion } from "motion/react";
 import { research } from "@/data/content";
-import { Panel } from "@/components/hud/Panel";
 import { EASE, useReducedMotionSafe } from "../summits/motion";
 
 const models = research.models;
 const best = Math.max(...models.map((m) => m.accuracy));
 const TICKS = [0, 25, 50, 75, 100];
 
-/** Horizontal accuracy bars on a true 0-100% axis; the best model is lit. */
+/** Horizontal accuracy bars on a true 0-100% axis; the best model is lit. Unboxed: sits inside the results panel. */
 export function ModelChart() {
   const reduce = useReducedMotionSafe();
   return (
-    <Panel label="Model comparison · accuracy" accent="var(--water)" className="h-full">
-      <figure className="flex h-full flex-col p-5 sm:p-7">
-        <figcaption className="sr-only">
-          Prediction accuracy by model: {models.map((m) => `${m.name} ${m.accuracy.toFixed(1)}%`).join(", ")}.
-        </figcaption>
-        <ul className="flex flex-1 flex-col justify-evenly gap-5 py-2" aria-hidden>
+    <figure data-cursor-box="" className="flex h-full flex-col">
+      <figcaption className="hud-label mb-3">
+        Model comparison · accuracy, %
+        <span className="sr-only">
+          : {models.map((m) => `${m.name} ${m.accuracy.toFixed(1)}%`).join(", ")}.
+        </span>
+      </figcaption>
+        <ul className="flex flex-1 flex-col justify-evenly gap-4" aria-hidden>
           {models.map((m, i) => {
             const isBest = m.accuracy === best;
             return (
@@ -68,8 +69,6 @@ export function ModelChart() {
             </span>
           ))}
         </div>
-        <p className="hud-label mt-4">Predicting COPD status · accuracy, %</p>
       </figure>
-    </Panel>
   );
 }

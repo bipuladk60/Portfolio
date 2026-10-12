@@ -1,117 +1,164 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import type { Experience } from "@/data/content";
 import { RouteCard } from "./RouteCard";
 
+const MONTHS: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, sept: 8, oct: 9, nov: 10, dec: 11,
+};
+const MON_LABEL = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+/** "Aug 2024" -> months since year 0. */
+function toMonth(s: string) {
+  const m = s.trim().match(/^([A-Za-z]+)\.?\s+(\d{4})$/);
+  if (!m) return null;
+  const mon = MONTHS[m[1].toLowerCase()];
+  return mon === undefined ? null : Number(m[2]) * 12 + mon;
+}
+
+function span(when: string) {
+  const [a, b] = when.split(/[–-]/).map((p) => p.trim());
+  const start = toMonth(a ?? "");
+  const end = b ? toMonth(b) : null;
+  return { start, end: end ?? start };
+}
+
+// Rail geometry (px). Mobile keeps only the rope, route and tenure bars, hugging the left edge.
+const RAIL = {
+  desktop: { w: 184, axis: 40, rope: 84, route: 132, tenure: 156 },
+  mobile: { w: 64, axis: -1, rope: 10, route: 34, tenure: 52 },
+};
+
+type Anchor = { m: number; y: number };
 type Geometry = {
   w: number;
   h: number;
-  d: string;
-  /** Fraction of total path length at which each camp marker sits. */
-  stops: number[];
+  desktop: boolean;
+  camps: { y: number; endY: number; concurrent: boolean }[];
+  routeD: string;
+  ticks: { y: number; label?: string; major: boolean }[];
+  ropeTop: number;
+  ropeBottom: number;
 };
 
-/** Decorative altitudes for the camps: 2,400 / 2,900 / 3,300 M for three, interpolated otherwise. */
-function altitudes(n: number) {
-  if (n === 3) return [2400, 2900, 3300];
-  return Array.from({ length: n }, (_, i) => Math.round((2400 + (900 * i) / Math.max(1, n - 1)) / 100) * 100);
-}
-
-/** Builds a zig-zag climbing line through every marker, like a route drawn on a topo sheet. */
-function buildRoute(points: { x: number; y: number }[], h: number, amp: number): Omit<Geometry, "w" | "h"> {
-  if (!points.length) return { d: "", stops: [] };
-  const verts: { x: number; y: number; stop?: number }[] = [{ x: points[0].x, y: 0 }];
-  const all = [...points.map((p, i) => ({ ...p, stop: i })), { x: points[points.length - 1].x, y: h }];
-  let prev = verts[0];
-  all.forEach((p, seg) => {
-    const dy = p.y - prev.y;
-    const sign = seg % 2 === 0 ? 1 : -1;
-    if (dy > 40) {
-      verts.push({ x: prev.x + amp * sign, y: prev.y + dy * 0.28 });
-      verts.push({ x: prev.x - amp * 0.6 * sign, y: prev.y + dy * 0.55 });
-      verts.push({ x: prev.x + amp * 0.35 * sign, y: prev.y + dy * 0.8 });
+/** Piecewise-linear month -> y through the measured card anchors, so the time axis bends to fit the cards. */
+function makeScale(anchors: Anchor[]) {
+  const a = [...anchors].sort((p, q) => p.m - q.m);
+  return (m: number) => {
+    if (m <= a[0].m) return a[0].y;
+    for (let i = 1; i < a.length; i++) {
+      if (m <= a[i].m) {
+        const t = (m - a[i - 1].m) / Math.max(1, a[i].m - a[i - 1].m);
+        return a[i - 1].y + (a[i].y - a[i - 1].y) * t;
+      }
     }
-    verts.push(p);
-    prev = p;
-  });
-  let total = 0;
-  const cum: number[] = [0];
-  for (let i = 1; i < verts.length; i++) {
-    total += Math.hypot(verts[i].x - verts[i - 1].x, verts[i].y - verts[i - 1].y);
-    cum.push(total);
-  }
-  const stops: number[] = [];
-  verts.forEach((v, i) => {
-    if (v.stop !== undefined) stops[v.stop] = total ? cum[i] / total : 0;
-  });
-  const d = verts.map((v, i) => `${i ? "L" : "M"}${v.x.toFixed(1)} ${v.y.toFixed(1)}`).join("");
-  return { d, stops };
+    return a[a.length - 1].y;
+  };
 }
 
 /**
- * The experience route: a line that draws itself with scroll, camp markers that light up as the
- * line reaches them, and alternating cards on desktop.
+ * Chronological ascent. Reading down is climbing up: the oldest role is first.
+ * The concurrent role (Gulf South) is a continuous rope running the full height beside the main
+ * route, with a shared time axis so the overlap with the later roles is visible at a glance.
  */
 export function RouteTrack({ entries }: { entries: Experience[] }) {
-  const listRef = useRef<HTMLDivElement>(null);
-  const markerRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
   const [geo, setGeo] = useState<Geometry | null>(null);
   const [reached, setReached] = useState(0);
-  // Most recent log starts open; the rest show a preview.
-  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(entries.slice(0, 1).map((e) => e.id)));
-  const expandable = entries.filter((e) => e.bullets.length > 2);
-  const allOpen = expandable.every((e) => openIds.has(e.id));
-  const toggle = (id: string) =>
-    setOpenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  const toggleAll = () => setOpenIds(allOpen ? new Set() : new Set(expandable.map((e) => e.id)));
   const reduce = useReducedMotion();
-  const alts = altitudes(entries.length);
 
-  const { scrollYProgress } = useScroll({ target: listRef, offset: ["start 70%", "end 55%"] });
+  const spans = entries.map((e) => span(e.when));
+  const rope = entries.find((e) => e.concurrent);
+
+  const { scrollYProgress } = useScroll({ target: wrapRef, offset: ["start 75%", "end 60%"] });
   const smooth = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4 });
   const drawn = useTransform(smooth, (v) => Math.max(0.001, v));
 
   const measure = useCallback(() => {
-    const list = listRef.current;
-    if (!list) return;
-    const box = list.getBoundingClientRect();
-    const points = markerRefs.current
-      .filter((m): m is HTMLSpanElement => Boolean(m))
-      .map((m) => {
-        const r = m.getBoundingClientRect();
-        return { x: r.left + r.width / 2 - box.left, y: r.top + r.height / 2 - box.top };
-      });
-    const amp = box.width >= 768 ? 22 : 8;
-    setGeo({ w: box.width, h: box.height, ...buildRoute(points, box.height, amp) });
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const box = wrap.getBoundingClientRect();
+    const desktop = box.width >= 768;
+    const R = desktop ? RAIL.desktop : RAIL.mobile;
+    const h = box.height;
+    const ys = itemRefs.current.map((li) => (li ? li.getBoundingClientRect().top - box.top + 34 : 0));
+    const lastEnd = Math.max(...spans.map((s) => s.end ?? 0));
+
+    const anchors: Anchor[] = [];
+    spans.forEach((s, i) => {
+      if (s.start !== null && !anchors.some((a) => a.m === s.start)) anchors.push({ m: s.start, y: ys[i] });
+    });
+    anchors.push({ m: lastEnd, y: h - 16 });
+    if (anchors.length < 2) return;
+    const scale = makeScale(anchors);
+
+    const camps = spans.map((s, i) => ({
+      y: ys[i],
+      endY: s.end !== null ? scale(s.end) : ys[i],
+      concurrent: Boolean(entries[i].concurrent),
+    }));
+
+    // Main route: zig-zag through every camp, ending where the last role ends.
+    const pts = camps.map((c) => ({ x: R.route, y: c.y }));
+    const last = camps[camps.length - 1];
+    if (last && last.endY > last.y + 20) pts.push({ x: R.route, y: last.endY });
+    const amp = desktop ? 9 : 6;
+    let d = pts.length ? `M${pts[0].x} ${pts[0].y.toFixed(1)}` : "";
+    for (let i = 1; i < pts.length; i++) {
+      const p0 = pts[i - 1];
+      const p1 = pts[i];
+      const dy = p1.y - p0.y;
+      const sign = i % 2 ? 1 : -1;
+      if (dy > 48) {
+        d += `L${p0.x + amp * sign} ${(p0.y + dy * 0.3).toFixed(1)}`;
+        d += `L${p0.x - amp * 0.6 * sign} ${(p0.y + dy * 0.6).toFixed(1)}`;
+        d += `L${p0.x + amp * 0.3 * sign} ${(p0.y + dy * 0.85).toFixed(1)}`;
+      }
+      d += `L${p1.x} ${p1.y.toFixed(1)}`;
+    }
+
+    // Shared time axis: a tick per quarter, labelled at each new year.
+    const firstStart = Math.min(...spans.map((s) => s.start ?? Infinity));
+    const ticks: Geometry["ticks"] = [];
+    if (Number.isFinite(firstStart)) {
+      for (let m = firstStart; m <= lastEnd; m++) {
+        const mon = m % 12;
+        const isYear = mon === 0;
+        if (m === firstStart || m === lastEnd || isYear || mon % 3 === 0) {
+          ticks.push({
+            y: scale(m),
+            major: isYear || m === firstStart || m === lastEnd,
+            label: isYear ? String(m / 12) : m === firstStart || m === lastEnd ? `${MON_LABEL[mon]} ${Math.floor(m / 12)}` : undefined,
+          });
+        }
+      }
+    }
+
+    const ropeIdx = entries.findIndex((e) => e.concurrent);
+    const ropeTop = ropeIdx >= 0 ? camps[ropeIdx].y : 0;
+    const ropeBottom = ropeIdx >= 0 ? camps[ropeIdx].endY : 0;
+
+    setGeo({ w: box.width, h, desktop, camps, routeD: d, ticks, ropeTop, ropeBottom });
+    // spans/entries are derived from props that do not change at runtime
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     measure();
-    const list = listRef.current;
-    if (!list) return;
+    const wrap = wrapRef.current;
+    if (!wrap) return;
     const ro = new ResizeObserver(() => measure());
-    ro.observe(list);
+    ro.observe(wrap);
     return () => ro.disconnect();
   }, [measure]);
 
   const updateReached = useCallback(
     (v: number) => {
       if (!geo) return;
-      const n = reduce ? geo.stops.length : geo.stops.filter((s) => v >= s - 0.005).length;
+      const n = reduce ? geo.camps.length : geo.camps.filter((c) => v >= c.y / geo.h - 0.01).length;
       setReached((prev) => (prev === n ? prev : n));
     },
     [geo, reduce],
@@ -119,111 +166,176 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
   useMotionValueEvent(drawn, "change", updateReached);
   useEffect(() => updateReached(drawn.get()), [updateReached, drawn]);
 
+  const R = geo?.desktop === false ? RAIL.mobile : RAIL.desktop;
+  const pathLen = reduce ? 1 : drawn;
+
   return (
-    <>
-    {expandable.length > 0 && (
-      <div className="mb-10 flex justify-start md:-mt-4 md:mb-14 md:justify-end">
-        <button
-          type="button"
-          onClick={toggleAll}
-          aria-pressed={allOpen}
-          className="group inline-flex items-center gap-3 border border-line-hi px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-text transition-colors hover:border-sky hover:text-sky"
-        >
-          <span aria-hidden className="flex flex-col gap-[3px]">
-            <span className="h-px w-3 bg-current" />
-            <span className="h-px w-3 bg-current" />
-            <span className="h-px w-3 bg-current" />
-          </span>
-          {allOpen ? "Collapse all" : "Expand all logs"}
-        </button>
-      </div>
-    )}
-    <div ref={listRef} className="relative">
-      {/* SSR / pre-measure guide so the route is never missing */}
-      <span
-        aria-hidden
-        className="absolute bottom-0 left-[18px] top-0 w-px border-l border-dashed border-line-hi md:left-1/2"
-        style={{ opacity: geo ? 0 : 1 }}
-      />
-      {geo && (
-        <svg
-          aria-hidden
-          className="pointer-events-none absolute left-0 top-0 overflow-visible"
-          width={geo.w}
-          height={geo.h}
-          viewBox={`0 0 ${geo.w} ${geo.h}`}
-          fill="none"
-        >
-          <path d={geo.d} stroke="var(--line-hi)" strokeWidth={1} strokeDasharray="2 5" />
-          <motion.path
-            d={geo.d}
-            stroke="var(--sky)"
-            strokeWidth={2}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            style={{ pathLength: reduce ? 1 : drawn, filter: "drop-shadow(0 0 4px color-mix(in oklab, var(--sky) 55%, transparent))" }}
-          />
-        </svg>
+    <div ref={wrapRef} className="relative">
+      {/* SSR / pre-measure guide so the rope is never missing */}
+      {!geo && (
+        <span aria-hidden className="absolute bottom-0 left-[10px] top-0 w-px border-l border-dashed border-signal/50 md:left-[84px]" />
       )}
 
-      <ol className="relative space-y-14 md:space-y-20">
-        {entries.map((entry, i) => {
-          const left = i % 2 === 0;
-          const isReached = i < reached;
-          const isActive = i === reached - 1;
-          const alt = `${alts[i].toLocaleString("en-US")} M`;
-          return (
-            <li key={entry.id} className="relative md:grid md:grid-cols-[1fr_9rem_1fr]">
-              {/* Camp marker on the route */}
-              <span
-                ref={(el) => {
-                  markerRefs.current[i] = el;
-                }}
-                aria-hidden
-                className="absolute left-[18px] top-9 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 md:left-1/2"
-              >
-                {isActive && !reduce && (
-                  <motion.span
-                    className="absolute inset-0 rotate-45 border border-sky"
-                    initial={{ scale: 1, opacity: 0.9 }}
-                    animate={{ scale: 2.6, opacity: 0 }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+      {geo && (
+        <div aria-hidden className="pointer-events-none absolute left-0 top-0" style={{ width: R.w, height: geo.h }}>
+          <svg className="absolute inset-0 overflow-visible" width={R.w} height={geo.h} fill="none">
+            {/* Time axis */}
+            {geo.desktop && (
+              <g>
+                <line x1={R.axis} x2={R.axis} y1={geo.ticks[0]?.y ?? 0} y2={geo.ticks.at(-1)?.y ?? geo.h} stroke="var(--line-hi)" />
+                {geo.ticks.map((t, i) => (
+                  <line
+                    key={i}
+                    x1={R.axis - (t.major ? 7 : 4)}
+                    x2={R.axis}
+                    y1={t.y}
+                    y2={t.y}
+                    stroke={t.major ? "var(--text-dim)" : "var(--line-hi)"}
                   />
-                )}
-                <span
-                  className="absolute inset-0 rotate-45 border-2 transition-colors duration-500"
-                  style={{
-                    borderColor: isReached ? "var(--sky)" : "var(--line-hi)",
-                    background: isReached ? "var(--sky)" : "var(--bg)",
-                    boxShadow: isActive ? "0 0 14px color-mix(in oklab, var(--sky) 70%, transparent)" : "none",
-                  }}
-                />
-                {/* Connector toward the card (desktop) */}
-                <span
-                  className={`absolute top-1/2 hidden h-px w-14 transition-colors duration-500 md:block ${
-                    left ? "right-full mr-2" : "left-full ml-2"
-                  }`}
-                  style={{ background: isReached ? "var(--sky)" : "var(--line-hi)" }}
-                />
-                {/* Altitude readout on the open side (desktop) */}
-                <span
-                  className={`absolute top-1/2 hidden -translate-y-1/2 whitespace-nowrap font-mono text-[11px] tracking-[0.16em] transition-colors duration-500 md:block ${
-                    left ? "left-full ml-5" : "right-full mr-5"
-                  }`}
-                  style={{ color: isReached ? "var(--sky)" : "var(--text-dim)" }}
-                >
-                  ALT {alt}
-                </span>
-              </span>
+                ))}
+              </g>
+            )}
 
-              <div className={`min-w-0 pl-12 md:pl-0 ${left ? "md:col-start-1" : "md:col-start-3"}`}>
-                <RouteCard entry={entry} altitude={alt} index={i} open={openIds.has(entry.id)} onToggle={() => toggle(entry.id)} />
-              </div>
-            </li>
-          );
-        })}
+            {/* Gulf South rope: a faint full-length guide plus the drawn double strand */}
+            {rope && (
+              <g>
+                <line x1={R.rope} x2={R.rope} y1={geo.ropeTop} y2={geo.ropeBottom} stroke="var(--line-hi)" strokeDasharray="2 5" />
+                <motion.line
+                  x1={R.rope - 2}
+                  x2={R.rope - 2}
+                  y1={geo.ropeTop}
+                  y2={geo.ropeBottom}
+                  stroke="var(--signal)"
+                  strokeWidth={1.5}
+                  style={{ pathLength: pathLen }}
+                />
+                <motion.line
+                  x1={R.rope + 2}
+                  x2={R.rope + 2}
+                  y1={geo.ropeTop}
+                  y2={geo.ropeBottom}
+                  stroke="var(--signal)"
+                  strokeWidth={1}
+                  strokeDasharray="5 4"
+                  opacity={0.6}
+                  style={{ pathLength: pathLen }}
+                />
+                {/* Branch where the main route leaves the rope */}
+                <line x1={R.rope} x2={R.route} y1={geo.ropeTop} y2={geo.ropeTop} stroke="var(--line-hi)" />
+                <circle cx={R.rope} cy={geo.ropeBottom} r={3} fill="var(--signal)" />
+              </g>
+            )}
+
+            {/* Main route */}
+            <path d={geo.routeD} stroke="var(--line-hi)" strokeDasharray="2 5" />
+            <motion.path
+              d={geo.routeD}
+              stroke="var(--sky)"
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              style={{ pathLength: pathLen, filter: "drop-shadow(0 0 4px color-mix(in oklab, var(--sky) 55%, transparent))" }}
+            />
+
+            {/* Tenure bars for the non-concurrent roles: start to end on the shared axis */}
+            {geo.camps.map((c, i) =>
+              c.concurrent ? null : (
+                <line
+                  key={`t${i}`}
+                  x1={R.tenure}
+                  x2={R.tenure}
+                  y1={c.y}
+                  y2={Math.max(c.endY, c.y + 6)}
+                  stroke="var(--sky)"
+                  strokeWidth={3}
+                  opacity={i < reached ? 0.9 : 0.25}
+                  style={{ transition: "opacity 500ms" }}
+                />
+              ),
+            )}
+
+            {/* Camp markers */}
+            {geo.camps.map((c, i) => {
+              const on = i < reached;
+              const color = c.concurrent ? "var(--signal)" : "var(--sky)";
+              return (
+                <g key={`m${i}`} transform={`translate(${R.route} ${c.y})`}>
+                  {on && i === reached - 1 && !reduce && (
+                    <g transform="rotate(45)">
+                    <motion.rect
+                      x={-6}
+                      y={-6}
+                      width={12}
+                      height={12}
+                      stroke={color}
+                      fill="none"
+                      initial={{ scale: 1, opacity: 0.9 }}
+                      animate={{ scale: 2.4, opacity: 0 }}
+                      transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                      style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                    />
+                    </g>
+                  )}
+                  <rect
+                    x={-6}
+                    y={-6}
+                    width={12}
+                    height={12}
+                    transform="rotate(45)"
+                    stroke={on ? color : "var(--line-hi)"}
+                    strokeWidth={2}
+                    fill={on ? color : "var(--bg)"}
+                    style={{ transition: "fill 500ms, stroke 500ms" }}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Axis labels */}
+          {geo.desktop &&
+            geo.ticks
+              .filter((t) => t.label)
+              .map((t, i) => (
+                <span
+                  key={i}
+                  className="absolute -translate-y-1/2 text-right font-mono text-[10px] leading-none tracking-[0.08em] text-dim"
+                  style={{ top: t.y, right: R.w - R.axis + 10, width: 64 }}
+                >
+                  {t.label}
+                </span>
+              ))}
+
+          {/* Rope label, set vertically beside the rope */}
+          {geo.desktop && rope && (
+            <span
+              className="absolute font-mono text-[10px] uppercase tracking-[0.18em] text-signal"
+              style={{
+                left: R.rope + 9,
+                top: geo.ropeTop + 40,
+                writingMode: "vertical-rl",
+                maxHeight: Math.max(0, geo.ropeBottom - geo.ropeTop - 60),
+                overflow: "hidden",
+              }}
+            >
+              {rope.company.split(" ").slice(0, 2).join(" ")} · {rope.when} · continuous
+            </span>
+          )}
+        </div>
+      )}
+
+      <ol className="relative space-y-8 pl-[4.5rem] md:space-y-10 md:pl-[12.5rem]">
+        {entries.map((entry, i) => (
+          <li
+            key={entry.id}
+            ref={(el) => {
+              itemRefs.current[i] = el;
+            }}
+          >
+            <RouteCard entry={entry} index={i} />
+          </li>
+        ))}
       </ol>
     </div>
-    </>
   );
 }

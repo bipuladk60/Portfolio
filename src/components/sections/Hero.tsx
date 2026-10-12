@@ -22,7 +22,7 @@ function Arrow() {
   );
 }
 
-/** Camp 00, Ground Station. Full-viewport HUD: name, live clocks, KTM -> MS route telemetry. */
+/** Camp 00, Ground Station. Full-viewport HUD: name, live clocks, Nepal -> Mississippi route telemetry. */
 export function Hero() {
   return (
     <CampSection campId="base" className="min-h-svh overflow-hidden py-0!">
@@ -96,7 +96,7 @@ export function Hero() {
           {/* Route telemetry */}
           <div className="min-w-0 lg:col-span-5">
             <Reveal delay={0.55} y={18}>
-              <Panel label={`Route · KTM → MS`} accent="var(--signal)" className="p-3 pt-5 sm:p-4 sm:pt-6">
+              <Panel label="Route · NP → MS" accent="var(--signal)" className="p-3 pt-5 sm:p-4 sm:pt-6">
                 <RouteMap />
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line pt-3 font-mono text-[10px] uppercase tracking-widest text-dim">
                   <span>Great circle · {ARC_KM.toLocaleString("en-US")} km</span>

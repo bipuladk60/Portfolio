@@ -67,7 +67,7 @@ export function StatGauge({ value, suffix, label, index, accent = "var(--signal)
 
   return (
     <div ref={ref} className="group relative flex flex-col items-center">
-      <div className="relative aspect-square w-full max-w-[150px]">
+      <div className="relative aspect-square w-full max-w-[128px]">
         <svg aria-hidden viewBox="0 0 120 120" className="absolute inset-0 h-full w-full overflow-visible" fill="none">
           {TICKS.map((t, i) => (
             <motion.line

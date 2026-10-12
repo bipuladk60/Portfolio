@@ -39,7 +39,7 @@ export function Uplink() {
               <kbd className="border border-line-hi px-1.5 py-0.5 font-mono text-[10px] text-text">⌘K</kbd> for the command
               console
             </p>
-            <p className="text-dim/80">Say hello the way we do in Kathmandu.</p>
+            <p className="text-dim/80">Say hello the way we do in Nepal.</p>
           </div>
         </div>
       </footer>

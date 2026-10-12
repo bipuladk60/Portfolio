@@ -21,8 +21,8 @@ export const ACHIEVEMENTS: { id: AchievementId; title: string; hint: string; det
   {
     id: "namaste",
     title: "Namaste",
-    hint: "Greet the mountain the way Kathmandu does.",
-    detail: "Typed the greeting. Kathmandu theme unlocked.",
+    hint: "Greet the mountain the way Nepal does.",
+    detail: "Himalaya theme unlocked.",
   },
   {
     id: "konami",

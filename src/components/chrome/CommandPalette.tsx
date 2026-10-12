@@ -16,7 +16,7 @@ import { toast } from "@/lib/toast";
 
 type Command = {
   id: string;
-  group: "Navigate" | "Transmit" | "Links" | "System";
+  group: "Navigate" | "Play" | "Transmit" | "Links" | "System";
   label: string;
   hint?: string;
   keywords?: string;
@@ -87,7 +87,7 @@ export function CommandPalette() {
   }, [open]);
 
   const commands = useMemo<Command[]>(() => {
-    const kathmanduUnlocked = unlocked.includes("namaste");
+    const himalayaUnlocked = unlocked.includes("namaste");
     const list: Command[] = camps.map((c, i) => ({
       id: `goto-${c.id}`,
       group: "Navigate",
@@ -97,6 +97,14 @@ export function CommandPalette() {
       run: () => scrollToCamp(c.id),
     }));
     list.push(
+      {
+        id: "warmer",
+        group: "Play",
+        label: "play warmer",
+        hint: "LIVE · warmergames.com",
+        keywords: "game games geography daily globe",
+        run: () => openExternal(profile.links.warmer),
+      },
       {
         id: "copy-email",
         group: "Transmit",
@@ -122,19 +130,11 @@ export function CommandPalette() {
         run: () => openExternal(profile.links.linkedin),
       },
       {
-        id: "warmer",
-        group: "Links",
-        label: "play warmer",
-        hint: "warmergames.com",
-        keywords: "game geography daily globe",
-        run: () => openExternal(profile.links.warmer),
-      },
-      {
         id: "ludo",
         group: "Links",
-        label: "open chautari ludo repo",
+        label: "chautari ludo (in development) · repo",
         hint: "github",
-        keywords: "game indie canvas",
+        keywords: "game indie canvas github open",
         run: () => openExternal(indieGame.repo),
       },
       {
@@ -160,14 +160,14 @@ export function CommandPalette() {
         },
       },
       {
-        id: "theme-kathmandu",
+        id: "theme-himalaya",
         group: "System",
-        label: "theme: kathmandu",
-        hint: kathmanduUnlocked ? (theme === "kathmandu" ? "ACTIVE" : "unlocked") : "LOCKED · greet the mountain",
+        label: "theme: himalaya",
+        hint: himalayaUnlocked ? (theme === "himalaya" ? "ACTIVE" : "unlocked") : "LOCKED · greet the mountain",
         keywords: "colour color nepal secret",
-        disabled: !kathmanduUnlocked,
+        disabled: !himalayaUnlocked,
         run: () => {
-          if (setTheme("kathmandu")) toast("Kathmandu", { title: "Theme", tone: "signal" });
+          if (setTheme("himalaya")) toast("Himalaya", { title: "Theme", tone: "signal" });
         },
       },
       {
@@ -364,7 +364,7 @@ export function CommandPalette() {
                       {cmd.hint && (
                         <span
                           className={`shrink-0 text-[10px] uppercase tracking-[0.12em] ${
-                            cmd.hint === "ACTIVE" ? "text-water" : cmd.disabled ? "text-fire/80" : "text-dim/80"
+                            cmd.hint === "ACTIVE" || cmd.id === "warmer" ? "text-water" : cmd.disabled ? "text-fire/80" : "text-dim/80"
                           }`}
                         >
                           {cmd.hint}

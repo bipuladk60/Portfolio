@@ -5,12 +5,12 @@ import { isUnlocked } from "./achievements";
 // Themes swap a handful of CSS custom properties inline on <html> and set data-theme,
 // so every Tailwind token (bg-bg, text-signal, border-line...) follows automatically.
 
-export type ThemeName = "amber" | "kathmandu";
+export type ThemeName = "amber" | "himalaya";
 
 const OVERRIDES: Record<ThemeName, Record<string, string>> = {
   amber: {},
-  // Temple brick, marigold and dusk: Kathmandu valley at lamp-lighting time.
-  kathmandu: {
+  // Temple brick, marigold and dusk: a Himalayan village at lamp-lighting time.
+  himalaya: {
     "--bg": "#0d0a09",
     "--panel": "#15100d",
     "--panel-2": "#1c1511",
@@ -26,7 +26,8 @@ const ALL_KEYS = Array.from(new Set(Object.values(OVERRIDES).flatMap((o) => Obje
 const KEY = "xc:theme";
 
 export const themeStore = createStore<ThemeName>("amber", () =>
-  readLocal(KEY) === "kathmandu" ? "kathmandu" : "amber",
+  // "kathmandu" is the pre-rename stored value; migrate it gracefully.
+  readLocal(KEY) === "himalaya" || readLocal(KEY) === "kathmandu" ? "himalaya" : "amber",
 );
 
 export const useTheme = () => useStore(themeStore);
@@ -39,9 +40,9 @@ export function applyTheme(name: ThemeName): void {
   Object.entries(OVERRIDES[name]).forEach(([k, v]) => root.style.setProperty(k, v));
 }
 
-/** Switch theme. Kathmandu stays locked until the namaste easter egg is found; returns false if refused. */
+/** Switch theme. Himalaya stays locked until the namaste easter egg is found; returns false if refused. */
 export function setTheme(name: ThemeName): boolean {
-  if (name === "kathmandu" && !isUnlocked("namaste")) return false;
+  if (name === "himalaya" && !isUnlocked("namaste")) return false;
   themeStore.set(name);
   writeLocal(KEY, name);
   applyTheme(name);
@@ -51,6 +52,6 @@ export function setTheme(name: ThemeName): boolean {
 /** Re-apply the persisted theme after hydration. */
 export function restoreTheme(): void {
   const t = themeStore.get();
-  if (t === "kathmandu" && !isUnlocked("namaste")) return;
+  if (t === "himalaya" && !isUnlocked("namaste")) return;
   if (t !== "amber") applyTheme(t);
 }

@@ -47,6 +47,7 @@ export function SummitScene() {
       </div>
       <svg
         aria-hidden
+        data-cursor-box=""
         viewBox="0 0 1200 420"
         preserveAspectRatio="xMidYMax slice"
         className="mt-4 block h-[240px] w-full sm:h-[300px] md:mt-2 md:h-[380px]"

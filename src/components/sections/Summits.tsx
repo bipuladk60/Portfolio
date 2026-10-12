@@ -7,7 +7,7 @@ export function Summits() {
       <SectionHeader
         campId="summits"
         title="Summit Attempts"
-        kicker="Every hackathon is a climb against a clock. Gold flags came home with an award; blue markers competed and came back with data gathered. Pick any marker for the full expedition report."
+        kicker="Gold flags came home with an award; blue markers competed and came back with data. Pick one for the report."
       />
       <Expedition />
     </CampSection>

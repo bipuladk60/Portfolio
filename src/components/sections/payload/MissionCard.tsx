@@ -77,13 +77,13 @@ export function MissionCard({ project, index, visual, large = false, className =
         <div
           aria-hidden
           className={`relative overflow-hidden border-b border-line bg-bg/70 ${
-            large ? "h-72 md:h-80 lg:h-auto lg:min-h-[26rem] lg:w-[56%] lg:shrink-0 lg:border-b-0 lg:border-r" : "h-36"
+            large ? "h-72 md:h-80 lg:h-auto lg:min-h-[26rem] lg:w-[56%] lg:shrink-0 lg:border-b-0 lg:border-r" : "h-36 lg:h-auto lg:min-h-36 lg:flex-1"
           }`}
         >
           {visual}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col p-5 md:p-6">
+        <div className={`flex min-w-0 flex-1 flex-col p-5 md:p-6 ${large ? "" : "lg:flex-none"}`}>
           <p className="hud-label flex flex-wrap items-center gap-2" style={{ color: FIRE }}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <span className="h-px w-5 bg-line-hi" />

@@ -6,31 +6,24 @@ import { OrderBookSim } from "./payload/OrderBookSim";
 import { FilmStrip } from "./payload/FilmStrip";
 import { RadarSweep } from "./payload/RadarSweep";
 import { PhoneSync } from "./payload/PhoneSync";
-import { TrieGrow } from "./payload/TrieGrow";
-import { AgendaTicker } from "./payload/AgendaTicker";
 
 const VISUALS: Record<string, ReactNode> = {
   openbook: <OrderBookSim />,
   clipfinder: <FilmStrip />,
-  mhd: <AgendaTicker />,
   jobradar: <RadarSweep />,
   partysync: <PhoneSync />,
-  typetrie: <TrieGrow />,
 };
 
-// Bento placement on a 6-column grid (lg). Large cards are 4 columns wide and lay out side by side
-// (visual left, copy right) so they never stretch taller than their row.
+// Bento on a 6-column grid (lg): two zig-zag rows, each a large side-by-side card (4 cols) plus a medium card (2 cols).
 const LAYOUT: Record<string, { className: string; large?: boolean }> = {
   openbook: { className: "md:col-span-2 lg:col-span-4", large: true },
-  mhd: { className: "lg:col-span-2" },
   jobradar: { className: "lg:col-span-2" },
+  partysync: { className: "lg:col-span-2" },
   clipfinder: { className: "md:col-span-2 lg:col-span-4", large: true },
-  partysync: { className: "lg:col-span-3" },
-  typetrie: { className: "lg:col-span-3" },
 };
 
-// Rows on lg: openbook + MHD | jobradar + clipfinder | PartySync + TypeTrie.
-const ORDER = ["openbook", "mhd", "jobradar", "clipfinder", "partysync", "typetrie"];
+// Rows on lg: openbook + jobradar | PartySync + clipfinder.
+const ORDER = ["openbook", "jobradar", "partysync", "clipfinder"];
 
 const PAYLOAD_CSS = `
 .pb-flash { animation: pb-flash 0.7s ease-out; }
@@ -42,9 +35,7 @@ const PAYLOAD_CSS = `
 @keyframes pb-spin { to { transform: rotate(360deg); } }
 .pb-blip { opacity: 0.12; transform-box: fill-box; transform-origin: center; animation: pb-blip 4.2s linear infinite; animation-play-state: var(--play, running); }
 @keyframes pb-blip { 0% { opacity: 1; transform: scale(1.8); } 30% { opacity: 0.4; transform: scale(1); } 100% { opacity: 0.12; transform: scale(1); } }
-.pb-progress { width: 0; animation: pb-progress linear forwards; }
-@keyframes pb-progress { to { width: 100%; } }
-@media (prefers-reduced-motion: reduce) { .pb-blip { opacity: 0.7; } .pb-progress { width: 50%; } }
+@media (prefers-reduced-motion: reduce) { .pb-blip { opacity: 0.7; } }
 `;
 
 export function Payload() {

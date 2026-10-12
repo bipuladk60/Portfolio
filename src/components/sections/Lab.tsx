@@ -7,7 +7,7 @@ export function Lab() {
       <SectionHeader
         campId="lab"
         title="Atmospheric Lab"
-        kicker="Research and machine learning, logged like an air-quality station: what was sampled, how it was processed, and what the instruments read."
+        kicker="Research and machine learning, logged like an air-quality station: what was sampled, how it was processed, what the instruments read."
       />
       <Station />
     </CampSection>

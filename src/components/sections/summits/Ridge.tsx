@@ -35,8 +35,8 @@ export function Ridge({
   const matches = (r: Hackathon["result"]) => filter === "all" || filter === r;
 
   return (
-    <div ref={ref} className="relative pt-10">
-      <div className="relative aspect-[3/2] w-full sm:aspect-[2/1] lg:aspect-[3/1]">
+    <div ref={ref} className="relative pt-10" data-cursor-box="">
+      <div className="relative aspect-[3/2] w-full sm:aspect-[2/1]">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
@@ -206,7 +206,7 @@ export function Ridge({
         </ul>
       </div>
 
-      <div className="hud-label mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 md:mt-12">
+      <div className="hud-label mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 md:mt-9">
         <span className="flex items-center gap-2">
           <span aria-hidden className="inline-block h-2.5 w-3.5" style={{ background: "var(--signal)" }} />
           Summit · flag planted
@@ -215,7 +215,6 @@ export function Ridge({
           <span aria-hidden className="inline-block h-2.5 w-2.5 rotate-45 border" style={{ borderColor: "var(--sky)" }} />
           Competed · data gathered
         </span>
-        <span className="text-dim/70">Time runs left to right</span>
       </div>
     </div>
   );

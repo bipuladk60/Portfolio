@@ -50,7 +50,7 @@ export function RouteLog() {
         <SectionHeader
           campId="route"
           title="Route Log"
-          kicker="Each role is a camp on the way up. Open a log for the full record."
+          kicker="Oldest camp first. The Gulf South role is the rope on the left: it ran the whole way up, alongside the others."
         />
         <RouteTrack entries={experience} />
         <p className="hud-label mt-8 flex items-center gap-3 md:justify-center">

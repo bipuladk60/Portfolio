@@ -42,7 +42,7 @@ export function Pipeline() {
 
   return (
     <Panel label="Sample pipeline" accent="var(--water)">
-      <div ref={ref} className="p-5 sm:p-7">
+      <div ref={ref} className="p-5 sm:p-6">
         <ol className="flex flex-col md:flex-row md:items-start" aria-label="Research pipeline, five steps">
           {steps.map((s, i) => {
             const on = i === active;

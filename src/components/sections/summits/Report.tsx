@@ -15,9 +15,9 @@ export function Report({ h, index, total, reduce }: { h: Hackathon; index: numbe
       as="article"
       label={`Expedition report · ${String(index + 1).padStart(2, "0")}/${String(total).padStart(2, "0")}`}
       accent={color}
-      className="min-h-[420px]"
+      className="lg:min-h-[440px]"
     >
-      <div id="summit-report" aria-live="polite" className="relative p-5 sm:p-7">
+      <div id="summit-report" aria-live="polite" className="relative p-5 sm:p-6">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={h.id}
@@ -42,12 +42,12 @@ export function Report({ h, index, total, reduce }: { h: Hackathon; index: numbe
               <span className="hud-label">{h.when}</span>
             </div>
 
-            <h3 className="mt-5 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-text sm:text-3xl">
+            <h3 className="mt-4 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-text">
               {h.event}
             </h3>
             <p className="mt-1 text-sm text-dim">{h.host}</p>
 
-            <dl className="mt-6 grid gap-4 border-y border-line py-4 sm:grid-cols-2">
+            <dl className="mt-4 grid grid-cols-2 gap-4 border-y border-line py-3">
               <div>
                 <dt className="hud-label">Result</dt>
                 <dd className="mt-1 font-display text-base font-semibold leading-snug" style={{ color }}>
@@ -60,11 +60,11 @@ export function Report({ h, index, total, reduce }: { h: Hackathon; index: numbe
               </div>
             </dl>
 
-            <p className="mt-5 border-l-2 pl-4 text-lg leading-snug text-text" style={{ borderColor: color }}>
+            <p className="mt-4 border-l-2 pl-4 text-base leading-snug text-text" style={{ borderColor: color }}>
               {h.pitch}
             </p>
 
-            <ul className="mt-5 space-y-2.5">
+            <ul className="mt-4 space-y-2">
               {h.bullets.map((b, i) => (
                 <motion.li
                   key={b}
@@ -79,14 +79,14 @@ export function Report({ h, index, total, reduce }: { h: Hackathon; index: numbe
               ))}
             </ul>
 
-            <div className="mt-6 flex flex-wrap gap-1.5">
+            <div className="mt-4 flex flex-wrap gap-1.5">
               {h.stack.map((s) => (
                 <Chip key={s}>{s}</Chip>
               ))}
             </div>
 
             {h.links && h.links.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-4 flex flex-wrap gap-3">
                 {h.links.map((l) => (
                   <a
                     key={l.href}

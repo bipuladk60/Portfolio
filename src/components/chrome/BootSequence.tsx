@@ -16,9 +16,9 @@ const PRE_PAINT = `try{if(sessionStorage.getItem("${SESSION_KEY}")==="1"){var s=
 type Line = { text: string; delay: number; dur: number; tone?: string };
 
 const LINES: Line[] = [
-  { text: "> EXP-CTRL // GROUND STATION KTM", delay: 60, dur: 260 },
+  { text: "> EXP-CTRL // GROUND STATION NEPAL", delay: 60, dur: 260 },
   { text: "> ACQUIRING SIGNAL..........", delay: 380, dur: 340 },
-  { text: "> UPLINK KTM 27.7172N 85.3240E", delay: 740, dur: 240 },
+  { text: "> UPLINK NP 28.39N 84.12E", delay: 740, dur: 240 },
   { text: ">     -> MS  31.33N  89.29W", delay: 960, dur: 200 },
   { text: "> HANDSHAKE  SYN / ACK  OK", delay: 1180, dur: 200 },
 ];
@@ -106,7 +106,7 @@ export function BootSequence() {
               <span className="led inline-block h-1.5 w-1.5 rounded-full bg-signal" />
               Ground station handshake
             </span>
-            <span className="hidden sm:inline">CH 01 · KTM</span>
+            <span className="hidden sm:inline">CH 01 · NP</span>
           </div>
 
           <div className="space-y-1.5 font-mono text-[11px] leading-relaxed text-dim sm:text-[13px]">
@@ -128,7 +128,7 @@ export function BootSequence() {
           <div className="mt-6">
             <div className="hud-label mb-2 flex justify-between">
               <span>Signal lock</span>
-              <span>KTM → MS</span>
+              <span>NP → MS</span>
             </div>
             <div className="relative h-1.5 overflow-hidden border border-line">
               <div className={`${styles.bar} absolute inset-0 bg-signal`} />

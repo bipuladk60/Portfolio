@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 type Station = { code: string; city: string; zone: string; fallbackAbbr: string };
 
 const STATIONS: Station[] = [
-  { code: "KTM", city: "Kathmandu", zone: "Asia/Kathmandu", fallbackAbbr: "NPT" },
+  { code: "NP", city: "Nepal", zone: "Asia/Kathmandu", fallbackAbbr: "NPT" },
   { code: "MS", city: "Hattiesburg", zone: "America/Chicago", fallbackAbbr: "CT" },
 ];
 
@@ -25,7 +25,7 @@ function read(now: Date, s: Station): Reading {
       .find((p) => p.type === "timeZoneName")?.value ?? "";
   const short = part("short");
   const offset = part("shortOffset").replace("GMT", "UTC") || "UTC";
-  // en-US gives CST/CDT for Chicago but only "GMT+5:45" for Kathmandu, so fall back to NPT there.
+  // en-US gives CST/CDT for Chicago but only "GMT+5:45" for Nepal, so fall back to NPT there.
   const abbr = /^[A-Z]{2,5}$/.test(short) ? short : s.fallbackAbbr;
   return { time, abbr, offset: offset === "UTC" ? "UTC+0" : offset };
 }
@@ -52,7 +52,7 @@ export function DualClock() {
   }, []);
 
   return (
-    <dl className="grid grid-cols-2 divide-x divide-line border border-line bg-panel/70">
+    <dl data-cursor-box="" className="grid grid-cols-2 divide-x divide-line border border-line bg-panel/70">
       {STATIONS.map((s, i) => {
         const r = now ? read(now, s) : null;
         const accent = i === 0 ? "text-signal" : "text-sky";

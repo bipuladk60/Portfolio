@@ -89,7 +89,7 @@ function DieFace({ value }: { value: number }) {
 
 const HOP_MS = 240;
 
-export function LudoTeaser() {
+export function LudoTeaser({ compact = false }: { compact?: boolean }) {
   const reduce = useReducedMotion();
   const [face, setFace] = useState(0); // 0 = blank until the first throw
   const [pos, setPos] = useState(0);
@@ -158,9 +158,14 @@ export function LudoTeaser() {
   const cy = gy * C + C / 2;
 
   return (
-    <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:gap-8">
+    <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:gap-6">
       {/* board vignette */}
-      <svg viewBox="-4 -4 158 158" className="block h-auto w-full max-w-[380px] justify-self-center" aria-hidden>
+      <svg
+        viewBox="-4 -4 158 158"
+        className={`block h-auto w-full justify-self-center ${compact ? "max-w-[190px]" : "max-w-[380px]"}`}
+        aria-hidden
+        data-cursor-box=""
+      >
         <rect x="-4" y="-4" width="158" height="158" rx="6" fill="#2a1912" stroke="#5a3a26" />
         <rect x="0" y="0" width="150" height="150" fill="#efe4cf" />
         {HOMES.map((h) => (

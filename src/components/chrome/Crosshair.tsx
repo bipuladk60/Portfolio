@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { playBlip } from "@/lib/sound";
 
 const INTERACTIVE = 'a[href], button, [role="button"], [data-cursor], summary, select, label[for], input[type="checkbox"], input[type="radio"]';
+const BOX = "[data-cursor-box]";
 const TEXT_INPUT = 'input:not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]';
 const ENABLE_QUERY = "(hover: hover) and (pointer: fine) and (min-width: 768px)";
 const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
@@ -11,7 +12,8 @@ const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
 const pad4 = (n: number) => String(Math.max(0, Math.round(n))).padStart(4, "0");
 
 /**
- * A thin reticle that tracks the pointer and locks its brackets onto interactive elements.
+ * A thin reticle that tracks the pointer and locks its brackets onto interactive elements
+ * and onto [data-cursor-box] panels/visuals (hugging the box in its --accent colour).
  * Desktop with a fine pointer only; off for touch and reduced motion. Positions are written
  * as transforms inside one rAF loop, so mouse movement never re-renders React.
  */
@@ -46,9 +48,42 @@ export function Crosshair() {
     let shownOpacity = 0;
     let press = 0;
     let locked: Element | null = null;
+    let kind: "interactive" | "box" | null = null;
+    let accent = "var(--signal)";
     let overText = false;
     let lastReadout = "";
+    let lastColor = "";
     let raf = 0;
+
+    /** Innermost interactive element wins; otherwise the innermost [data-cursor-box]. */
+    const resolve = (el: Element | null) => {
+      overText = !!el?.closest(TEXT_INPUT);
+      let next: Element | null = null;
+      let nextKind: typeof kind = null;
+      if (el && !overText) {
+        const inter = el.closest(INTERACTIVE);
+        if (inter) {
+          next = inter;
+          nextKind = "interactive";
+        } else {
+          const b = el.closest(BOX);
+          if (b) {
+            next = b;
+            nextKind = "box";
+          }
+        }
+      }
+      if (next === locked) return;
+      locked = next;
+      kind = nextKind;
+      if (next && nextKind === "box") {
+        const a = getComputedStyle(next).getPropertyValue("--accent").trim();
+        accent = a || "var(--signal)";
+      } else {
+        accent = "var(--signal)";
+      }
+      if (nextKind === "interactive") playBlip("hover");
+    };
 
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
@@ -61,20 +96,17 @@ export function Crosshair() {
       }
     };
     const onOver = (e: PointerEvent) => {
-      const t = e.target as Element | null;
-      if (!t || !(t instanceof Element)) return;
-      overText = !!t.closest(TEXT_INPUT);
-      const hit = overText ? null : t.closest(INTERACTIVE);
-      if (hit !== locked) {
-        locked = hit;
-        if (hit) playBlip("hover");
-      }
+      resolve(e.target instanceof Element ? e.target : null);
     };
+    // Scrolling/resizing moves content under a still pointer: re-resolve once per frame.
+    let recheckQueued = false;
     const recheck = () => {
-      if (!visible) return;
-      const el = document.elementFromPoint(mouse.x, mouse.y);
-      overText = !!el?.closest(TEXT_INPUT);
-      locked = el && !overText ? el.closest(INTERACTIVE) : null;
+      if (!visible || recheckQueued) return;
+      recheckQueued = true;
+      requestAnimationFrame(() => {
+        recheckQueued = false;
+        resolve(document.elementFromPoint(mouse.x, mouse.y));
+      });
     };
     const onDown = () => {
       press = 1;
@@ -85,23 +117,35 @@ export function Crosshair() {
 
     const tick = () => {
       raf = requestAnimationFrame(tick);
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
       let tx: number, ty: number, tw: number, th: number;
+      let rw = 0;
+      let rh = 0;
       if (locked && locked.isConnected) {
         const r = locked.getBoundingClientRect();
+        rw = r.width;
+        rh = r.height;
         const p = 6;
-        tx = r.left - p;
-        ty = r.top - p;
-        tw = r.width + p * 2;
-        th = r.height + p * 2;
+        // Clamp to the viewport so a box taller than the screen still shows its brackets.
+        const x0 = Math.max(4, r.left - p);
+        const y0 = Math.max(4, r.top - p);
+        const x1 = Math.min(vw - 4, r.right + p);
+        const y1 = Math.min(vh - 4, r.bottom + p);
+        tx = x0;
+        ty = y0;
+        tw = Math.max(12, x1 - x0);
+        th = Math.max(12, y1 - y0);
       } else {
         locked = null;
+        kind = null;
         const s = 24 - press * 8;
         tx = mouse.x - s / 2;
         ty = mouse.y - s / 2;
         tw = s;
         th = s;
       }
-      const k = locked ? 0.28 : 0.42;
+      const k = kind === "box" ? 0.2 : kind ? 0.28 : 0.42;
       box.x += (tx - box.x) * k;
       box.y += (ty - box.y) * k;
       box.w += (tw - box.w) * k;
@@ -114,10 +158,14 @@ export function Crosshair() {
 
       if (dot.current) {
         dot.current.style.transform = `translate3d(${mouse.x}px, ${mouse.y}px, 0)`;
-        dot.current.style.opacity = locked ? "0" : "1";
+        // Over links/buttons the native pointer shows, so the centre cross steps aside.
+        dot.current.style.opacity = kind === "interactive" ? "0" : "1";
       }
+      const color = kind ? accent : "var(--text-dim)";
+      const colorChanged = color !== lastColor;
+      lastColor = color;
       const c = corners.current;
-      const s = locked ? 9 : 6;
+      const s = kind === "box" ? 12 : kind ? 9 : 6;
       const pos: [number, number][] = [
         [box.x, box.y],
         [box.x + box.w - s, box.y],
@@ -129,16 +177,23 @@ export function Crosshair() {
         if (!el) continue;
         el.style.transform = `translate3d(${pos[i][0]}px, ${pos[i][1]}px, 0)`;
         el.style.width = el.style.height = `${s}px`;
-        el.style.borderColor = locked ? "var(--signal)" : "var(--text-dim)";
+        if (colorChanged) el.style.borderColor = color;
       }
       if (readout.current) {
-        const label = locked ? `LOCK  X ${pad4(mouse.x)}  Y ${pad4(mouse.y)}` : `X ${pad4(mouse.x)}  Y ${pad4(mouse.y)}`;
+        const label =
+          kind === "box"
+            ? `LOCK · ${Math.round(rw)}×${Math.round(rh)}`
+            : kind
+              ? `LOCK  X ${pad4(mouse.x)}  Y ${pad4(mouse.y)}`
+              : `X ${pad4(mouse.x)}  Y ${pad4(mouse.y)}`;
         if (label !== lastReadout) {
           lastReadout = label;
           readout.current.textContent = label;
         }
-        readout.current.style.transform = `translate3d(${box.x + box.w + 8}px, ${box.y + box.h + 4}px, 0)`;
-        readout.current.style.color = locked ? "var(--signal)" : "var(--text-dim)";
+        const rx = kind === "box" ? box.x + 2 : box.x + box.w + 8;
+        const ry = kind === "box" ? Math.max(2, box.y - 14) : box.y + box.h + 4;
+        readout.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+        if (colorChanged) readout.current.style.color = color;
       }
     };
 
@@ -146,6 +201,7 @@ export function Crosshair() {
     document.addEventListener("pointerover", onOver, { passive: true });
     window.addEventListener("pointerdown", onDown, { passive: true });
     window.addEventListener("scroll", recheck, { passive: true });
+    window.addEventListener("resize", recheck);
     document.documentElement.addEventListener("pointerleave", onLeave);
     raf = requestAnimationFrame(tick);
 
@@ -156,6 +212,7 @@ export function Crosshair() {
       document.removeEventListener("pointerover", onOver);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("scroll", recheck);
+      window.removeEventListener("resize", recheck);
       document.documentElement.removeEventListener("pointerleave", onLeave);
     };
   }, [enabled]);

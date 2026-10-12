@@ -1,53 +1,33 @@
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
-import { Chip, Panel } from "@/components/hud/Panel";
+import { Panel } from "@/components/hud/Panel";
 import { education, profile, stats } from "@/data/content";
 import { Reveal } from "./hero/Reveal";
 import { StatGauge } from "./telemetry/StatGauge";
 
-/** Splits an education `detail` string ("GPA x · Coursework: a, b") into labelled dossier fields. */
+/** Splits an education `detail` string ("GPA x · a, b, c") into a GPA value and the remaining notes. */
 function parseDetail(detail: string) {
   const parts = detail.split(" · ").map((p) => p.trim()).filter(Boolean);
   let gpa: string | undefined;
-  let coursework: string[] = [];
   const notes: string[] = [];
   for (const p of parts) {
     if (/^GPA\s/i.test(p)) gpa = p.replace(/^GPA\s*/i, "");
-    else if (/^Coursework:/i.test(p)) coursework = p.replace(/^Coursework:\s*/i, "").split(",").map((c) => c.trim());
-    else notes.push(p);
+    else notes.push(p.replace(/^Coursework:\s*/i, ""));
   }
-  return { gpa, coursework, notes };
+  return { gpa, notes: notes.join(" · ") };
 }
 
-function Field({ label, children, wide = false }: { label: string; children: React.ReactNode; wide?: boolean }) {
-  return (
-    <div className={`min-w-0 border-t border-line py-3 ${wide ? "col-span-2" : ""}`}>
-      <dt className="hud-label">{label}</dt>
-      <dd className="mt-1 text-[15px] leading-snug text-text">{children}</dd>
-    </div>
-  );
-}
-
-/** Camp 01, Telemetry: pilot dossier and the instrument cluster of real stats. */
+/**
+ * Camp 01, Telemetry. Compact by design: one strip of gauges, then the dossier beside the
+ * training record. Role, status, origin and base live in the hero, so they are not repeated here.
+ */
 export function Telemetry() {
   return (
     <CampSection campId="telemetry">
-      <SectionHeader
-        campId="telemetry"
-        title="Telemetry"
-        kicker="Pilot dossier and the readings logged on the way up."
-      />
+      <SectionHeader campId="telemetry" title="Telemetry" />
 
-      {/* Instrument cluster: full-width strip of gauges */}
-      <Reveal trigger="view" className="relative mb-12">
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-24 right-0 hidden select-none font-display text-[9rem] font-bold leading-none text-transparent lg:block"
-          style={{ WebkitTextStroke: "1px var(--line-hi)" }}
-        >
-          01
-        </span>
-        <Panel label="Instrument cluster" accent="var(--signal)" className="relative px-3 pb-7 pt-8 sm:px-6">
-          <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
+      <Reveal trigger="view" className="mb-10">
+        <Panel label="Instrument cluster" accent="var(--signal)" className="px-3 pb-5 pt-7 sm:px-6">
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4">
             {stats.map((s, i) => (
               <li key={s.label}>
                 <StatGauge value={s.value} suffix={s.suffix} label={s.label} index={i} />
@@ -57,116 +37,61 @@ export function Telemetry() {
         </Panel>
       </Reveal>
 
-      <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
-        {/* Dossier: the wide, document-like column */}
-        <Reveal trigger="view" className="min-w-0 lg:col-span-7">
-          <Panel as="article" label="Pilot dossier" accent="var(--signal)" className="p-5 pt-7 sm:p-8 sm:pt-9">
-            <header className="flex items-start justify-between gap-4">
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
+        <Reveal trigger="view" delay={0.05} className="min-w-0 lg:col-span-7">
+          <Panel as="article" label="Pilot dossier" accent="var(--signal)" className="h-full p-5 pt-7 sm:p-7 sm:pt-8">
+            <header className="flex items-start justify-between gap-4 border-b border-line pb-4">
               <div className="min-w-0">
-                <p className="hud-label">Subject</p>
-                <h3 className="mt-1 font-display text-3xl font-bold uppercase leading-none tracking-tight text-text sm:text-4xl">
+                <p className="hud-label">Subject · Callsign {profile.handle}</p>
+                <h3 className="mt-1 font-display text-2xl font-bold uppercase leading-none tracking-tight text-text sm:text-3xl">
                   {profile.name}
                 </h3>
               </div>
               <span
                 aria-hidden
-                className="mt-1 shrink-0 -rotate-6 border-2 border-signal/60 px-2 py-1 text-center font-display text-[10px] font-bold uppercase leading-tight tracking-[0.18em] text-signal/80"
+                className="shrink-0 -rotate-6 border-2 border-signal/60 px-2 py-1 text-center font-display text-[10px] font-bold uppercase leading-tight tracking-[0.18em] text-signal/80"
               >
                 Cleared
                 <br />
                 for ascent
               </span>
             </header>
-
-            <dl className="mt-6 grid sm:grid-cols-2 sm:gap-x-8">
-              <Field label="Role">{profile.role}</Field>
-              <Field label="Callsign">{profile.handle}</Field>
-            </dl>
-
-            <div className="mt-6 border-t border-line pt-5">
-              <p className="hud-label text-signal!">Narrative</p>
-              <ol className="mt-4 space-y-5">
-                {profile.about.map((para, i) => (
-                  <li key={i} className="grid grid-cols-[2.25rem_1fr] gap-2 sm:grid-cols-[3rem_1fr]">
-                    <span aria-hidden className="pt-1 font-mono text-[11px] tracking-widest text-dim/70">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <p className="text-base leading-relaxed text-text/90 md:text-[17px]">{para}</p>
-                  </li>
-                ))}
-              </ol>
-            </div>
+            <ol className="mt-4 space-y-3">
+              {profile.about.map((para, i) => (
+                <li key={i} className="grid grid-cols-[2rem_1fr] gap-2">
+                  <span aria-hidden className="pt-1 font-mono text-[11px] tracking-widest text-dim/70">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p className="leading-relaxed text-text/90">{para}</p>
+                </li>
+              ))}
+            </ol>
           </Panel>
         </Reveal>
 
-        {/* Flight plan and training record */}
-        <div className="min-w-0 space-y-12 lg:col-span-5">
-          <Reveal trigger="view" delay={0.1}>
-            <Panel label="Flight plan" accent="var(--text-dim)" className="px-5 pb-2 pt-6 sm:px-6">
-              <dl className="grid grid-cols-2 gap-x-6">
-                <Field label="Origin">{profile.origin}</Field>
-                <Field label="Base">{profile.base}</Field>
-                <Field label="Status" wide>
-                  <span className="font-mono text-[13px] text-dim">{profile.status}</span>
-                </Field>
-              </dl>
-            </Panel>
-          </Reveal>
-
-          <Reveal trigger="view" delay={0.15}>
-            <Panel label="Training record" accent="var(--text-dim)" className="p-5 pt-7 sm:p-6 sm:pt-8">
-              <ol className="space-y-6">
-                {education.map((e, i) => {
-                  const d = parseDetail(e.detail);
-                  return (
-                    <li key={e.school} className={i > 0 ? "border-t border-dashed border-line-hi pt-6" : ""}>
-                      <p className="hud-label">Institution</p>
-                      <h3 className="mt-1 font-display text-lg font-semibold leading-tight text-text">{e.school}</h3>
-                      <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
-                        <div className="col-span-2">
-                          <dt className="hud-label">Degree</dt>
-                          <dd className="mt-0.5 text-sm text-text">{e.degree}</dd>
-                        </div>
-                        <div>
-                          <dt className="hud-label">{/^expected/i.test(e.when) ? "Graduation" : "Completed"}</dt>
-                          <dd className="mt-0.5 font-mono text-sm text-signal">{e.when}</dd>
-                        </div>
-                        <div>
-                          <dt className="hud-label">Location</dt>
-                          <dd className="mt-0.5 font-mono text-sm text-text">{e.where}</dd>
-                        </div>
-                        {d.gpa && (
-                          <div>
-                            <dt className="hud-label">GPA</dt>
-                            <dd className="mt-0.5 font-mono text-sm text-text">{d.gpa}</dd>
-                          </div>
-                        )}
-                        {d.notes.length > 0 && (
-                          <div className="col-span-2">
-                            <dt className="hud-label">Notes</dt>
-                            <dd className="mt-0.5 text-sm text-dim">{d.notes.join(" · ")}</dd>
-                          </div>
-                        )}
-                      </dl>
-                      {d.coursework.length > 0 && (
-                        <div className="mt-4">
-                          <p className="hud-label">Coursework</p>
-                          <ul className="mt-2 flex flex-wrap gap-1.5">
-                            {d.coursework.map((c) => (
-                              <li key={c}>
-                                <Chip>{c}</Chip>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </Panel>
-          </Reveal>
-        </div>
+        <Reveal trigger="view" delay={0.1} className="min-w-0 lg:col-span-5">
+          <Panel label="Training record" accent="var(--text-dim)" className="h-full p-5 pt-7 sm:p-6 sm:pt-8">
+            <ol className="space-y-4">
+              {education.map((e, i) => {
+                const d = parseDetail(e.detail);
+                return (
+                  <li key={e.school} className={i > 0 ? "border-t border-dashed border-line-hi pt-4" : ""}>
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                      <h3 className="font-display text-base font-semibold leading-tight text-text">{e.school}</h3>
+                      <span className="font-mono text-xs text-signal">{e.when}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-text/85">{e.degree}</p>
+                    <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
+                      {e.where}
+                      {d.gpa && <span className="text-text"> · GPA {d.gpa}</span>}
+                    </p>
+                    {d.notes && <p className="mt-2 text-[13px] leading-snug text-dim">{d.notes}</p>}
+                  </li>
+                );
+              })}
+            </ol>
+          </Panel>
+        </Reveal>
       </div>
     </CampSection>
   );
