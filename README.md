@@ -39,7 +39,7 @@ This is a dark mission-control look with Himalayan cartography and prayer-flag c
 
 - **Palette** (`src/app/globals.css`, exposed as Tailwind colours): bg `#0A0D12`, panel `#10151C`, line `#1F2B38`, text `#E9E5DA`, dim `#8A97A6`. Each accent maps to a prayer-flag meaning: signal amber `#F2B418` (wins), sky blue `#4C8DFF` (links), fire red `#FF5C5C` (projects), water green `#34C98A` (research), air `#EDEDE6` (contact).
 - **Type:** Saira Condensed for headings (tall, squared, like expedition signage), Barlow for body text (a warm grotesk drawn from highway signs) and Martian Mono for telemetry and the small `.hud-label` captions (a wide, instrument-panel mono).
-- **Look:** clean, but still an instrument. There's generous whitespace and no box-in-box nesting. HUD details carry information: every section opens on a survey line (camp number, altitude, a tick ruler and the climb from the previous camp), and key visuals sit in framed instruments with corner brackets, a figure number and a live status light.
+- **Look:** clean, but still an instrument. There's generous whitespace and no box-in-box nesting. HUD details carry information: every section opens on a quiet strip (camp number, altitude and the climb from the previous camp), and key visuals sit in framed instruments with corner brackets, a figure number and a live status light.
 - **Signature visuals:** a zoomable route map with real Nepal and USA outlines (Natural Earth), live dual clocks for Nepal and Central time, a hackathon ridge line, and a live degree-progress dial.
 - **Research & ML:** all three entries share one layout (`lab/LabEntry.tsx`): text on the left and a framed figure on the right.
   - PFAS and COPD: the study's findings plus a model comparison.

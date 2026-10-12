@@ -66,8 +66,8 @@ export function Instrument({ n, label, status, children }: { n: string; label: s
       style={{ ["--accent" as string]: "var(--water)" }}
     >
       <Brackets size={9} />
-      <figcaption className="hud-label flex items-center justify-between gap-4 border-b border-line px-4 py-2.5">
-        <span className="truncate">
+      <figcaption className="hud-label flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line px-4 py-2.5">
+        <span className="min-w-0">
           <span className="text-water">Fig. {n}</span> · {label}
         </span>
         <span className="flex shrink-0 items-center gap-2">

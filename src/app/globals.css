@@ -72,15 +72,6 @@ body {
   }
 }
 
-/* Survey ruler in section headers: a baseline with minor ticks every 8px and major ticks every 64px */
-.hud-ruler {
-  background:
-    repeating-linear-gradient(90deg, var(--text-dim) 0 1px, transparent 1px 64px) left bottom / 100% 10px no-repeat,
-    repeating-linear-gradient(90deg, var(--line-hi) 0 1px, transparent 1px 8px) left bottom / 100% 5px no-repeat,
-    linear-gradient(var(--line-hi), var(--line-hi)) left bottom / 100% 1px no-repeat;
-  opacity: 0.8;
-}
-
 /* Faint coordinate grid */
 .hud-grid {
   background-image:

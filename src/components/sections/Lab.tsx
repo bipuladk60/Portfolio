@@ -8,7 +8,7 @@ import { PfasFigure, PfasMethod } from "./lab/PfasStudy";
 /** Research & ML: three entries on one shared layout (text left, framed instrument right). */
 export function Lab() {
   return (
-    <CampSection campId="lab" className="pt-8 md:pt-10">
+    <CampSection campId="lab" className="md:py-28!">
       <SectionHeader campId="lab" title="Research & ML" />
 
       <div className="space-y-20 md:space-y-28">

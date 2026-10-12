@@ -27,14 +27,20 @@ dim `#8A97A6`, signal `#F2B418` (amber/wins), sky `#4C8DFF` (participations/link
 (projects), water `#34C98A` (research/GO), air `#EDEDE6` (contact), dusk `#2A1A14`, dusk-glow `#FF9A3C`.
 Tailwind classes: `bg-bg bg-panel text-text text-dim text-signal border-line` etc.
 
-Fonts: `font-display` (Chakra Petch 500-700) headings/HUD; `font-sans` (IBM Plex Sans) body;
-`font-mono` (JetBrains Mono) telemetry and labels. `.hud-label` = 11px mono uppercase tracked label.
+Fonts (chapter 1, set in `layout.tsx`): `font-display` (Saira Condensed 500-800, `--font-display-face`) headings;
+`font-sans` (Barlow 400-600, `--font-body-face`) body; `font-mono` (Martian Mono 400-500, `--font-mono-face`)
+telemetry and labels. `.hud-label` = 11px mono uppercase tracked label. Chapter 2 uses Fredoka + Nunito (see Revision 5).
 Utilities: `.hud-grid` background grid, `.led` blinking dot.
 
 ## Shared primitives (use them, do not re-invent)
 - `Panel` (`@/components/hud/Panel`): hairline box with corner brackets, `label`, `accent`. Also `Chip`, `Brackets`.
 - `DecodeText`: scramble-to-final text on scroll-in; real text stays in DOM.
-- `CampSection` + `SectionHeader` (`@/components/hud/SectionHeader`): every section must use these.
+- `CampSection` (every section) + `SectionHeader` (`@/components/hud/SectionHeader`, chapter 1 only): a quiet strip
+  over the title, "01 — 2,000 m  ▲ +600 m" (camp number, altitude, climb from the previous camp). No tick ruler, no stamps.
+  Chapter-2 sections use `ToonHeader` (`sections/shared/ToonHeader.tsx`): a sticker pill "Chapter 2 · 01 · Warmer" over a
+  Fredoka title. Never put the dark HUD strip on the sky.
+- Research & ML: every entry uses `lab/LabEntry.tsx`, text left and a framed figure right with a caption strip
+  "Fig. 0N · label" plus a live status; the caption wraps on narrow screens instead of truncating.
 - Animation library: `motion` (import from `"motion/react"`). No GSAP, no three.js, no WebGL
   (the reviewer's headless browser has no WebGL; use SVG / Canvas 2D / CSS).
 

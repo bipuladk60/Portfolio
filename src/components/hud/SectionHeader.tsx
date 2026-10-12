@@ -9,7 +9,7 @@ type SectionHeaderProps = {
 };
 
 /**
- * Standard section opener. A survey line runs across the top: the camp number, the altitude, a tick ruler
+ * Standard chapter-1 section opener. A quiet strip runs across the top: the camp number, the altitude
  * and the climb from the previous camp. Then the title and an optional line of copy.
  */
 export function SectionHeader({ campId, title, kicker }: SectionHeaderProps) {
@@ -22,13 +22,11 @@ export function SectionHeader({ campId, title, kicker }: SectionHeaderProps) {
         <span style={{ color: camp.color }}>{String(i).padStart(2, "0")}</span>
         <span aria-hidden className="h-px w-6" style={{ background: camp.color }} />
         <span>{formatAltitude(camp.altitude).toLowerCase()}</span>
-        <span aria-hidden className="hud-ruler h-2.5 min-w-6 flex-1" />
         {climb > 0 && (
-          <span className="shrink-0">
+          <span className="ml-3 shrink-0">
             <span aria-hidden style={{ color: camp.color }}>▲ </span>+{climb.toLocaleString("en-US")} m
           </span>
         )}
-        <span aria-hidden className="font-mono text-[13px] leading-none text-line-hi">+</span>
       </div>
       <DecodeText
         as="h2"
