@@ -53,6 +53,22 @@ export const viewport: Viewport = {
   themeColor: "#0a0d12",
 };
 
+// No JS: motion serializes each element's `initial` state into its inline style (opacity:0, a closed
+// clip-path, scale(0), pathLength 0 as stroke-dasharray="0 1") and only JS ever animates it out. Force
+// the revealed state so the page reads fully without scripts. State-driven fades (CSS transitions on
+// opacity, e.g. the Warmer tabs and hover glows) are excluded; they already render their real state.
+// `data-noscript-fade` marks an element whose transform is layout (keep it, only fade in);
+// `data-noscript-keep` marks a stroke whose drawn length is data (the degree dial), left alone.
+const SKIP = ':not([style*="transition:opacity"]):not([class*="transition-opacity"]):not([data-noscript-fade])';
+const NOSCRIPT_CSS = `<style>${[
+  `[style="opacity:0"]`,
+  `[style^="opacity:0;"]${SKIP}`,
+  `[style*=";opacity:0;"]${SKIP}`,
+  `[style$=";opacity:0"]${SKIP}`,
+  `[style*="clip-path:inset(0% 0% 100% 0%)"]`,
+  `[style*="clip-path:inset(-12% 100%"]`,
+].join(",")}{opacity:1!important;transform:none!important;clip-path:none!important}[data-noscript-fade]{opacity:1!important}[stroke-dasharray="0 1"]:not([data-noscript-keep]),[stroke-dasharray="0px 1px"]:not([data-noscript-keep]){stroke-dasharray:none!important}</style>`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,6 +78,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: CHAPTER_BOOT_SCRIPT }} />
+        <noscript dangerouslySetInnerHTML={{ __html: NOSCRIPT_CSS }} />
       </head>
       <body className={`${display.variable} ${body.variable} ${mono.variable} ${fredoka.variable} ${nunito.variable} grain antialiased`}>
         {children}

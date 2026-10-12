@@ -383,6 +383,7 @@ export function WarmerStats({ footnote, live = null }: { footnote?: string; live
         {/* labels as HTML so they stay readable when the chart scales down */}
         <motion.span
           aria-hidden
+          data-noscript-fade=""
           className="wr-display pointer-events-none absolute whitespace-nowrap text-[13px] font-bold leading-none md:text-[15px]"
           style={{
             left: `${((xs[PEAK_I] - 76) / W) * 100}%`,
