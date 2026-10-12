@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { animate, motion, useInView, useReducedMotion } from "motion/react";
 import { games } from "@/data/content";
 import { GREEN, INK, ORANGE, RED, YELLOW } from "@/components/toon/toon";
+import type { SearchDay, WarmerSearchLive } from "@/lib/server/searchConsole";
 
 const A = games[0].analytics;
 const S = games[0].search;
@@ -45,6 +46,41 @@ const LINE = (() => {
 })();
 const AREA = `${LINE} L${rd(xs[xs.length - 1])} ${H - PAD.b} L${rd(xs[0])} ${H - PAD.b} Z`;
 
+// "1.1K" / "15.5K" / "980", the way Search Console shows totals
+const compact = (n: number) =>
+  n >= 1000 ? `${(Math.round(n / 100) / 10).toLocaleString("en-US")}K` : Math.round(n).toLocaleString("en-US");
+const isoDay = (iso: string, withYear = false) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${MONTHS[m - 1]} ${d}${withYear ? `, ${y}` : ""}`;
+};
+
+// live daily-clicks line: same soft curve, smaller frame
+const SW = 600;
+const SH = 84;
+const SPAD = { l: 6, r: 6, t: 10, b: 6 };
+function clicksLine(daily: SearchDay[]) {
+  const max = Math.max(1, ...daily.map((d) => d.clicks));
+  const n = Math.max(1, daily.length - 1);
+  const px = daily.map((_, i) => SPAD.l + (i * (SW - SPAD.l - SPAD.r)) / n);
+  const py = daily.map((d) => SH - SPAD.b - (d.clicks / max) * (SH - SPAD.t - SPAD.b));
+  let line = `M${rd(px[0])} ${rd(py[0])}`;
+  for (let i = 0; i < px.length - 1; i++) {
+    const x0 = px[i - 1] ?? px[i];
+    const y0 = py[i - 1] ?? py[i];
+    const x3 = px[i + 2] ?? px[i + 1];
+    const y3 = py[i + 2] ?? py[i + 1];
+    // clamp control points to the plot so the soft curve never dips below zero clicks
+    const cy = (v: number) => Math.min(SH - SPAD.b, Math.max(SPAD.t, v));
+    line += ` C${rd(px[i] + (px[i + 1] - x0) / 6)} ${rd(cy(py[i] + (py[i + 1] - y0) / 6))} ${rd(px[i + 1] - (x3 - px[i]) / 6)} ${rd(cy(py[i + 1] - (y3 - py[i]) / 6))} ${rd(px[i + 1])} ${rd(py[i + 1])}`;
+  }
+  const area = `${line} L${rd(px[px.length - 1])} ${SH - SPAD.b} L${rd(px[0])} ${SH - SPAD.b} Z`;
+  let peak = 0;
+  daily.forEach((d, i) => {
+    if (d.clicks > daily[peak].clicks) peak = i;
+  });
+  return { line, area, peak, peakX: px[peak], peakY: py[peak] };
+}
+
 function CountUp({ value, start }: { value: number; start: boolean }) {
   const reduce = useReducedMotion();
   const [n, setN] = useState(value);
@@ -73,7 +109,7 @@ function Stat({ label, value, growth, start }: { label: string; value: number; g
 }
 
 /** Analytics sticker: real Vercel Analytics totals + an approximate daily visitors chart that draws on scroll. */
-export function WarmerStats({ footnote }: { footnote?: string }) {
+export function WarmerStats({ footnote, live = null }: { footnote?: string; live?: WarmerSearchLive | null }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
   const reduce = useReducedMotion();
@@ -82,6 +118,26 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
   const rangeId = useId();
   const tabBase = useId().replace(/[^a-zA-Z0-9]/g, "");
   const [tab, setTab] = useState<"traffic" | "search">("traffic");
+  const [searchSeen, setSearchSeen] = useState(false);
+  useEffect(() => {
+    if (tab === "search") setSearchSeen(true);
+  }, [tab]);
+  const liveLine = useMemo(() => (live && live.daily.length > 1 ? clicksLine(live.daily) : null), [live]);
+  const recent = live?.daily.slice(-7) ?? [];
+  const recentAvg = recent.length ? Math.round(recent.reduce((a, d) => a + d.clicks, 0) / recent.length) : 0;
+  const metrics = live
+    ? [
+        { label: "Clicks", value: compact(live.clicks) },
+        { label: "Impressions", value: compact(live.impressions) },
+        { label: "Avg. position", value: live.position.toFixed(1) },
+        { label: "CTR", value: `${(live.ctr * 100).toFixed(1)}%` },
+      ]
+    : [
+        { label: "Clicks", value: S.clicks },
+        { label: "Impressions", value: S.impressions },
+        { label: "Avg. position", value: S.avgPosition },
+        { label: "CTR", value: S.ctr },
+      ];
 
   const onPointer = (e: React.PointerEvent<SVGSVGElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -135,16 +191,34 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
         className={`[grid-area:1/1] ${tab === "search" ? "" : "invisible"}`}
         inert={tab !== "search"}
       >
-        <p className="mt-4 text-[11px] font-extrabold uppercase tracking-wide opacity-70">
-          {S.source} · {S.period} · {S.scope}
-        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          {live ? (
+            <p className="wr-pill inline-flex items-center gap-2 px-2.5 py-0.5 text-[11px] font-extrabold" style={{ background: GREEN }}>
+              <span className="relative inline-flex h-2 w-2" aria-hidden>
+                <span className="led absolute inset-0 rounded-full bg-white" />
+                <span className="relative inline-block h-2 w-2 rounded-full border-2" style={{ borderColor: INK }} />
+              </span>
+              <span>
+                Updated <time dateTime={live.fetchedAt}>{isoDay(live.fetchedAt.slice(0, 10), true)}</time> · {S.source}
+              </span>
+            </p>
+          ) : (
+            <p className="wr-pill inline-flex items-center px-2.5 py-0.5 text-[11px] font-extrabold" style={{ background: "#ffffff" }}>
+              Snapshot · {S.source} · {S.period.replace(/^Since launch · /, "")}
+            </p>
+          )}
+          <p className="text-[11px] font-extrabold uppercase tracking-wide opacity-70">
+            {S.scope} · since launch
+            {live && (
+              <>
+                {" "}
+                · data through <time dateTime={live.dataThrough}>{isoDay(live.dataThrough)}</time>
+              </>
+            )}
+          </p>
+        </div>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { label: "Clicks", value: S.clicks },
-            { label: "Impressions", value: S.impressions },
-            { label: "Avg. position", value: S.avgPosition },
-            { label: "CTR", value: S.ctr },
-          ].map((m, i) => (
+          {metrics.map((m, i) => (
             <div
               key={m.label}
               className="wr-pill !rounded-2xl px-3 py-2.5"
@@ -155,16 +229,67 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
             </div>
           ))}
         </dl>
-        <div className="mt-4 flex items-center gap-4">
-          <svg viewBox="0 0 160 56" aria-hidden className="hidden h-14 w-36 shrink-0 sm:block">
-            <path d="M4 50 C 30 50, 44 48, 62 42 S 96 30, 112 22 S 140 10, 156 8" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
-            <path d="M146 4 l 11 4 l -8 8" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <div className="min-w-0">
-            <p className="text-sm font-bold leading-snug">{S.trend}</p>
-            <p className="mt-1 hidden text-[11px] font-bold opacity-70 sm:block">Curve is illustrative, not plotted data.</p>
+        {live && liveLine ? (
+          <div className="mt-4">
+            <div className="relative">
+              <svg
+                viewBox={`0 0 ${SW} ${SH}`}
+                preserveAspectRatio="none"
+                className="block h-16 w-full overflow-visible md:h-20"
+                role="img"
+                aria-label={`Daily Google clicks from ${isoDay(live.startDate)} to ${isoDay(live.dataThrough)}, best day ${isoDay(live.daily[liveLine.peak].date)} with ${live.daily[liveLine.peak].clicks} clicks.`}
+              >
+                <line x1={SPAD.l} x2={SW - SPAD.r} y1={SH - SPAD.b} y2={SH - SPAD.b} stroke={INK} strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                <motion.path
+                  d={liveLine.area}
+                  fill={`url(#${gradId})`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: searchSeen ? 1 : 0 }}
+                  transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.6 }}
+                />
+                <motion.path
+                  d={liveLine.line}
+                  fill="none"
+                  stroke={INK}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: searchSeen ? 1 : 0 }}
+                  transition={{ duration: reduce ? 0 : 1.1, ease: [0.2, 0.8, 0.2, 1] }}
+                />
+              </svg>
+              {/* peak dot as HTML so it stays round when the line stretches */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+                style={{ left: `${(liveLine.peakX / SW) * 100}%`, top: `${(liveLine.peakY / SH) * 100}%`, background: RED, borderColor: INK }}
+              />
+            </div>
+            <div aria-hidden className="mt-1 flex justify-between gap-2 text-[11px] font-bold opacity-70">
+              <span>{isoDay(live.startDate)}</span>
+              <span>
+                Best day {isoDay(live.daily[liveLine.peak].date)} · {live.daily[liveLine.peak].clicks} clicks
+              </span>
+              <span>{isoDay(live.dataThrough)}</span>
+            </div>
+            <p className="mt-2 text-sm font-bold leading-snug">
+              Daily clicks since launch. Last 7 days of data: about {recentAvg.toLocaleString("en-US")} a day.
+            </p>
           </div>
-        </div>
+        ) : (
+          <div className="mt-4 flex items-center gap-4">
+            <svg viewBox="0 0 160 56" aria-hidden className="hidden h-14 w-36 shrink-0 sm:block">
+              <path d="M4 50 C 30 50, 44 48, 62 42 S 96 30, 112 22 S 140 10, 156 8" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+              <path d="M146 4 l 11 4 l -8 8" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div className="min-w-0">
+              <p className="text-sm font-bold leading-snug">{S.trend}</p>
+              <p className="mt-1 hidden text-[11px] font-bold opacity-70 sm:block">Curve is illustrative, not plotted data.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div

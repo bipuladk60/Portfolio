@@ -3,6 +3,7 @@ import { games } from "@/data/content";
 import { SkyWorld } from "./games/SkyWorld";
 import { FoundSticker } from "./games/FoundSticker";
 import { WarmerStats } from "./games/WarmerStats";
+import { getWarmerSearchLive } from "@/lib/server/searchConsole";
 import { GREEN, INK, ORANGE, WARMER_CSS, YELLOW } from "@/components/toon/toon";
 import { Reveal } from "./shared/Reveal";
 import { GAMES_HEADING_ID, ToonHeader } from "./shared/ToonHeader";
@@ -10,7 +11,9 @@ import { GAMES_HEADING_ID, ToonHeader } from "./shared/ToonHeader";
 const CHIP_COLORS = [YELLOW, "#a8d8ff", GREEN];
 const TILTS = ["-1.5deg", "1deg", "-0.6deg"];
 
-export function Games() {
+export async function Games() {
+  // Search Console totals, fetched at build time; null falls back to the content.ts snapshot
+  const searchLive = await getWarmerSearchLive();
   const warmer = games[0];
   // the last bullet (SEO + visitors) is covered by the analytics sticker; the rest become feature stickers
   const features = warmer.bullets.slice(0, -1);
@@ -78,7 +81,7 @@ export function Games() {
               </article>
             </Reveal>
             <Reveal delay={0.05}>
-              <WarmerStats />
+              <WarmerStats live={searchLive} />
             </Reveal>
           </div>
 
