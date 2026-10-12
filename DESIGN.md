@@ -96,3 +96,18 @@ cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, n
   (warmergames.com: cartoon sky, clouds, sticker-style cards, warm→cold heat colours, globe). Feature Warmer's real
   analytics from `games[0].analytics` (2,224 visitors / 4,693 page views in the last 30 days, growth chips, daily sparkline
   labelled approximate). No bounce rate.
+
+## Revision 5: two chapters and the Warmer gate (owner idea)
+- Chapter 1 = the dark expedition HUD: base → telemetry → route → summits → lab.
+- `gate` (Checkpoint, `sections/Gate.tsx`): a full Warmer round in the HUD style that the visitor must solve to continue.
+  The answer is ALWAYS Nepal. Type-ahead country input over `src/data/countryList.ts` (215 countries, label points),
+  each guess shows distance + warm/cold heat colour + direction arrow; escalating hints (after 4 guesses: a clue;
+  after 6: a "reveal" button) so nobody gets stuck. On solve call `unlockChapterTwo()` from `@/lib/chapter` and play a
+  big transition: the dark HUD world transforms into Warmer's day-sky world (e.g. heat bloom from Nepal floods the
+  screen into sky + clouds), then scroll continues into chapter 2.
+- Chapter 2 (`<div data-chapter2-root>` in page.tsx: games, payload, systems, uplink) is Warmer's cartoon world:
+  day sky, ink outlines, sticker cards, Fredoka (`--font-fredoka`) + Nunito (`--font-nunito`), heat colours.
+  Shared tokens/CSS in `@/components/toon/toon` (INK, SKY_*, YELLOW, ORANGE, RED, GREEN, PAPER, WARMER_CSS with
+  `.wr-world .wr-display .wr-sticker .wr-pill .wr-press .wr-wobble`). All chapter-2 sections use this theme.
+- `html[data-chapter]` is "1" (locked, chapter 2 hidden) or "2"; set pre-paint from localStorage. No JS → everything
+  visible. `useChapter()` / `unlockChapterTwo()` / `relockGate()` in `@/lib/chapter`.

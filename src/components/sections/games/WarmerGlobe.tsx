@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useInView, useReducedMotion } from "motion/react";
 import { LAND_DOTS } from "../hero/geo";
-import { GREEN, INK, toonHeat } from "./toon";
+import { GREEN, INK, toonHeat } from "@/components/toon/toon";
 
 const N = 3600;
 

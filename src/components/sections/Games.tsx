@@ -1,15 +1,12 @@
-import { Fredoka, Nunito } from "next/font/google";
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
 import { games } from "@/data/content";
 import { SkyWorld } from "./games/SkyWorld";
 import { WarmerTeaser } from "./games/WarmerTeaser";
 import { WarmerStats } from "./games/WarmerStats";
-import { GREEN, INK, ORANGE, WARMER_CSS, YELLOW } from "./games/toon";
+import { GREEN, INK, ORANGE, WARMER_CSS, YELLOW } from "@/components/toon/toon";
 import { Reveal } from "./shared/Reveal";
 
 // Warmer's own rounded, friendly type, scoped to this section.
-const fredoka = Fredoka({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-fredoka", display: "swap" });
-const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700", "800"], variable: "--font-nunito", display: "swap" });
 
 const CHIP_COLORS = [YELLOW, "#a8d8ff", GREEN];
 const TILTS = ["-1.5deg", "1deg", "-0.6deg"];
@@ -20,7 +17,7 @@ export function Games() {
   const features = warmer.bullets.slice(0, -1);
 
   return (
-    <CampSection campId="games" className={`overflow-hidden ${fredoka.variable} ${nunito.variable}`}>
+    <CampSection campId="games" className="overflow-hidden">
       <style>{WARMER_CSS}</style>
       <SectionHeader
         campId="games"

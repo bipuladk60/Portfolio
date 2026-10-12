@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Chakra_Petch, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
+import { Chakra_Petch, Fredoka, IBM_Plex_Sans, JetBrains_Mono, Nunito } from "next/font/google";
+import { CHAPTER_BOOT_SCRIPT } from "@/lib/chapter";
 import "./globals.css";
 
 const chakra = Chakra_Petch({
@@ -23,6 +24,21 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
+// Chapter 2 (the Warmer world) fonts.
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Bipul Adhikari · Expedition Control",
   description:
@@ -39,8 +55,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${chakra.variable} ${plex.variable} ${jetbrains.variable} grain antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: CHAPTER_BOOT_SCRIPT }} />
+      </head>
+      <body className={`${chakra.variable} ${plex.variable} ${jetbrains.variable} ${fredoka.variable} ${nunito.variable} grain antialiased`}>
         {children}
       </body>
     </html>

@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { animate, motion, useInView, useReducedMotion } from "motion/react";
 import { games } from "@/data/content";
-import { GREEN, INK, ORANGE, RED, YELLOW } from "./toon";
+import { GREEN, INK, ORANGE, RED, YELLOW } from "@/components/toon/toon";
 
 const A = games[0].analytics;
 const S = games[0].search;

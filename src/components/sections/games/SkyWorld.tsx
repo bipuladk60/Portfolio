@@ -3,7 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import { motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { mulberry32, r1 } from "../shared/prng";
-import { INK, SKY_BOTTOM, SKY_TOP } from "./toon";
+import { INK, SKY_BOTTOM, SKY_TOP } from "@/components/toon/toon";
 
 type Puff = { cx: number; cy: number; r: number };
 

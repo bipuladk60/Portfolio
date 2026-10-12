@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { playBlip } from "@/lib/sound";
 import { WarmerGlobe, type GlobeGuess, type LatLon } from "./WarmerGlobe";
-import { GREEN, INK, RED, YELLOW, heatWord, toonHeat } from "./toon";
+import { GREEN, INK, RED, YELLOW, heatWord, toonHeat } from "@/components/toon/toon";
 
 // Approximate country centroids (lat, lon) for the teaser round.
 const POOL: (LatLon & { name: string })[] = [

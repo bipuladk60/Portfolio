@@ -4,6 +4,7 @@ import { Telemetry } from "@/components/sections/Telemetry";
 import { RouteLog } from "@/components/sections/RouteLog";
 import { Summits } from "@/components/sections/Summits";
 import { Lab } from "@/components/sections/Lab";
+import { Gate } from "@/components/sections/Gate";
 import { Games } from "@/components/sections/Games";
 import { Payload } from "@/components/sections/Payload";
 import { Systems } from "@/components/sections/Systems";
@@ -19,10 +20,14 @@ export default function Home() {
         <RouteLog />
         <Summits />
         <Lab />
-        <Games />
-        <Payload />
-        <Systems />
-        <Uplink />
+        <Gate />
+        {/* Chapter 2: hidden until the gate is solved (see src/lib/chapter.ts and globals.css). */}
+        <div data-chapter2-root>
+          <Games />
+          <Payload />
+          <Systems />
+          <Uplink />
+        </div>
       </main>
     </>
   );

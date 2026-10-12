@@ -101,6 +101,11 @@ body {
   100% { transform: translate(0, 0); }
 }
 
+/* Chapter gate: chapter-2 content is hidden only once JS has marked the page as chapter 1. */
+html[data-chapter="1"] [data-chapter2-root] {
+  display: none;
+}
+
 @keyframes blink {
   50% { opacity: 0.25; }
 }
