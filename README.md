@@ -63,9 +63,25 @@ This is a cartoon day sky with ink outlines and sticker cards, based on the real
 ## How it works
 
 - **Chapter state** (`src/lib/chapter.ts`): `html[data-chapter]` is `"1"` (locked) or `"2"`. It's set before paint from localStorage so the page never flashes. `useChapter()`, `unlockChapterTwo()` and `relockGate()` drive it, and with JavaScript disabled everything is visible.
-- **Chrome** (`src/components/chrome/`): the altimeter, a crosshair cursor, a ⌘K command palette (go to a section, skip or replay the checkpoint, copy email, themes, sound, achievements), toasts, boot sequence and easter eggs.
+- **Chrome** (`src/components/chrome/`): the altimeter, a crosshair cursor, a ⌘K command palette (go to a section, skip or replay the checkpoint, copy email, themes, sound, achievements), toasts and easter eggs. No intro screen: the page opens straight on the hero.
 - **Cursor:** a small dot with faint ticks. It locks onto an element only when that element opts in with `data-cursor-box="lock"`. Only top-level visuals do, such as the route map, ridge, disease sim and Warmer globe. The lock shows thin corner ticks with soft easing, and links and buttons get a light hug. It turns ink-coloured in chapter 2 and is off on touch screens and under reduced motion.
 - **Content** (`src/data/content.ts`): every fact on the page comes from this one file. Components never invent numbers, awards or metrics.
+
+## Live Warmer search data
+
+The "Found on Google" tab in the Warmer section can show live Google Search Console numbers instead of the dated snapshot in `content.ts`. The scope is the same as the snapshot: web search, the homepage `https://warmergames.com/` only, since launch (2026-07-21). Both values live in `games[0].search` (`scopePage`, `launchDate`).
+
+**Setup (once):**
+
+1. In Google Cloud, pick or create a project and enable the **Google Search Console API**.
+2. Create a service account (no roles needed), then add a **JSON key** and download it.
+3. In Search Console, open the Domain property `sc-domain:warmergames.com`, go to Settings → Users and permissions, and add the service account's email as a **Restricted** user.
+4. For local builds, copy `.env.example` to `.env.local` and fill in `GSC_CLIENT_EMAIL` (the JSON's `client_email`) and `GSC_PRIVATE_KEY` (the JSON's `private_key`, kept on one line with its `\n` escapes, in double quotes). `GSC_SITE_URL` is optional and defaults to `sc-domain:warmergames.com`.
+5. For the deployed site, add `GSC_CLIENT_EMAIL` and `GSC_PRIVATE_KEY` as **GitHub Actions secrets** (repo Settings → Secrets and variables → Actions) and pass them as `env` to the build step. They are only needed at build time; never commit them.
+
+**How it works:** the site is a static export (GitHub Pages), so there is no server at runtime. During `next build`, the Warmer section (a server component) calls `src/lib/server/searchConsole.ts`, which signs a service-account JWT with Node `crypto` (no Google SDK), swaps it for a read-only access token and queries `searchAnalytics/query` by date. The numbers are baked into the static HTML, so they stay crawlable. Totals are summed. CTR is clicks / impressions, and the average position is the impression-weighted mean of the daily positions, so it can differ from the Search Console UI by a tenth or so. Freshness comes from a scheduled GitHub Action that rebuilds about every 6 hours; the pill shows the build date ("Updated {date}") and the scope line shows the last day Search Console has data for. In `pnpm dev`, a successful result is memoised in-process for 6 hours so reloads don't call Google each time.
+
+**Fallback:** with no credentials, or on any error or a 5 s timeout, the tab shows the `content.ts` snapshot labelled "Snapshot" with its illustrative curve, exactly as before. Builds never fail because of it. Failures log one line without any credentials. The Traffic tab (Vercel Analytics) is always the static snapshot.
 
 ## Motion language
 
