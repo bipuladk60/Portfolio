@@ -30,7 +30,7 @@ const CAMP_KEYWORDS: Record<string, string> = {
   base: "home hero top start",
   telemetry: "about bio education",
   route: "experience work jobs career",
-  summits: "hackathons hackathon awards wins",
+  hackathons: "hackathons hackathon awards wins",
   lab: "research ml machine learning pfas copd",
   gate: "checkpoint gate puzzle nepal",
   games: "games game room warmer play",

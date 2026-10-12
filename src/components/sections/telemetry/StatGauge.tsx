@@ -40,9 +40,9 @@ type StatGaugeProps = {
 };
 
 /**
- * Arc gauge that sweeps and counts up when scrolled into view.
- * Percentages fill to their value; counts have no natural maximum, so the dial sweeps to a full lock
- * instead of implying a scale that does not exist.
+ * A stat that counts up when scrolled into view. Only a percentage gets the arc dial, because only a
+ * percentage has a scale to fill; plain counts are shown as clean numbers in the same-sized cell so
+ * the row stays aligned.
  */
 export function StatGauge({ value, suffix, label, index, accent = "var(--signal)" }: StatGaugeProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -50,14 +50,23 @@ export function StatGauge({ value, suffix, label, index, accent = "var(--signal)
   const reduce = useReducedMotion();
   const count = useMotionValue(0);
   const shown = useTransform(count, (v) => Math.round(v).toLocaleString("en-US"));
-  const fill = suffix.trim() === "%" ? value / 100 : 1;
+  const isPct = suffix.trim() === "%";
+  const fill = isPct ? value / 100 : 1;
   const delay = index * 0.08;
   // "Users · MHD Connect + Warmer": the part after the dot is a quieter second line.
   const [main, ...rest] = label.split(" · ");
   const detail = rest.join(" · ");
   // Longer readouts ("2,600+") step down a size so they sit inside the dial instead of touching it.
   const chars = value.toLocaleString("en-US").length + suffix.trim().length;
-  const numberSize = chars >= 5 ? "text-2xl" : chars >= 3 ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl";
+  const numberSize = !isPct
+    ? chars >= 5
+      ? "text-4xl sm:text-5xl"
+      : "text-5xl sm:text-6xl"
+    : chars >= 5
+      ? "text-2xl"
+      : chars >= 3
+        ? "text-3xl sm:text-4xl"
+        : "text-4xl sm:text-5xl";
 
   useEffect(() => {
     if (reduce) {
@@ -74,6 +83,7 @@ export function StatGauge({ value, suffix, label, index, accent = "var(--signal)
   return (
     <div ref={ref} className="group relative flex flex-col items-center">
       <div className="relative aspect-square w-full max-w-[128px]">
+        {isPct && (
         <svg aria-hidden viewBox="0 0 120 120" className="absolute inset-0 h-full w-full overflow-visible" fill="none">
           {TICKS.map((t, i) => (
             <motion.line
@@ -111,6 +121,7 @@ export function StatGauge({ value, suffix, label, index, accent = "var(--signal)
             transition={{ duration: reduce ? 0 : 0.3, delay: reduce ? 0 : delay + 1.5 }}
           />
         </svg>
+        )}
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="sr-only">
             {value.toLocaleString("en-US")}

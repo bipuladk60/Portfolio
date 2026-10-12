@@ -16,7 +16,10 @@ const fmt = (m: number) => Math.round(m).toLocaleString("en-US");
 const FREDOKA = "var(--font-fredoka), var(--font-nunito), system-ui, sans-serif";
 const FADE = "opacity 600ms cubic-bezier(0.2,0.8,0.2,1)";
 
-type Anchor = { idx: number; at: number };
+type Anchor = { idx: number; at: number; top: number };
+
+/** A camp becomes active once its section's top has crossed this fraction of the viewport. */
+const ACTIVE_LINE = 0.4;
 
 const isRendered = (el: HTMLElement) => el.getClientRects().length > 0;
 
@@ -24,6 +27,8 @@ const isRendered = (el: HTMLElement) => el.getClientRects().length > 0;
  * Scroll position is altitude. Each visible camp section is an anchor at the scroll offset where it
  * reaches the upper third of the viewport; between anchors the camp index (and so the altitude)
  * is interpolated linearly. Hidden sections (display:none, e.g. locked chapter 2) are skipped.
+ * The active camp (label, colour) is NOT taken from that interpolation: it is the last section whose
+ * real top has crossed ~40% of the viewport, so the label never runs ahead of what is on screen.
  * Numbers and markers are written straight to the DOM in rAF; only a camp change re-renders.
  *
  * Two skins crossfade: the dark HUD rail (chapter 1) and a cartoon thermometer (chapter 2).
@@ -56,7 +61,7 @@ export function Altimeter() {
         const el = document.querySelector<HTMLElement>(`[data-camp="${c.id}"]`);
         if (!el || !isRendered(el)) return;
         const top = el.getBoundingClientRect().top + window.scrollY;
-        list.push({ idx, at: Math.min(maxScroll, Math.max(0, top - vh * 0.35)) });
+        list.push({ idx, top, at: Math.min(maxScroll, Math.max(0, top - vh * 0.35)) });
       });
       if (list.length) list[0].at = 0;
       for (let k = 1; k < list.length; k++) {
@@ -74,6 +79,28 @@ export function Altimeter() {
         if (y < b.at) return a.idx + ((y - a.at) / (b.at - a.at)) * (b.idx - a.idx);
       }
       return anchors[anchors.length - 1].idx;
+    };
+
+    /** Index of the last rendered camp whose section top is above the activation line. */
+    const activeAt = (y: number): number => {
+      if (anchors.length === 0) return 0;
+      // At the very bottom a short final section may never reach the line; it is still the one in view.
+      if (y >= maxScroll - 2) return anchors[anchors.length - 1].idx;
+      const line = y + window.innerHeight * ACTIVE_LINE;
+      let idx = anchors[0].idx;
+      for (const a of anchors) {
+        if (a.top <= line) idx = a.idx;
+        else break;
+      }
+      return idx;
+    };
+
+    const setActiveIdx = (idx: number) => {
+      if (idx === lastIdx) return;
+      lastIdx = idx;
+      setActive(idx);
+      activeCamp.set(camps[idx].id);
+      document.documentElement.dataset.activeCamp = camps[idx].id;
     };
 
     const paint = (f: number) => {
@@ -94,13 +121,6 @@ export function Altimeter() {
       if (progress.current) {
         progress.current.style.transform = `scaleX(${Math.min(1, window.scrollY / maxScroll)})`;
       }
-      const idx = Math.max(0, Math.min(LAST, Math.round(f)));
-      if (idx !== lastIdx) {
-        lastIdx = idx;
-        setActive(idx);
-        activeCamp.set(camps[idx].id);
-        document.documentElement.dataset.activeCamp = camps[idx].id;
-      }
     };
 
     const loop = () => {
@@ -112,6 +132,7 @@ export function Altimeter() {
 
     const onScroll = () => {
       target = fractional(window.scrollY);
+      setActiveIdx(activeAt(window.scrollY));
       if (reduce) {
         shown = target;
         paint(shown);
@@ -128,6 +149,7 @@ export function Altimeter() {
     measure();
     target = shown = fractional(window.scrollY);
     paint(shown);
+    setActiveIdx(activeAt(window.scrollY));
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", remeasure);
@@ -295,8 +317,11 @@ export function Altimeter() {
                       {/* Toon label */}
                       <span style={layer(toon)}>
                         <span
-                          className={`block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all duration-300 [transition-timing-function:var(--ease-hud)] group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 ${
-                            isActive ? "opacity-100" : "translate-x-1 opacity-0"
+                          className={`block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all duration-300 [transition-timing-function:var(--ease-hud)] ${
+                            // The current camp is already named in the pill under the rail; don't repeat it here.
+                            isActive
+                              ? "invisible opacity-0"
+                              : "translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
                           }`}
                           style={{
                             fontFamily: FREDOKA,

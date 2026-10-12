@@ -16,7 +16,7 @@ export const camps: Camp[] = [
   { id: "base", name: "Ground Station", short: "Base", altitude: 1400, color: "var(--signal)" },
   { id: "telemetry", name: "About", short: "About", altitude: 2000, color: "var(--signal)" },
   { id: "route", name: "Experience", short: "Experience", altitude: 3500, color: "var(--sky)" },
-  { id: "summits", name: "Hackathons", short: "Hackathons", altitude: 5300, color: "var(--signal)" },
+  { id: "hackathons", name: "Hackathons", short: "Hackathons", altitude: 5300, color: "var(--signal)" },
   { id: "lab", name: "Research & ML", short: "Research", altitude: 6100, color: "var(--water)" },
   { id: "gate", name: "Checkpoint", short: "Checkpoint", altitude: 6400, color: "var(--dusk-glow)" },
   // Chapter 2 (unlocked by the gate): Warmer's world.

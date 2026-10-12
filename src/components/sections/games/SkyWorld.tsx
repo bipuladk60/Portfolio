@@ -95,7 +95,7 @@ export function SkyWorld({ children }: { children: ReactNode }) {
   return (
     <div ref={ref} className={`wr-world relative ${!inView || reduce ? "wr-paused" : ""}`}>
       {/* full-bleed backdrop (the section clips the overhang) */}
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-[100vw] -translate-x-1/2">
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 z-0 w-[100vw] -translate-x-1/2">
         <div
           className="absolute inset-x-0 bottom-0 top-0"
           style={{ background: `linear-gradient(to bottom, ${SKY_TOP}, ${SKY_BOTTOM})` }}
@@ -105,22 +105,23 @@ export function SkyWorld({ children }: { children: ReactNode }) {
           className="absolute right-[8%] top-[60px] h-[180px] w-[180px] rounded-full md:h-[260px] md:w-[260px]"
           style={{ background: "radial-gradient(circle, #fff6c9 0%, #ffe58a 32%, rgba(255,229,138,0.35) 52%, transparent 70%)" }}
         />
-        {/* drifting clouds, two depths */}
+        {/* drifting clouds, two depths. Below md the text column is the full width, so the mid-sky
+            clouds are hidden and the two big ones only peek in from the side gutters. */}
         <motion.div className="absolute inset-0" style={{ y: far }}>
-          <Cloud className="absolute left-[4%] top-[22%] w-[90px] opacity-90" dur={14} />
-          <Cloud className="absolute right-[30%] top-[14%] w-[70px] opacity-80" dur={18} />
-          <Cloud className="absolute left-[46%] top-[62%] w-[80px] opacity-80" dur={16} />
+          <Cloud className="absolute left-[4%] top-[22%] hidden w-[90px] opacity-90 md:block" dur={14} />
+          <Cloud className="absolute right-[30%] top-[14%] hidden w-[70px] opacity-80 md:block" dur={18} />
+          <Cloud className="absolute left-[46%] top-[62%] hidden w-[80px] opacity-80 md:block" dur={16} />
         </motion.div>
         <motion.div className="absolute inset-0" style={{ y: near }}>
-          <Cloud className="absolute left-[-2%] top-[52%] w-[140px]" dur={11} />
-          <Cloud className="absolute right-[2%] top-[38%] w-[150px]" dur={13} />
-          <Cloud className="absolute right-[22%] top-[80%] w-[110px]" dur={12} />
+          <Cloud className="absolute left-[-100px] top-[52%] w-[118px] md:left-[-2%] md:w-[140px]" dur={11} />
+          <Cloud className="absolute right-[-100px] top-[38%] w-[118px] md:right-[2%] md:w-[150px]" dur={13} />
+          <Cloud className="absolute right-[22%] top-[80%] hidden w-[110px] md:block" dur={12} />
         </motion.div>
         <div className="absolute inset-x-0 top-0">
           <CloudBank flip />
         </div>
       </div>
-      <div className="relative pb-12 pt-[72px] md:pb-16 md:pt-[96px]">{children}</div>
+      <div className="relative z-[1] pb-12 pt-[72px] md:pb-16 md:pt-[96px]">{children}</div>
     </div>
   );
 }

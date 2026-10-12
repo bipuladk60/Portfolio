@@ -191,7 +191,8 @@ export function ChapterTransition({ origin, onCovered, onDone }: Props) {
         animate={reduce ? undefined : { opacity: hold([0, 0, 1]), y: hold(["0%", "0%", "-66.667%"]) }}
         transition={{
           opacity: kf("easeOut", 0, 0.25, 0.95),
-          y: kf(EASE_IO, 0, 0.55, 2.0),
+          // lifts a touch earlier so the middle of the screen is already dawn-light when the caption arrives
+          y: kf(EASE_IO, 0, 0.45, 1.85),
         }}
       />
 
@@ -258,14 +259,16 @@ export function ChapterTransition({ origin, onCovered, onDone }: Props) {
             );
           })}
 
-          {/* one plain line that rides the motion */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center">
+          {/* one plain line that rides the motion. It waits until the sky behind it is light (~1.25 s)
+              and sits below the middle of the screen, out of the sun's climb toward the top-right corner
+              and between the drifting clouds. */}
+          <div className="pointer-events-none absolute inset-x-0 top-[60vh] flex justify-center px-6 text-center">
             <motion.p
               className="font-[family-name:var(--font-fredoka)] text-3xl font-semibold md:text-5xl"
               style={{ color: INK }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: hold([0, 0, 1, 1, 0]), y: hold([10, 10, 0, 0, -8]) }}
-              transition={kf("easeInOut", 0, 1.0, 1.35, 1.75, 2.1)}
+              transition={kf("easeInOut", 0, 1.25, 1.6, 2.05, 2.4)}
             >
               Nepal. Welcome to chapter two.
             </motion.p>

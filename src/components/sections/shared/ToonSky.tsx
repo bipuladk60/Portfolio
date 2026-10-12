@@ -71,7 +71,8 @@ export function ToonSky({ from, to, seed = 7, clouds = 4, children }: Props) {
       {placed.map((c, i) => (
         <ToonCloud
           key={i}
-          className="absolute"
+          // below md the text column spans the full width, so scattered clouds would land on copy
+          className="absolute hidden md:block"
           style={{ left: `${c.left}%`, top: `${c.top}%`, width: c.w, opacity: c.o }}
           dur={c.dur}
         />

@@ -158,18 +158,21 @@ export function Ridge({
                   className="group relative flex h-14 w-10 cursor-pointer items-end justify-center transition-opacity duration-300 sm:h-[72px] sm:w-12"
                   style={{ opacity: dim ? 0.22 : 1, filter: dim ? "grayscale(0.8)" : undefined }}
                 >
-                  {/* selection reticle */}
+                  {/* selection: a soft pool of light under the flag and a short underline, no box */}
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute -inset-x-1.5 -bottom-2 -top-1.5 border transition-all duration-300"
+                    className="pointer-events-none absolute -bottom-3 left-1/2 h-5 w-14 -translate-x-1/2 rounded-full transition-opacity duration-300"
                     style={{
-                      borderColor: active ? color : "transparent",
-                      boxShadow: active ? `0 0 24px -6px ${color}` : "none",
+                      background: `radial-gradient(closest-side, color-mix(in oklab, ${color} 45%, transparent), transparent)`,
+                      opacity: active ? 1 : 0,
                     }}
                   />
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute -inset-x-1.5 -bottom-2 -top-1.5 border border-transparent transition-colors duration-200 group-hover:border-line-hi"
+                    className={`pointer-events-none absolute -bottom-2 left-1/2 h-[2px] -translate-x-1/2 rounded-full transition-all duration-300 [transition-timing-function:var(--ease-hud)] ${
+                      active ? "w-6 opacity-100" : "w-3 opacity-0 group-hover:opacity-50"
+                    }`}
+                    style={{ background: active ? color : "var(--line-hi)" }}
                   />
                   {isWin ? (
                     <PlantedFlag
