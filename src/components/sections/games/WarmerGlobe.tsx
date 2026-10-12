@@ -5,7 +5,7 @@ import { useInView, useReducedMotion } from "motion/react";
 import { LAND_DOTS } from "../hero/geo";
 import { GREEN, INK, toonHeat } from "./toon";
 
-const N = 1500;
+const N = 3600;
 
 // Coarse 3-degree land cells, recovered from the hero map's shared land mask (equirectangular, 2 units per degree).
 const LAND = (() => {
@@ -141,7 +141,7 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
         if (z2 < 0) continue;
 
         let col = INK;
-        let alpha = land[i] ? 0.28 + 0.4 * z2 : 0.05 + 0.08 * z2;
+        let alpha = land[i] ? 0.75 + 0.25 * z2 : 0.04 + 0.06 * z2;
         let boost = 1;
         if (rvv && s.revealAmt > 0) {
           const d = Math.acos(Math.max(-1, Math.min(1, x * rvv[0] + y * rvv[1] + z * rvv[2]))) / Math.PI;
@@ -159,7 +159,7 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = col;
         ctx.beginPath();
-        ctx.arc(cx + x1 * R, cy - y2 * R, (0.6 + 1.0 * z2) * unit * boost, 0, Math.PI * 2);
+        ctx.arc(cx + x1 * R, cy - y2 * R, (land[i] ? 1.0 + 0.8 * z2 : 0.45 + 0.5 * z2) * unit * boost, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -174,6 +174,23 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
       ctx.beginPath();
       ctx.arc(cx, cy, R, 0, Math.PI * 2);
       ctx.stroke();
+
+      // sticker markers on every guessed country that faces us
+      for (const q of gs) {
+        const [qx, qy, qz] = toVec(q.lat, q.lon);
+        const qx1 = qx * cr + qz * sr;
+        const qz1 = -qx * sr + qz * cr;
+        const qy2 = qy * ct - qz1 * st;
+        const qz2 = qy * st + qz1 * ct;
+        if (qz2 <= 0.05) continue;
+        ctx.fillStyle = toonHeat(q.t, q.t === 0);
+        ctx.strokeStyle = INK;
+        ctx.lineWidth = 2.2 * unit;
+        ctx.beginPath();
+        ctx.arc(cx + qx1 * R, cy - qy2 * R, 7 * unit * (0.6 + 0.4 * qz2), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
 
       // ping on the latest guess
       const last = gs[gs.length - 1];
@@ -242,7 +259,7 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
   }, [inView, reduce]);
 
   return (
-    <div ref={wrap} aria-hidden className="relative mx-auto aspect-square w-full max-w-[400px]">
+    <div ref={wrap} aria-hidden className="relative mx-auto aspect-square w-full max-w-[220px] sm:max-w-[300px] lg:max-w-[340px]">
       <canvas ref={canvasRef} className="block h-full w-full" />
     </div>
   );

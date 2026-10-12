@@ -98,7 +98,7 @@ export function WarmerTeaser({ href }: { href: string }) {
   return (
     <div
       data-cursor-box=""
-      className="wr-sticker wr-wobble flex h-full flex-col p-5 transition-[background-color] duration-700 md:p-6"
+      className="wr-sticker wr-wobble p-4 transition-[background-color] duration-700 md:p-6"
       style={{ background: bleed ? `color-mix(in oklab, ${bleed} 16%, #ffffff)` : "#ffffff" }}
     >
       <div className="flex items-center justify-between gap-3">
@@ -106,11 +106,11 @@ export function WarmerTeaser({ href }: { href: string }) {
         <p className="text-xs font-bold opacity-70">{guesses.length} {guesses.length === 1 ? "guess" : "guesses"}</p>
       </div>
 
-      <div className="mt-3 flex flex-1 items-center">
+      <div className="mt-2">
         <WarmerGlobe guesses={globeGuesses} reveal={solved && target ? target : null} focus={solved && target ? target : lastGuess} />
       </div>
 
-      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-bold" aria-hidden>
+      <p className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-bold" aria-hidden>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-full border-2" style={{ background: YELLOW, borderColor: INK }} /> far
         </span>
@@ -122,9 +122,9 @@ export function WarmerTeaser({ href }: { href: string }) {
         </span>
       </p>
 
-      <fieldset className="mt-4">
-        <legend className="mb-2 text-sm font-bold">Which country is hidden? Distances in km.</legend>
-        <ul className="grid auto-rows-fr grid-cols-2 gap-2.5 sm:grid-cols-3">
+      <fieldset className="mt-3">
+        <legend className="mb-2 text-[13px] font-bold">Which country is hidden? Distances in km.</legend>
+        <ul className="grid auto-rows-fr grid-cols-3 gap-2">
           {round.choices.map((i) => {
             const c = POOL[i];
             const g = guesses.find((x) => x.name === c.name);
@@ -142,9 +142,9 @@ export function WarmerTeaser({ href }: { href: string }) {
                   }`}
                   style={{ background: color ?? "#ffffff" }}
                 >
-                  <span className="text-sm font-extrabold leading-tight">{c.name}</span>
+                  <span className="text-[13px] font-extrabold leading-tight sm:text-sm">{c.name}</span>
                   {g && (
-                    <span className="whitespace-nowrap text-[11px] font-bold leading-tight">
+                    <span className="whitespace-nowrap text-[10px] font-bold leading-tight sm:text-[11px]">
                       {heatWord(g.t, g.t === 0)}
                       {g.t > 0 && ` · ${roundKm(g.dist)}`}
                     </span>
@@ -156,7 +156,7 @@ export function WarmerTeaser({ href }: { href: string }) {
         </ul>
       </fieldset>
 
-      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3">
+      <div className="mt-3 flex min-h-10 flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-bold">
           {solved
             ? `Found it in ${guesses.length} ${guesses.length === 1 ? "guess" : "guesses"}!`

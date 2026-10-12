@@ -16,9 +16,8 @@ const TILTS = ["-1.5deg", "1deg", "-0.6deg"];
 
 export function Games() {
   const warmer = games[0];
-  // the last bullet (SEO + visitors) is told by the analytics sticker; the rest become feature stickers
+  // the last bullet (SEO + visitors) is covered by the analytics sticker; the rest become feature stickers
   const features = warmer.bullets.slice(0, -1);
-  const distribution = warmer.bullets[warmer.bullets.length - 1];
 
   return (
     <CampSection campId="games" className={`overflow-hidden ${fredoka.variable} ${nunito.variable}`}>
@@ -26,15 +25,15 @@ export function Games() {
       <SectionHeader
         campId="games"
         title="Game Room"
-        kicker="Step out of the console for a minute. This is Warmer, the game I build and run, and you can play a round right here."
       />
 
+      <div className="-mb-16 -mt-8 md:-mb-20 md:-mt-10">
       <SkyWorld>
-        <div className="grid items-start gap-5 lg:grid-cols-12 lg:gap-7">
+        <div className="grid items-start gap-4 lg:grid-cols-12 lg:gap-6">
           {/* left column: intro + analytics */}
-          <div className="flex flex-col gap-5 lg:col-span-7 lg:gap-6">
+          <div className="flex flex-col gap-4 lg:col-span-7 lg:gap-5">
             <Reveal>
-              <article data-cursor-box="" className="wr-sticker p-5 md:p-7">
+              <article data-cursor-box="" className="wr-sticker p-5 md:p-6">
                 <p className="wr-pill inline-flex items-center gap-2 bg-white px-3 py-1 text-xs font-extrabold uppercase tracking-wider">
                   <span className="relative inline-flex h-2.5 w-2.5">
                     <span className="led absolute inset-0 rounded-full" style={{ background: GREEN }} />
@@ -61,8 +60,8 @@ export function Games() {
                   </a>
                 </div>
                 <p className="mt-3 text-lg font-bold leading-snug md:text-xl">{warmer.tagline}</p>
-                <p className="mt-2 text-[15px] leading-relaxed opacity-85">{warmer.howItWorks}</p>
-                <ul className="mt-4 flex flex-col gap-2">
+                <p className="mt-1.5 text-[15px] leading-snug opacity-85">{warmer.howItWorks}</p>
+                <ul className="mt-3 flex flex-col gap-1.5">
                   {features.map((f, i) => (
                     <li
                       key={f}
@@ -73,7 +72,7 @@ export function Games() {
                     </li>
                   ))}
                 </ul>
-                <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Stack">
+                <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Stack">
                   {warmer.stack.map((s) => (
                     <li key={s} className="rounded-full border-2 px-2.5 py-0.5 text-xs font-extrabold" style={{ borderColor: INK }}>
                       {s}
@@ -83,16 +82,17 @@ export function Games() {
               </article>
             </Reveal>
             <Reveal delay={0.05}>
-              <WarmerStats footnote={distribution} />
+              <WarmerStats />
             </Reveal>
           </div>
 
           {/* right column: the mini round */}
-          <Reveal delay={0.08} className="lg:col-span-5 lg:self-stretch">
+          <Reveal delay={0.08} className="lg:col-span-5">
             <WarmerTeaser href={warmer.href} />
           </Reveal>
         </div>
       </SkyWorld>
+      </div>
     </CampSection>
   );
 }

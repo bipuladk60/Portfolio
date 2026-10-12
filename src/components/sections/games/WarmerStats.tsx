@@ -155,34 +155,14 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
             </div>
           ))}
         </dl>
-        <div className="mt-5 flex items-center gap-4">
-          <svg viewBox="0 0 160 56" aria-hidden className="h-14 w-36 shrink-0">
+        <div className="mt-4 flex items-center gap-4">
+          <svg viewBox="0 0 160 56" aria-hidden className="hidden h-14 w-36 shrink-0 sm:block">
             <path d="M4 50 C 30 50, 44 48, 62 42 S 96 30, 112 22 S 140 10, 156 8" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
             <path d="M146 4 l 11 4 l -8 8" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        {/* labels as HTML so they stay readable when the chart scales down */}
-        <motion.span
-          aria-hidden
-          className="wr-display pointer-events-none absolute whitespace-nowrap text-[13px] font-bold leading-none md:text-[15px]"
-          style={{
-            left: `${((xs[PEAK_I] - 76) / W) * 100}%`,
-            top: `${(ys[PEAK_I] / H) * 100}%`,
-            x: "-100%",
-            y: "-60%",
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: inView ? 1 : 0 }}
-          transition={{ delay: reduce ? 0 : 1.3 }}
-        >
-          Peak {A.peak.day} · {A.peak.visitors}
-        </motion.span>
-        <div aria-hidden className="mt-1 flex justify-between text-xs font-bold opacity-70">
-          <span>{A.dailyStart}</span>
-          <span>{A.dailyEnd}</span>
-        </div>
           <div className="min-w-0">
             <p className="text-sm font-bold leading-snug">{S.trend}</p>
-            <p className="mt-1 text-[11px] font-bold opacity-70">Curve is illustrative, not plotted data.</p>
+            <p className="mt-1 hidden text-[11px] font-bold opacity-70 sm:block">Curve is illustrative, not plotted data.</p>
           </div>
         </div>
       </div>
@@ -194,7 +174,7 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
         className={`[grid-area:1/1] ${tab === "traffic" ? "" : "invisible"}`}
         inert={tab !== "traffic"}
       >
-      <p className="mt-4 text-[11px] font-extrabold uppercase tracking-wide opacity-70">
+      <p className="mt-3 text-[11px] font-extrabold uppercase tracking-wide opacity-70">
         {A.source} · {A.period}
       </p>
       <div className="mt-3 grid grid-cols-2 gap-4">
@@ -202,7 +182,7 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
         <Stat label="Page views" value={A.pageViews} growth={A.pageViewsGrowth} start={inView} />
       </div>
 
-      <div className="relative mt-5">
+      <div className="relative mt-3">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           className="block h-auto w-full touch-pan-y overflow-visible"
@@ -274,6 +254,22 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
 
 
         </svg>
+        {/* labels as HTML so they stay readable when the chart scales down */}
+        <motion.span
+          aria-hidden
+          className="wr-display pointer-events-none absolute whitespace-nowrap text-[13px] font-bold leading-none md:text-[15px]"
+          style={{
+            left: `${((xs[PEAK_I] - 76) / W) * 100}%`,
+            top: `${(ys[PEAK_I] / H) * 100}%`,
+            x: "-100%",
+            y: "-60%",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: inView ? 1 : 0 }}
+          transition={{ delay: reduce ? 0 : 1.3 }}
+        >
+          Peak {A.peak.day} · {A.peak.visitors}
+        </motion.span>
 
         {active !== null && (
           <div
@@ -288,6 +284,10 @@ export function WarmerStats({ footnote }: { footnote?: string }) {
         )}
       </div>
 
+      <div aria-hidden className="mt-1 flex justify-between text-xs font-bold opacity-70">
+          <span>{A.dailyStart}</span>
+          <span>{A.dailyEnd}</span>
+      </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <label htmlFor={rangeId} className="flex min-w-0 flex-1 items-center gap-3 text-xs font-bold">
           <span className="shrink-0">Scrub days</span>

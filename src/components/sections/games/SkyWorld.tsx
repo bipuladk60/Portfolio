@@ -123,7 +123,7 @@ export function SkyWorld({ children }: { children: ReactNode }) {
           <CloudBank />
         </div>
       </div>
-      <div className="relative py-[64px] md:py-[88px]">{children}</div>
+      <div className="relative pb-[60px] pt-[56px] md:pb-[72px] md:pt-[64px]">{children}</div>
     </div>
   );
 }
