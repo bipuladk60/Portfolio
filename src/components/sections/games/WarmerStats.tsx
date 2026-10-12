@@ -6,6 +6,7 @@ import { games } from "@/data/content";
 import { GREEN, INK, ORANGE, RED, YELLOW } from "./toon";
 
 const A = games[0].analytics;
+const S = games[0].search;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const YEAR = 2026; // analytics window Sep 12 - Oct 11, 2026 (see content.ts)
 
@@ -79,6 +80,8 @@ export function WarmerStats() {
   const [active, setActive] = useState<number | null>(null);
   const gradId = useId().replace(/[^a-zA-Z0-9]/g, "");
   const rangeId = useId();
+  const tabBase = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const [tab, setTab] = useState<"traffic" | "search">("traffic");
 
   const onPointer = (e: React.PointerEvent<SVGSVGElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -94,14 +97,73 @@ export function WarmerStats() {
 
   return (
     <div ref={ref} data-cursor-box="" className="wr-sticker p-5 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="wr-display text-lg font-semibold">How it&apos;s doing</p>
-        <p className="wr-pill bg-white px-3 py-0.5 text-[11px] font-extrabold">
-          {A.period} · {A.source}
-        </p>
+        <div role="tablist" aria-label="Warmer analytics" className="wr-pill inline-flex bg-white p-1">
+          {(["traffic", "search"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="tab"
+              id={`${tabBase}-${t}-tab`}
+              aria-selected={tab === t}
+              aria-controls={`${tabBase}-${t}`}
+              tabIndex={tab === t ? 0 : -1}
+              onClick={() => setTab(t)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                  const next = tab === "traffic" ? "search" : "traffic";
+                  setTab(next);
+                  document.getElementById(`${tabBase}-${next}-tab`)?.focus();
+                }
+              }}
+              className="min-h-8 cursor-pointer rounded-full px-3 text-xs font-extrabold transition-colors"
+              style={{ background: tab === t ? YELLOW : "transparent" }}
+            >
+              {t === "traffic" ? "Traffic" : "Found on Google"}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
+      <div role="tabpanel" id={`${tabBase}-search`} aria-labelledby={`${tabBase}-search-tab`} hidden={tab !== "search"}>
+        <p className="mt-4 text-[11px] font-extrabold uppercase tracking-wide opacity-70">
+          {S.source} · {S.period} · {S.scope}
+        </p>
+        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: "Clicks", value: S.clicks },
+            { label: "Impressions", value: S.impressions },
+            { label: "Avg. position", value: S.avgPosition },
+            { label: "CTR", value: S.ctr },
+          ].map((m, i) => (
+            <div
+              key={m.label}
+              className="wr-pill !rounded-2xl px-3 py-2.5"
+              style={{ background: [YELLOW, "#a8d8ff", GREEN, "#ffffff"][i] }}
+            >
+              <dt className="text-[11px] font-extrabold uppercase tracking-wide opacity-75">{m.label}</dt>
+              <dd className="wr-display mt-0.5 text-3xl font-bold leading-none">{m.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-5 flex items-center gap-4">
+          <svg viewBox="0 0 160 56" aria-hidden className="h-14 w-36 shrink-0">
+            <path d="M4 50 C 30 50, 44 48, 62 42 S 96 30, 112 22 S 140 10, 156 8" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+            <path d="M146 4 l 11 4 l -8 8" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="min-w-0">
+            <p className="text-sm font-bold leading-snug">{S.trend}</p>
+            <p className="mt-1 text-[11px] font-bold opacity-70">Curve is illustrative, not plotted data.</p>
+          </div>
+        </div>
+      </div>
+
+      <div role="tabpanel" id={`${tabBase}-traffic`} aria-labelledby={`${tabBase}-traffic-tab`} hidden={tab !== "traffic"}>
+      <p className="mt-4 text-[11px] font-extrabold uppercase tracking-wide opacity-70">
+        {A.source} · {A.period}
+      </p>
+      <div className="mt-3 grid grid-cols-2 gap-4">
         <Stat label="Visitors" value={A.visitors} growth={A.visitorsGrowth} start={inView} />
         <Stat label="Page views" value={A.pageViews} growth={A.pageViewsGrowth} start={inView} />
       </div>
@@ -215,6 +277,7 @@ export function WarmerStats() {
           />
         </label>
         <p className="text-[11px] font-bold opacity-70">Daily values approximate</p>
+      </div>
       </div>
     </div>
   );

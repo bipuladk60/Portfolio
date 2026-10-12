@@ -60,7 +60,6 @@ export function Games() {
                   Play at warmergames.com
                   <span aria-hidden>→</span>
                 </a>
-                <span className="text-sm font-bold opacity-70">Free · no sign-up · new country daily</span>
               </div>
             </article>
           </Reveal>
