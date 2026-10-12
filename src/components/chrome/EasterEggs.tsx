@@ -73,7 +73,7 @@ export function EasterEggs() {
       if (detail !== 2) return;
       if (consumeChapterSkip()) return;
       unlock("nepal", {
-        toastDelay: 1200,
+        toastDelay: 2000,
         toastDuration: 2200,
         toastTitle: "Checkpoint cleared",
       });

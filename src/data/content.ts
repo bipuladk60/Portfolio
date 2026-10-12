@@ -74,9 +74,9 @@ export const experience: Experience[] = [
     bullets: [
       "Maintained the center's two WordPress sites and provided day-to-day IT support for staff.",
       "Cleaned and sanitized census datasets for the center's research team.",
-      "Contributed to the center's PFAS research study and presented the findings.",
+      "Contributed to the center's PFAS research study and presented it at the USM undergraduate research symposium.",
       "Proposed and built MHD Connect, the conference app for Mississippi Health Disparities 2026, used by 400+ attendees.",
-      "Represented the center at community outreach events.",
+      "Supported the center's community outreach events.",
     ],
     stack: ["Next.js", "TypeScript", "Firebase", "WordPress", "Python", "pandas"],
     concurrent: true,
@@ -89,7 +89,7 @@ export const experience: Experience[] = [
     where: "Remote",
     summary: "Contributed to an AI product across backend services and the React frontend.",
     bullets: [
-      "Developed a backend microservice with FastAPI and RabbitMQ for asynchronous, event-driven processing.",
+      "Contributed to a backend microservice with FastAPI and RabbitMQ for asynchronous, event-driven processing.",
       "Built React and TypeScript interfaces from Figma designs, integrating Auth0 authentication and Azure messaging and storage.",
     ],
     stack: ["FastAPI", "RabbitMQ", "React", "TypeScript", "Auth0", "Azure"],
