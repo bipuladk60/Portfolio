@@ -101,6 +101,47 @@ body {
   100% { transform: translate(0, 0); }
 }
 
+/* Rev 7 surface: ONE level of soft tinted containment. Set --accent (any CSS colour) on the element
+   or a parent to tint the fill, hairline and corner ticks. Pair with .surface-lift for a hover lift. */
+.surface {
+  position: relative;
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in oklab, var(--accent, var(--line-hi)) 9%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in oklab, var(--panel-2) 82%, transparent), color-mix(in oklab, var(--panel) 72%, transparent));
+  border: 1px solid color-mix(in oklab, var(--accent, var(--line-hi)) 22%, var(--line));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--text) 5%, transparent),
+    0 28px 60px -36px rgba(0, 0, 0, 0.85);
+}
+.surface-lift {
+  transition:
+    transform 320ms var(--ease-hud),
+    border-color 320ms var(--ease-hud),
+    box-shadow 320ms var(--ease-hud);
+}
+.surface-lift:hover,
+.surface-lift:focus-within {
+  border-color: color-mix(in oklab, var(--accent, var(--line-hi)) 50%, var(--line));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--text) 7%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--accent, var(--line-hi)) 10%, transparent),
+    0 30px 70px -34px color-mix(in oklab, var(--accent, var(--line-hi)) 38%, transparent);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .surface-lift:hover { transform: translateY(-3px); }
+}
+/* Corner ticks drawn by <Surface corners>: they stretch a little on hover. */
+.surface-tick {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--accent, var(--line-hi));
+  opacity: 0.85;
+  pointer-events: none;
+  transition: width 320ms var(--ease-hud), height 320ms var(--ease-hud), opacity 320ms;
+}
+.surface-lift:hover .surface-tick { width: 16px; height: 16px; opacity: 1; }
+
 /* Chapter gate: chapter-2 content is hidden only once JS has marked the page as chapter 1. */
 html[data-chapter="1"] [data-chapter2-root] {
   display: none;

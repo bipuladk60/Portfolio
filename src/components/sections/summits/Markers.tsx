@@ -3,9 +3,10 @@
 import { motion } from "motion/react";
 import { EASE } from "./motion";
 
-const FLAG_A = "M7 5 C14 1.5 21 8.5 31 5 L31 18 C21 21.5 14 14.5 7 18 Z";
-const FLAG_B = "M7 5 C14 8.5 21 1.5 31 5 L31 18 C21 14.5 14 21.5 7 18 Z";
-const FLAG_C = "M7 5 C14 3 21 6 31 4 L31 17 C21 19 14 16 7 18 Z";
+// Gentle cloth: small amplitude, slow period, so the four flags read as wind, not as a loop.
+const FLAG_A = "M7 5 C14 3 21 7 31 5 L31 18 C21 20 14 16 7 18 Z";
+const FLAG_B = "M7 5 C14 7 21 3 31 5.5 L31 18.5 C21 16 14 20 7 18 Z";
+const FLAG_C = "M7 5 C14 4 21 6 31 4.5 L31 17.5 C21 19 14 17 7 18 Z";
 
 /**
  * A gold flag for a win. The pole rises, then the flag unfurls from the pole and flutters
@@ -61,7 +62,7 @@ export function PlantedFlag({
           {!reduce && (
             <animate
               attributeName="d"
-              dur="1.8s"
+              dur="3.2s"
               repeatCount="indefinite"
               values={`${FLAG_A};${FLAG_C};${FLAG_B};${FLAG_A}`}
               calcMode="spline"
@@ -70,8 +71,8 @@ export function PlantedFlag({
             />
           )}
         </path>
-        {/* embroidered stitch along the flag */}
-        <path d="M11 11.5 L26 11.5" stroke="var(--bg)" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
+        {/* a soft fold shading the cloth near the pole */}
+        <path d="M7 5 L13 4.6 L13 17.4 L7 18 Z" fill="var(--bg)" opacity="0.18" />
       </motion.g>
       <circle cx="7" cy="3" r="1.6" fill="var(--signal)" />
     </svg>
@@ -101,8 +102,8 @@ export function BaseBeacon({
         {/* pulse ring: a slow sonar ping */}
         {!reduce && (
           <circle cx="20" cy="50" r="6" fill="none" stroke="var(--sky)" strokeWidth="1">
-            <animate attributeName="r" values="5;15" dur="2.4s" repeatCount="indefinite" />
-            <animate attributeName="opacity" values="0.8;0" dur="2.4s" repeatCount="indefinite" />
+            <animate attributeName="r" values="5;14" dur="3.4s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.6;0" dur="3.4s" repeatCount="indefinite" />
           </circle>
         )}
         {/* tent / base marker */}
@@ -112,6 +113,21 @@ export function BaseBeacon({
         <path d="M14 30 L20 36 L26 30" fill="none" stroke="var(--sky)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M14 23 L20 29 L26 23" fill="none" stroke="var(--sky)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
       </motion.g>
+    </svg>
+  );
+}
+
+/** Small static glyphs for the cards: a flag for a win, a tent for an event the team competed in. */
+export function ResultGlyph({ win, className = "" }: { win: boolean; className?: string }) {
+  return win ? (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
+      <line x1="4" y1="15" x2="4" y2="1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M4 2.2 C7 1 9.5 3.6 13.5 2.4 L13.5 8 C9.5 9.2 7 6.6 4 7.8 Z" fill="currentColor" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
+      <path d="M2 14.5 L8 3 L14 14.5 Z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M8 3 L8 14.5" stroke="currentColor" strokeWidth="1" opacity="0.6" />
     </svg>
   );
 }

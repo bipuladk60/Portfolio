@@ -148,3 +148,7 @@ stamps, quiet cursor, plain section names, facts only from content.ts), but brin
   hackathons, Warmer's daily sparkline for users, a timeline with year ticks) rather than generic stamps.
 - Motion: purposeful entry choreography (draw, stagger, count-up), hover micro-interactions; nothing loops loudly.
 - Density: no empty bands taller than ~25% of the viewport inside a section on desktop.
+- Rev 7 primitives (`@/components/hud`): `Surface` (one tinted surface; `accent`, `corners`, `lift`) plus `Ticks` and
+  `Glow` in `Surface.tsx`; `.surface` / `.surface-lift` / `.surface-tick` in `globals.css`; `Assemble` + `AssembleItem`
+  (clip-draw then content rise, once in view); `Ridgeline` (layered Himalayan silhouettes with scroll + pointer parallax);
+  `SectionHeader` takes optional `glow` and `className`.

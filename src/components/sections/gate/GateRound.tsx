@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Panel } from "@/components/hud/Panel";
 import { SectionHeader } from "@/components/hud/SectionHeader";
 import { countries, NEPAL, type Country } from "@/data/countryList";
 import { relockGate, unlockChapterTwo, useChapter } from "@/lib/chapter";
@@ -16,6 +15,20 @@ import { bearing, compassWord, gateGuesses, HALF_EARTH_KM, km, rememberGuesses, 
 type Guess = { code: string; name: string; lat: number; lon: number; dist: number; t: number; deg: number };
 
 const GLOW = "var(--dusk-glow)";
+
+/** A few faint stars over the round (deterministic, so server and client agree). */
+const STARS = Array.from({ length: 22 }, (_, i) => ({ x: (i * 37.3 + 11) % 100, y: ((i * 53.7) % 45) + 3, o: 0.2 + ((i * 7) % 5) / 12 }));
+
+// The threshold: dusk light breathing slowly behind a low ridge at the bottom edge, hinting at the
+// day sky of chapter 2. Static under reduced motion.
+const GATE_ATMOS_CSS = `
+@keyframes gate-breathe { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+.gate-dusk { animation: gate-breathe 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .gate-dusk { animation: none; } }
+`;
+const GATE_RIDGE_LINE =
+  "M0 48 L60 40 L110 46 L170 30 L215 38 L260 22 L300 34 L350 28 L410 42 L470 26 L520 12 L560 26 L610 20 L670 36 L720 30 L780 40 L840 24 L900 34 L960 30 L1000 40";
+const GATE_RIDGE = `${GATE_RIDGE_LINE} L1000 70 L0 70 Z`;
 const norm = (s: string) =>
   s
     .toLowerCase()
@@ -208,10 +221,52 @@ export function GateRound() {
           title="Checkpoint"
           kicker="Find the country to continue. One round of Warmer stands between you and the next chapter."
         />
-        <Panel label="Warmer round · find the hidden country" accent={GLOW} className="p-4 md:p-7">
-          <div className="grid items-start gap-6 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:gap-10">
+        <style>{GATE_ATMOS_CSS}</style>
+        <div
+          className="relative overflow-hidden border px-4 pb-16 pt-5 md:px-8 md:pb-24 md:pt-8"
+          style={{
+            borderColor: "color-mix(in oklab, var(--dusk-glow) 22%, var(--line))",
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--panel) 75%, transparent) 0%, color-mix(in oklab, var(--panel) 85%, var(--dusk)) 55%, color-mix(in oklab, var(--dusk) 85%, var(--panel)) 100%)",
+          }}
+        >
+          {/* atmosphere: faint stars up top, dusk light rising behind a low ridge at the bottom edge */}
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            {STARS.map((st, i) => (
+              <span
+                key={i}
+                className="absolute h-px w-px rounded-full bg-text"
+                style={{ left: `${st.x}%`, top: `${st.y}%`, opacity: st.o }}
+              />
+            ))}
+            <div
+              className="gate-dusk absolute inset-x-0 bottom-0 h-[70%]"
+              style={{
+                background:
+                  "radial-gradient(ellipse 65% 70% at 50% 100%, color-mix(in oklab, var(--dusk-glow) 26%, transparent), color-mix(in oklab, var(--dusk-glow) 6%, transparent) 55%, transparent 80%)",
+              }}
+            />
+            <svg viewBox="0 0 1000 70" preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-12 w-full md:h-16">
+              <path d={GATE_RIDGE} fill="var(--bg)" opacity="0.92" />
+              <path
+                d={GATE_RIDGE_LINE}
+                fill="none"
+                stroke="var(--dusk-glow)"
+                strokeOpacity="0.45"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+            <span className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2" style={{ borderColor: GLOW }} />
+            <span className="absolute right-0 top-0 h-3 w-3 border-r-2 border-t-2" style={{ borderColor: GLOW }} />
+          </div>
+
+          <div className="relative grid items-start gap-6 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:gap-10">
             <div ref={globeRef} className="order-2 md:order-1">
-              <div className="mx-auto w-[160px] md:w-auto">
+              <div
+                className="mx-auto w-[160px] md:w-auto"
+                style={{ background: "radial-gradient(closest-side, color-mix(in oklab, var(--dusk-glow) 10%, transparent) 70%, transparent)" }}
+              >
                 <HudGlobe guesses={globeGuesses} focus={latest ? { lat: latest.lat, lon: latest.lon } : null} bloom={solved ? NEPAL : null} />
               </div>
               <div className="mx-auto mt-3 hidden max-w-[380px] items-center gap-3 md:flex" aria-hidden>
@@ -226,6 +281,11 @@ export function GateRound() {
                 Type a country
               </label>
               <div className="relative mt-2">
+                <div className="flex items-center gap-3 border-b-2 border-line-hi transition-[border-color,box-shadow] duration-300 focus-within:border-[var(--dusk-glow)] focus-within:shadow-[0_10px_18px_-14px_var(--dusk-glow)]">
+                <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-dim" aria-hidden>
+                  <circle cx="7" cy="7" r="4.8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M10.6 10.6 L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
                 <input
                   ref={inputRef}
                   id={`${listId}-input`}
@@ -248,8 +308,11 @@ export function GateRound() {
                   onFocus={focusInput}
                   onBlur={() => window.setTimeout(() => setOpen(false), 120)}
                   onKeyDown={onKeyDown}
-                  className="w-full border border-line-hi bg-bg/80 px-4 py-3 font-mono text-base text-text outline-none placeholder:text-dim/60 focus:border-[var(--dusk-glow)]"
+                  className="w-full bg-transparent py-3 pr-2 font-mono text-base text-text outline-none placeholder:text-dim/60 md:text-lg"
+                  // focus shows as the underline turning dusk-orange (focus-within above), not a second box
+                  style={{ outline: "none" }}
                 />
+                </div>
                 {expanded && (
                   <ul
                     id={listId}
@@ -283,7 +346,10 @@ export function GateRound() {
               </div>
 
               {/* guesses, closest first (like Warmer); the newest is highlighted */}
-              <ol className="mt-4 space-y-1.5" aria-label="Your guesses, closest first">
+              <ol
+                className={`mt-5 divide-y divide-line/80 ${guesses.length ? "border-y border-line/80" : ""}`}
+                aria-label="Your guesses, closest first"
+              >
                 <AnimatePresence initial={false}>
                   {[...guesses].sort((a, b) => a.dist - b.dist).map((g) => {
                     const found = g.t === 0;
@@ -297,14 +363,13 @@ export function GateRound() {
                         initial={{ opacity: 0, y: found ? 0 : -8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: reduce ? 0 : found ? 0.2 : 0.3 }}
-                        className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-3 border px-3 py-2 font-mono text-[12px]"
+                        className="relative grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 py-2.5 pl-4 pr-1 font-mono text-[12px] sm:gap-3"
                         layout={!reduce && !solved}
                         style={{
-                          borderColor: isNew ? col : `color-mix(in oklab, ${col} 45%, transparent)`,
-                          background: `color-mix(in oklab, ${col} ${isNew ? 16 : 8}%, transparent)`,
-                          boxShadow: isNew ? `0 0 0 1px ${col}` : undefined,
+                          background: isNew ? `linear-gradient(90deg, color-mix(in oklab, ${col} 16%, transparent), transparent 85%)` : undefined,
                         }}
                       >
+                        <span aria-hidden className="absolute bottom-2 left-0 top-2 w-[3px] rounded-full" style={{ background: col }} />
                         <span className="flex min-w-0 items-center gap-2">
                           <span className="truncate font-sans text-sm text-text">{g.name}</span>
                           {isNew && guesses.length > 1 && (
@@ -314,7 +379,10 @@ export function GateRound() {
                           )}
                         </span>
                         <span className="tabular-nums text-dim">{found ? "0 km" : `${roundKm(g.dist)} km`}</span>
-                        <span className="w-14 text-right uppercase tracking-[0.1em]" style={{ color: col }}>
+                        <span
+                          className="min-w-14 rounded-full px-2 py-0.5 text-center text-[11px] uppercase tracking-[0.1em]"
+                          style={{ color: col, background: `color-mix(in oklab, ${col} 16%, transparent)` }}
+                        >
                           {heatWord(g.t, found)}
                         </span>
                         <span
@@ -344,7 +412,7 @@ export function GateRound() {
                     <button
                       type="button"
                       onClick={reveal}
-                      className="min-h-9 cursor-pointer border border-[var(--dusk-glow)] px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--dusk-glow)] hover:bg-[var(--dusk-glow)] hover:text-bg"
+                      className="min-h-9 cursor-pointer rounded-full bg-[color-mix(in_oklab,var(--dusk-glow)_16%,transparent)] px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--dusk-glow)] transition-colors duration-300 hover:bg-[var(--dusk-glow)] hover:text-bg"
                     >
                       Reveal it
                     </button>
@@ -362,7 +430,7 @@ export function GateRound() {
               </div>
             </div>
           </div>
-        </Panel>
+        </div>
         {lift && !solved && <div aria-hidden className="h-[60vh] md:hidden" />}
       </div>
 

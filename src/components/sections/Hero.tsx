@@ -1,4 +1,6 @@
 import { CampSection } from "@/components/hud/SectionHeader";
+import { Glow, Surface } from "@/components/hud/Surface";
+import { Ridgeline } from "@/components/hud/Ridgeline";
 import { profile } from "@/data/content";
 import { HeroName } from "./hero/HeroName";
 import { RouteMap } from "./hero/RouteMap";
@@ -19,14 +21,20 @@ function Arrow() {
   );
 }
 
-/** Camp 00, Ground Station. Full-viewport, deliberately calm: name, live clocks, Nepal -> Mississippi route telemetry. */
+/**
+ * Camp 00, Ground Station. Full-viewport and calm, but with depth: an amber glow behind the name,
+ * layered Himalayan ridges along the bottom (scroll + pointer parallax), and the route map with its
+ * live clocks as one instrument card.
+ */
 export function Hero() {
   return (
     <CampSection campId="base" className="min-h-svh overflow-hidden py-0!">
-      <div className="relative z-10 flex min-h-svh flex-col pb-32 pt-24 md:pb-32 md:pt-28">
+      <Ridgeline className="inset-x-0 bottom-0 h-[clamp(150px,30vh,300px)]" />
+      <div className="relative z-10 flex min-h-svh flex-col pb-36 pt-24 md:pb-40 md:pt-28">
         <div className="grid flex-1 items-center gap-14 lg:grid-cols-12 lg:gap-12">
           {/* Identity */}
-          <div className="min-w-0 lg:col-span-7">
+          <div className="relative min-w-0 lg:col-span-7">
+            <Glow color="var(--signal)" strength={13} className="-left-40 -top-24 h-[34rem] w-[50rem] max-w-none" />
             <Reveal delay={0.25} className="mb-5 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-signal">
               <span aria-hidden className="h-px w-10 bg-signal" />
               {profile.role}
@@ -66,18 +74,24 @@ export function Hero() {
             </Reveal>
           </div>
 
-          {/* Route telemetry */}
-          <div className="min-w-0 lg:col-span-5">
+          {/* Route telemetry: one instrument card (map + live clocks) */}
+          <div className="relative min-w-0 lg:col-span-5">
+            <Glow color="var(--sky)" strength={9} className="-right-24 -top-16 h-[26rem] w-[34rem] max-w-none" />
             <Reveal delay={0.55} y={18}>
-              <figure className="min-w-0">
-                <RouteMap usaPath={USA_PATH} nepalPath={NEPAL_PATH} usaBox={USA_BBOX} nepalBox={NEPAL_BBOX} />
-                <figcaption className="mt-3 font-mono text-[11px] tracking-[0.08em] text-dim">
-                  Nepal <span className="text-signal">→</span> Mississippi · {ARC_KM.toLocaleString("en-US")} km great circle
+              <Surface as="figure" accent="var(--signal)" corners className="min-w-0">
+                <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line/70 px-4 py-3">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-text">
+                    Nepal <span className="text-signal">→</span> Mississippi
+                  </span>
+                  <span className="font-mono text-[10px] tracking-[0.08em] text-dim">
+                    {ARC_KM.toLocaleString("en-US")} km great circle
+                  </span>
                 </figcaption>
-              </figure>
-              <div className="mt-8">
-                <DualClock />
-              </div>
+                <RouteMap framed={false} usaPath={USA_PATH} nepalPath={NEPAL_PATH} usaBox={USA_BBOX} nepalBox={NEPAL_BBOX} />
+                <div className="border-t border-line/70 px-4 pb-4 pt-3.5">
+                  <DualClock />
+                </div>
+              </Surface>
             </Reveal>
           </div>
         </div>

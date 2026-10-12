@@ -213,8 +213,12 @@ export function MusicRnn() {
             type="button"
             onClick={toggleSound}
             aria-pressed={sound}
-            className="cursor-pointer border border-line-hi px-2.5 py-1.5 transition-colors hover:border-text hover:text-text aria-pressed:border-water aria-pressed:text-water"
+            className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-full bg-line/60 px-3 py-1.5 transition-colors duration-300 hover:bg-line hover:text-text aria-pressed:bg-water/15 aria-pressed:text-water"
           >
+            <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" aria-hidden>
+              <path d="M1.5 4.5h2l3-2.5v8l-3-2.5h-2z" fill="currentColor" />
+              {sound && <path d="M8.5 4a3 3 0 0 1 0 4M9.8 2.6a5 5 0 0 1 0 6.8" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />}
+            </svg>
             {sound ? "Sound on" : "Sound off"}
           </button>
         </div>

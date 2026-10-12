@@ -1,23 +1,29 @@
 import { campById, camps, formatAltitude } from "@/data/camps";
 import { DecodeText } from "./DecodeText";
+import { Glow } from "./Surface";
 
 type SectionHeaderProps = {
   campId: string;
   /** Defaults to the camp's plain name from camps.ts (About, Experience, Hackathons...). */
   title?: string;
   kicker?: string;
+  /** Rev 7: a soft glow in the camp colour behind the title. Off by default. */
+  glow?: boolean;
+  /** Override the bottom margin (default "mb-12 md:mb-16"). */
+  className?: string;
 };
 
 /**
  * Standard chapter-1 section opener. A quiet strip runs across the top: the camp number, the altitude
  * and the climb from the previous camp. Then the title and an optional line of copy.
  */
-export function SectionHeader({ campId, title, kicker }: SectionHeaderProps) {
+export function SectionHeader({ campId, title, kicker, glow = false, className = "mb-12 md:mb-16" }: SectionHeaderProps) {
   const camp = campById(campId);
   const i = camps.findIndex((c) => c.id === camp.id);
   const climb = i > 0 ? camp.altitude - camps[i - 1].altitude : 0;
   return (
-    <header className="mb-12 md:mb-16">
+    <header className={`relative ${className}`}>
+      {glow && <Glow color={camp.color} strength={14} className="-top-24 left-0 h-72 w-full max-w-[40rem] md:-left-24" />}
       <div className="hud-label flex items-center gap-3">
         <span style={{ color: camp.color }}>{String(i).padStart(2, "0")}</span>
         <span aria-hidden className="h-px w-6" style={{ background: camp.color }} />
