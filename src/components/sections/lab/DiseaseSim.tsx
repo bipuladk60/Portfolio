@@ -331,7 +331,15 @@ export function DiseaseSim() {
 
   return (
     <div ref={rootRef} className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_200px]">
-      <div className="relative aspect-square w-full bg-bg/70">
+      {/* the field: no inner box, just a dark pool that fades out and four faint wall ticks */}
+      <div
+        className="relative aspect-square w-full"
+        style={{ background: "radial-gradient(closest-side, color-mix(in oklab, var(--bg) 80%, transparent) 70%, transparent)" }}
+      >
+        <span aria-hidden className="pointer-events-none absolute left-0 top-0 h-3 w-3 border-l border-t border-line-hi" />
+        <span aria-hidden className="pointer-events-none absolute right-0 top-0 h-3 w-3 border-r border-t border-line-hi" />
+        <span aria-hidden className="pointer-events-none absolute bottom-0 left-0 h-3 w-3 border-b border-l border-line-hi" />
+        <span aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-3 w-3 border-b border-r border-line-hi" />
         <canvas
           ref={fieldRef}
           className="absolute inset-0 h-full w-full"
@@ -360,7 +368,7 @@ export function DiseaseSim() {
         </dl>
 
         <div>
-          <canvas ref={chartRef} aria-hidden className="block h-16 w-full border-b border-line bg-panel/60" />
+          <canvas ref={chartRef} aria-hidden className="block h-16 w-full border-b border-line-hi" />
           <div className="mt-1 flex justify-between font-mono text-[10px] text-dim" aria-hidden>
             <span>day 0</span>
             <span>{RUN_DAYS}</span>
@@ -374,8 +382,11 @@ export function DiseaseSim() {
           <button
             type="button"
             onClick={onPlay}
-            className="flex-1 cursor-pointer border border-water/60 px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] text-water transition-colors hover:bg-water hover:text-bg"
+            className="inline-flex min-h-9 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-water/15 px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] text-water transition-[background-color,color,transform] duration-300 hover:bg-water hover:text-bg active:scale-[0.97]"
           >
+            <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" aria-hidden>
+              {playing ? <path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" fill="currentColor" /> : <path d="M3 1.5 L10.5 6 L3 10.5 Z" fill="currentColor" />}
+            </svg>
             {playing ? "Pause" : stats.done ? "Run again" : "Play"}
           </button>
           <button
@@ -384,14 +395,14 @@ export function DiseaseSim() {
               touchedRef.current = true;
               restart(population, initial, true);
             }}
-            className="flex-1 cursor-pointer border border-line-hi px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] text-dim transition-colors hover:border-text hover:text-text"
+            className="inline-flex min-h-9 flex-1 cursor-pointer items-center justify-center rounded-full px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] text-dim transition-[background-color,color,transform] duration-300 hover:bg-line hover:text-text active:scale-[0.97]"
           >
             Restart
           </button>
         </div>
 
         <fieldset className="space-y-3">
-          <legend className="hud-label mb-2">Try it</legend>
+          <legend className="hud-label mb-2 w-full border-t border-line pt-4">Try it</legend>
           <Slider
             label="Population"
             def={P.population}

@@ -29,6 +29,8 @@ export type RidgeMarker = {
   peakY: number;
   /** dashed unclimbed route (participations only) */
   route?: string;
+  /** snow cap under a win summit; clipped to the ridge so its top follows the rock line */
+  cap?: string;
 };
 
 export function buildRidge(items: Hackathon[]) {
@@ -51,7 +53,22 @@ export function buildRidge(items: Hackathon[]) {
     if (i < n - 1) pts.push({ x: x + step * 0.5, y: 262 + ((i * 53) % 29) });
 
     if (h.result === "win") {
-      markers.push({ id: h.id, index: i, result: h.result, x, y: peakY, peakX: x, peakY });
+      // a ragged snow line a little below the summit; everything above it is clipped to the ridge
+      const w = step * 0.32;
+      const d = 30;
+      const cap = toPath([
+        { x: x - w, y: peakY - 30 },
+        { x: x + w, y: peakY - 30 },
+        { x: x + w, y: peakY + d * 1.05 },
+        { x: x + w * 0.55, y: peakY + d * 0.7 },
+        { x: x + w * 0.3, y: peakY + d * 1.1 },
+        { x: x + w * 0.08, y: peakY + d * 0.62 },
+        { x: x - w * 0.12, y: peakY + d * 0.95 },
+        { x: x - w * 0.34, y: peakY + d * 0.58 },
+        { x: x - w * 0.6, y: peakY + d * 1.0 },
+        { x: x - w, y: peakY + d * 0.8 },
+      ]) + " Z";
+      markers.push({ id: h.id, index: i, result: h.result, x, y: peakY, peakX: x, peakY, cap });
     } else {
       // base marker partway up the left face; the unclimbed route continues to the summit
       const t = 0.55;

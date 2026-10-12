@@ -27,14 +27,20 @@ dim `#8A97A6`, signal `#F2B418` (amber/wins), sky `#4C8DFF` (participations/link
 (projects), water `#34C98A` (research/GO), air `#EDEDE6` (contact), dusk `#2A1A14`, dusk-glow `#FF9A3C`.
 Tailwind classes: `bg-bg bg-panel text-text text-dim text-signal border-line` etc.
 
-Fonts: `font-display` (Chakra Petch 500-700) headings/HUD; `font-sans` (IBM Plex Sans) body;
-`font-mono` (JetBrains Mono) telemetry and labels. `.hud-label` = 11px mono uppercase tracked label.
+Fonts (chapter 1, set in `layout.tsx`): `font-display` (Saira Condensed 500-800, `--font-display-face`) headings;
+`font-sans` (Barlow 400-600, `--font-body-face`) body; `font-mono` (Martian Mono 400-500, `--font-mono-face`)
+telemetry and labels. `.hud-label` = 11px mono uppercase tracked label. Chapter 2 uses Fredoka + Nunito (see Revision 5).
 Utilities: `.hud-grid` background grid, `.led` blinking dot.
 
 ## Shared primitives (use them, do not re-invent)
 - `Panel` (`@/components/hud/Panel`): hairline box with corner brackets, `label`, `accent`. Also `Chip`, `Brackets`.
 - `DecodeText`: scramble-to-final text on scroll-in; real text stays in DOM.
-- `CampSection` + `SectionHeader` (`@/components/hud/SectionHeader`): every section must use these.
+- `CampSection` (every section) + `SectionHeader` (`@/components/hud/SectionHeader`, chapter 1 only): a quiet strip
+  over the title, "01 — 2,000 m  ▲ +600 m" (camp number, altitude, climb from the previous camp). No tick ruler, no stamps.
+  Chapter-2 sections use `ToonHeader` (`sections/shared/ToonHeader.tsx`): a sticker pill "Chapter 2 · 01 · Warmer" over a
+  Fredoka title. Never put the dark HUD strip on the sky.
+- Research & ML: every entry uses `lab/LabEntry.tsx`, text left and a framed figure right with a caption strip
+  "Fig. 0N · label" plus a live status; the caption wraps on narrow screens instead of truncating.
 - Animation library: `motion` (import from `"motion/react"`). No GSAP, no three.js, no WebGL
   (the reviewer's headless browser has no WebGL; use SVG / Canvas 2D / CSS).
 
@@ -128,3 +134,21 @@ cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, n
 - Links: only links verified working (swipedin.co and the openbook repo were removed).
 - Chapter transition: smooth and professional. One continuous, eased move from night HUD to day sky
   (no flashes, no jumpy stages, no long text cards), about 2–2.5 s, Escape/skip still works, reduced motion = quick fade.
+
+## Revision 7: in between (owner feedback)
+"I wanted it clean but not this clean, it's boring now, make something in between."
+Rev 6 stripped too much: About and Experience are floating text on a flat background with large dead gaps.
+Target: rich but calm. Keep the Rev 6 bans (no box inside a box inside a box, no meaningless serial/coordinate
+stamps, quiet cursor, plain section names, facts only from content.ts), but bring back character:
+- Surfaces: ONE level of containment is fine and wanted. Use soft tinted surfaces (panel fill, faint gradient, a
+  hairline, small corner accents in the section colour) to group content. Cards may hover-lift / tilt ≤ 3°.
+- Depth and atmosphere: section-colour glows behind headings or key visuals, layered ridge silhouettes / contour
+  parallax between sections, subtle grain. Each section should have one signature visual, not just text.
+- Meaningful decoration: small data-driven visuals that encode real facts (e.g. 4 flags for 4 wins, 6 pips for 6
+  hackathons, Warmer's daily sparkline for users, a timeline with year ticks) rather than generic stamps.
+- Motion: purposeful entry choreography (draw, stagger, count-up), hover micro-interactions; nothing loops loudly.
+- Density: no empty bands taller than ~25% of the viewport inside a section on desktop.
+- Rev 7 primitives (`@/components/hud`): `Surface` (one tinted surface; `accent`, `corners`, `lift`) plus `Ticks` and
+  `Glow` in `Surface.tsx`; `.surface` / `.surface-lift` / `.surface-tick` in `globals.css`; `Assemble` + `AssembleItem`
+  (clip-draw then content rise, once in view); `Ridgeline` (layered Himalayan silhouettes with scroll + pointer parallax);
+  `SectionHeader` takes optional `glow` and `className`.

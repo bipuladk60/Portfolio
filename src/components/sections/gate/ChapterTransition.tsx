@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, useReducedMotion, type Easing } from "motion/react";
 import { INK, ORANGE, SKY_TOP, YELLOW } from "@/components/toon/toon";
+import { GAMES_HEADING_ID } from "../shared/ToonHeader";
 
 type Props = {
   /** viewport point the warm light rises from (the globe, over Nepal) */
@@ -20,6 +21,9 @@ const COVER_AT = 1.6; // fully opaque from ~0.95 s to ~1.95 s; the scroll jump h
 const SKIP_DELAY = 0.6;
 const EASE_IO = [0.65, 0, 0.35, 1] as const;
 const EASE_OUT = [0.2, 0.8, 0.2, 1] as const;
+
+// Focus moves to the Warmer title once the overlay is gone, so keyboard users land in chapter 2.
+const focusGames = () => document.getElementById(GAMES_HEADING_ID)?.focus({ preventScroll: true });
 
 // Keyframe helpers. Every track must end at offset 1: a WAAPI track whose last offset is < 1 eases
 // back to the element's base style for the rest of the duration. `ts` takes seconds and appends 1,
@@ -99,7 +103,11 @@ export function ChapterTransition({ origin, onCovered, onDone }: Props) {
   const done = useRef(onDone);
   const born = useRef(0);
   cover.current = onCovered;
-  done.current = onDone;
+  // every way out (full play, skip, reduced motion) ends here, so focus follows the same moment
+  done.current = () => {
+    onDone();
+    focusGames();
+  };
 
   const doCover = () => {
     if (covered.current) return;

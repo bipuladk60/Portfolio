@@ -65,6 +65,8 @@ type RouteMapProps = {
   nepalPath: string;
   usaBox: BBox;
   nepalBox: BBox;
+  /** false when the map sits inside a card: the hairline frame only appears while the map is live. */
+  framed?: boolean;
 };
 
 const ctrl =
@@ -80,7 +82,7 @@ const chip =
  * wheel / ctrl+wheel zoom around the pointer, drag pans, double-click zooms in, pinch on touch.
  * The viewBox is animated imperatively through refs, so interaction never re-renders React.
  */
-export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps) {
+export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox, framed = true }: RouteMapProps) {
   const boxRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const npRef = useRef<HTMLDivElement>(null);
@@ -490,7 +492,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox }: RouteMapProps
         aria-hidden
         className="pointer-events-none absolute inset-0 border transition-[border-color,box-shadow] duration-300"
         style={{
-          borderColor: active ? "var(--signal)" : "var(--line)",
+          borderColor: active ? "var(--signal)" : framed ? "var(--line)" : "transparent",
           boxShadow: active ? "inset 0 0 0 1px color-mix(in oklab, var(--signal) 35%, transparent), 0 0 18px -6px var(--signal)" : "none",
         }}
       />

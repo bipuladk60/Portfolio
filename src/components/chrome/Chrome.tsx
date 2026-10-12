@@ -5,7 +5,6 @@ import { playBlip } from "@/lib/sound";
 import { startHudModeSync } from "@/lib/hud-mode";
 import { restoreTheme } from "@/lib/theme";
 import { Altimeter } from "./Altimeter";
-import { BootSequence } from "./BootSequence";
 import { CommandPalette } from "./CommandPalette";
 import { CornerHud } from "./CornerHud";
 import { Crosshair } from "./Crosshair";
@@ -17,7 +16,7 @@ const LOST_TITLE = "SIGNAL LOST · return to base";
 
 /**
  * Global chrome: terrain background, HUD, altimeter, command palette, easter eggs,
- * toasts, crosshair cursor and the boot handshake. Mounted once above <main>.
+ * toasts and the crosshair cursor. Mounted once above <main>.
  */
 export function Chrome() {
   useTabTitle();
@@ -32,7 +31,6 @@ export function Chrome() {
       <EasterEggs />
       <Toaster />
       <Crosshair />
-      <BootSequence />
     </>
   );
 }

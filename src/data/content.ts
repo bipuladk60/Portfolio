@@ -339,6 +339,10 @@ export const games = [
       source: "Google Search Console",
       period: "Since launch · Jul 21 – Oct 9, 2026",
       scope: "Homepage, web search",
+      // The live Search Console query (src/lib/server/searchConsole.ts) uses this exact scope and start date,
+      // so live numbers and this snapshot measure the same thing.
+      scopePage: "https://warmergames.com/",
+      launchDate: "2026-07-21",
       clicks: "1.1K",
       impressions: "15.5K",
       ctr: "7.1%",

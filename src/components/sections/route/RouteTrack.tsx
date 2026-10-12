@@ -26,9 +26,11 @@ function span(when: string) {
 }
 
 // Rail geometry (px). Mobile keeps only the rope, route and tenure bars, hugging the left edge.
+// `card` is where the cards start (the list's left padding), `node` the node's offset below a card's top
+// so it lines up with the date chip.
 const RAIL = {
-  desktop: { w: 184, axis: 40, rope: 84, route: 132, tenure: 156 },
-  mobile: { w: 64, axis: -1, rope: 10, route: 34, tenure: 52 },
+  desktop: { w: 200, axis: 40, rope: 84, route: 132, tenure: 156, card: 200, node: 42 },
+  mobile: { w: 60, axis: -1, rope: 8, route: 28, tenure: 44, card: 60, node: 34 },
 };
 
 type Anchor = { m: number; y: number };
@@ -39,6 +41,8 @@ type Geometry = {
   camps: { y: number; endY: number; concurrent: boolean }[];
   routeD: string;
   ticks: { y: number; label?: string; major: boolean }[];
+  /** y of the rope label (middle of the stretch where the rope runs beside the later roles) */
+  ropeLabelY: number;
   ropeTop: number;
   ropeBottom: number;
 };
@@ -84,7 +88,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
     const desktop = box.width >= 768;
     const R = desktop ? RAIL.desktop : RAIL.mobile;
     const h = box.height;
-    const ys = itemRefs.current.map((li) => (li ? li.getBoundingClientRect().top - box.top + 8 : 0));
+    const ys = itemRefs.current.map((li) => (li ? li.getBoundingClientRect().top - box.top + R.node : 0));
     const lastEnd = Math.max(...spans.map((s) => s.end ?? 0));
 
     const anchors: Anchor[] = [];
@@ -127,7 +131,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
       for (let m = firstStart; m <= lastEnd; m++) {
         const mon = m % 12;
         const isYear = mon === 0;
-        if (m === firstStart || m === lastEnd || isYear) {
+        if (m === firstStart || m === lastEnd || isYear || (desktop && mon % 3 === 0)) {
           ticks.push({
             y: scale(m),
             major: isYear || m === firstStart || m === lastEnd,
@@ -141,7 +145,10 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
     const ropeTop = ropeIdx >= 0 ? camps[ropeIdx].y : 0;
     const ropeBottom = ropeIdx >= 0 ? camps[ropeIdx].endY : 0;
 
-    setGeo({ w: box.width, h, desktop, camps, routeD: d, ticks, ropeTop, ropeBottom });
+    const after = camps.filter((c, i) => i > ropeIdx && !c.concurrent);
+    const ropeLabelY = after.length ? (after[0].y + ropeBottom) / 2 : (ropeTop + ropeBottom) / 2;
+
+    setGeo({ w: box.width, h, desktop, camps, routeD: d, ticks, ropeTop, ropeBottom, ropeLabelY });
     // spans/entries are derived from props that do not change at runtime
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -173,7 +180,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
     <div ref={wrapRef} className="relative">
       {/* SSR / pre-measure guide so the rope is never missing */}
       {!geo && (
-        <span aria-hidden className="absolute bottom-0 left-[10px] top-0 w-px border-l border-dashed border-signal/50 md:left-[84px]" />
+        <span aria-hidden className="absolute bottom-0 left-[8px] top-0 w-px border-l border-dashed border-signal/50 md:left-[84px]" />
       )}
 
       {geo && (
@@ -207,7 +214,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
                   y2={geo.ropeBottom}
                   stroke="var(--signal)"
                   strokeWidth={1.5}
-                  style={{ pathLength: pathLen }}
+                  style={{ pathLength: pathLen, filter: "drop-shadow(0 0 4px color-mix(in oklab, var(--signal) 60%, transparent))" }}
                 />
                 <motion.line
                   x1={R.rope + 2}
@@ -254,12 +261,34 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
               ),
             )}
 
+            {/* Branches from each node to its card; they light up when the route reaches the role */}
+            {geo.camps.map((c, i) => {
+              const on = i < reached;
+              const color = c.concurrent ? "var(--signal)" : "var(--sky)";
+              return (
+                <line
+                  key={`b${i}`}
+                  x1={R.route + 8}
+                  x2={R.card - 2}
+                  y1={c.y}
+                  y2={c.y}
+                  stroke={on ? color : "var(--line-hi)"}
+                  strokeDasharray={on ? undefined : "2 3"}
+                  opacity={on ? 0.75 : 0.6}
+                  style={{ transition: "stroke 500ms, opacity 500ms" }}
+                />
+              );
+            })}
+
             {/* Camp markers */}
             {geo.camps.map((c, i) => {
               const on = i < reached;
               const color = c.concurrent ? "var(--signal)" : "var(--sky)";
               return (
                 <g key={`m${i}`} transform={`translate(${R.route} ${c.y})`}>
+                  {on && (
+                    <circle r={13} fill={color} opacity={0.12} />
+                  )}
                   {on && i === reached - 1 && !reduce && (
                     <g transform="rotate(45)">
                     <motion.rect
@@ -271,7 +300,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
                       fill="none"
                       initial={{ scale: 1, opacity: 0.9 }}
                       animate={{ scale: 2.4, opacity: 0 }}
-                      transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                      transition={{ duration: 1.6, repeat: 3, ease: "easeOut" }}
                       style={{ transformBox: "fill-box", transformOrigin: "center" }}
                     />
                     </g>
@@ -306,10 +335,19 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
                 </span>
               ))}
 
+          {/* Rope label: says what the gold parallel line is */}
+          {rope && geo.desktop && (
+            <span
+              className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.18em] text-signal/75 [writing-mode:vertical-rl] rotate-180"
+              style={{ left: R.rope - 14, top: geo.ropeLabelY }}
+            >
+              {rope.company.split(" ").slice(0, 2).join(" ")} · alongside
+            </span>
+          )}
         </div>
       )}
 
-      <ol className="relative space-y-16 pl-[4.5rem] md:space-y-20 md:pl-[12.5rem]">
+      <ol className="relative space-y-8 pl-[60px] md:space-y-10 md:pl-[200px]">
         {entries.map((entry, i) => (
           <li
             key={entry.id}
@@ -317,7 +355,7 @@ export function RouteTrack({ entries }: { entries: Experience[] }) {
               itemRefs.current[i] = el;
             }}
           >
-            <RouteCard entry={entry} />
+            <RouteCard entry={entry} lit={reduce ? true : i < reached} />
           </li>
         ))}
       </ol>
