@@ -98,7 +98,7 @@ export function WarmerTeaser({ href }: { href: string }) {
   return (
     <div
       data-cursor-box=""
-      className="wr-sticker wr-wobble p-5 transition-[background-color] duration-700 md:p-6"
+      className="wr-sticker wr-wobble flex h-full flex-col p-5 transition-[background-color] duration-700 md:p-6"
       style={{ background: bleed ? `color-mix(in oklab, ${bleed} 16%, #ffffff)` : "#ffffff" }}
     >
       <div className="flex items-center justify-between gap-3">
@@ -106,7 +106,7 @@ export function WarmerTeaser({ href }: { href: string }) {
         <p className="text-xs font-bold opacity-70">{guesses.length} {guesses.length === 1 ? "guess" : "guesses"}</p>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-3 flex flex-1 items-center">
         <WarmerGlobe guesses={globeGuesses} reveal={solved && target ? target : null} focus={solved && target ? target : lastGuess} />
       </div>
 

@@ -22,7 +22,7 @@ function CloudBank({ flip = false }: { flip?: boolean }) {
     <svg
       viewBox="0 0 2600 120"
       preserveAspectRatio="xMidYMid slice"
-      className="block h-[84px] w-full md:h-[120px]"
+      className="block h-[52px] w-full md:h-[70px]"
       style={flip ? { transform: "scaleY(-1)" } : undefined}
     >
       {/* soft offset shade */}
@@ -97,12 +97,12 @@ export function SkyWorld({ children }: { children: ReactNode }) {
       {/* full-bleed backdrop (the section clips the overhang) */}
       <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-[100vw] -translate-x-1/2">
         <div
-          className="absolute inset-x-0 top-[42px] bottom-[42px] md:top-[60px] md:bottom-[60px]"
+          className="absolute inset-x-0 top-[26px] bottom-[26px] md:top-[35px] md:bottom-[35px]"
           style={{ background: `linear-gradient(to bottom, ${SKY_TOP}, ${SKY_BOTTOM})` }}
         />
         {/* sun */}
         <div
-          className="absolute right-[8%] top-[110px] h-[180px] w-[180px] rounded-full md:h-[260px] md:w-[260px]"
+          className="absolute right-[8%] top-[60px] h-[180px] w-[180px] rounded-full md:h-[260px] md:w-[260px]"
           style={{ background: "radial-gradient(circle, #fff6c9 0%, #ffe58a 32%, rgba(255,229,138,0.35) 52%, transparent 70%)" }}
         />
         {/* drifting clouds, two depths */}
@@ -123,7 +123,7 @@ export function SkyWorld({ children }: { children: ReactNode }) {
           <CloudBank />
         </div>
       </div>
-      <div className="relative py-[104px] md:py-[150px]">{children}</div>
+      <div className="relative py-[64px] md:py-[88px]">{children}</div>
     </div>
   );
 }

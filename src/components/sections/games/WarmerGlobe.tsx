@@ -2,9 +2,22 @@
 
 import { useEffect, useRef } from "react";
 import { useInView, useReducedMotion } from "motion/react";
+import { LAND_DOTS } from "../hero/geo";
 import { GREEN, INK, toonHeat } from "./toon";
 
-const N = 760;
+const N = 1500;
+
+// Coarse 3-degree land cells, recovered from the hero map's shared land mask (equirectangular, 2 units per degree).
+const LAND = (() => {
+  const cells = new Set<number>();
+  for (const m of LAND_DOTS.matchAll(/M([\d.]+) ([\d.]+)/g)) {
+    const i = Math.floor(Number(m[2]) / 2 / 3);
+    const j = Math.floor(Number(m[1]) / 2 / 3);
+    cells.add(i * 1000 + j);
+  }
+  return cells;
+})();
+const isLand = (lat: number, lon: number) => LAND.has(Math.floor((90 - lat) / 3) * 1000 + Math.floor((lon + 180) / 3));
 
 export type LatLon = { lat: number; lon: number };
 /** t = distance / half circumference; t === 0 is the answer */
@@ -68,6 +81,12 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
       pts[i * 3 + 1] = y;
       pts[i * 3 + 2] = Math.sin(phi) * r;
     }
+    const land = new Uint8Array(N);
+    for (let i = 0; i < N; i++) {
+      const lat = (Math.asin(pts[i * 3 + 1]) * 180) / Math.PI;
+      const lon = (Math.atan2(pts[i * 3], pts[i * 3 + 2]) * 180) / Math.PI;
+      land[i] = isLand(lat, lon) ? 1 : 0;
+    }
     const s = state.current;
     let size = 0;
     let dpr = 1;
@@ -122,7 +141,7 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
         if (z2 < 0) continue;
 
         let col = INK;
-        let alpha = 0.1 + 0.3 * z2;
+        let alpha = land[i] ? 0.28 + 0.4 * z2 : 0.05 + 0.08 * z2;
         let boost = 1;
         if (rvv && s.revealAmt > 0) {
           const d = Math.acos(Math.max(-1, Math.min(1, x * rvv[0] + y * rvv[1] + z * rvv[2]))) / Math.PI;
@@ -140,7 +159,7 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = col;
         ctx.beginPath();
-        ctx.arc(cx + x1 * R, cy - y2 * R, (0.8 + 1.3 * z2) * unit * boost, 0, Math.PI * 2);
+        ctx.arc(cx + x1 * R, cy - y2 * R, (0.6 + 1.0 * z2) * unit * boost, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -223,7 +242,7 @@ export function WarmerGlobe({ guesses, reveal, focus }: GlobeProps) {
   }, [inView, reduce]);
 
   return (
-    <div ref={wrap} aria-hidden className="relative mx-auto aspect-square w-full max-w-[320px]">
+    <div ref={wrap} aria-hidden className="relative mx-auto aspect-square w-full max-w-[400px]">
       <canvas ref={canvasRef} className="block h-full w-full" />
     </div>
   );

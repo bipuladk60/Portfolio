@@ -1,19 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { profile } from "@/data/content";
 import { togglePalette } from "@/lib/chrome-ui";
 import { toggleSound, useSoundEnabled } from "@/lib/sound";
 
 /** Top-left status strip and the top-right control cluster (palette trigger + sound toggle). */
 export function CornerHud() {
+  const overGames = useSectionUnderTop("games", 64);
   return (
     <>
-      {/* Scrim so the fixed HUD never sits directly on body text */}
+      {/* Scrim so the fixed HUD never sits directly on body text; fades out over the light Game Room */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0 z-[69] hidden h-16 md:block"
-        style={{ background: "linear-gradient(to bottom, var(--bg) 0%, color-mix(in oklab, var(--bg) 70%, transparent) 55%, transparent 100%)" }}
+        className="pointer-events-none fixed inset-x-0 top-0 z-[69] hidden h-16 transition-opacity duration-500 [transition-timing-function:var(--ease-hud)] md:block"
+        style={{
+          opacity: overGames ? 0 : 1,
+          background: "linear-gradient(to bottom, var(--bg) 0%, color-mix(in oklab, var(--bg) 70%, transparent) 55%, transparent 100%)",
+        }}
       />
       <div
         className="pointer-events-none fixed left-4 top-4 z-[70] hidden items-center gap-1.5 border border-line bg-bg/85 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-dim md:flex"
@@ -83,4 +88,35 @@ function SoundButton() {
       <style>{`@keyframes xc-eq { from { transform: scaleY(0.35); } to { transform: scaleY(1); } }`}</style>
     </button>
   );
+}
+
+/** True while the section with `id` covers the top `band` px of the viewport. Re-renders only on change. */
+function useSectionUnderTop(id: string, band: number): boolean {
+  const [over, setOver] = useState(false);
+  useEffect(() => {
+    let raf = 0;
+    let last = false;
+    const check = () => {
+      raf = 0;
+      const el = document.getElementById(id);
+      const r = el?.getBoundingClientRect();
+      const next = !!r && r.top < band && r.bottom > 0;
+      if (next !== last) {
+        last = next;
+        setOver(next);
+      }
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [id, band]);
+  return over;
 }

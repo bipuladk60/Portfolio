@@ -20,8 +20,8 @@ const PEAK_I = Math.max(0, A.daily.findIndex((_, i) => dayLabel(i) === A.peak.da
 
 // chart geometry
 const W = 600;
-const H = 210;
-const PAD = { l: 14, r: 14, t: 30, b: 28 };
+const H = 180;
+const PAD = { l: 14, r: 14, t: 30, b: 8 };
 const MAX = Math.ceil(Math.max(...A.daily) / 25) * 25 + 10;
 const xs = A.daily.map((_, i) => PAD.l + (i * (W - PAD.l - PAD.r)) / (A.daily.length - 1));
 const ys = A.daily.map((v) => H - PAD.b - (v / MAX) * (H - PAD.t - PAD.b));
@@ -73,7 +73,7 @@ function Stat({ label, value, growth, start }: { label: string; value: number; g
 }
 
 /** Analytics sticker: real Vercel Analytics totals + an approximate daily visitors chart that draws on scroll. */
-export function WarmerStats() {
+export function WarmerStats({ footnote }: { footnote?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
   const reduce = useReducedMotion();
@@ -126,7 +126,15 @@ export function WarmerStats() {
         </div>
       </div>
 
-      <div role="tabpanel" id={`${tabBase}-search`} aria-labelledby={`${tabBase}-search-tab`} hidden={tab !== "search"}>
+      {/* both panels share one grid cell so switching tabs never changes the card height */}
+      <div className="grid">
+      <div
+        role="tabpanel"
+        id={`${tabBase}-search`}
+        aria-labelledby={`${tabBase}-search-tab`}
+        className={`[grid-area:1/1] ${tab === "search" ? "" : "invisible"}`}
+        inert={tab !== "search"}
+      >
         <p className="mt-4 text-[11px] font-extrabold uppercase tracking-wide opacity-70">
           {S.source} · {S.period} · {S.scope}
         </p>
@@ -152,6 +160,26 @@ export function WarmerStats() {
             <path d="M4 50 C 30 50, 44 48, 62 42 S 96 30, 112 22 S 140 10, 156 8" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
             <path d="M146 4 l 11 4 l -8 8" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
+        {/* labels as HTML so they stay readable when the chart scales down */}
+        <motion.span
+          aria-hidden
+          className="wr-display pointer-events-none absolute whitespace-nowrap text-[13px] font-bold leading-none md:text-[15px]"
+          style={{
+            left: `${((xs[PEAK_I] - 76) / W) * 100}%`,
+            top: `${(ys[PEAK_I] / H) * 100}%`,
+            x: "-100%",
+            y: "-60%",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: inView ? 1 : 0 }}
+          transition={{ delay: reduce ? 0 : 1.3 }}
+        >
+          Peak {A.peak.day} · {A.peak.visitors}
+        </motion.span>
+        <div aria-hidden className="mt-1 flex justify-between text-xs font-bold opacity-70">
+          <span>{A.dailyStart}</span>
+          <span>{A.dailyEnd}</span>
+        </div>
           <div className="min-w-0">
             <p className="text-sm font-bold leading-snug">{S.trend}</p>
             <p className="mt-1 text-[11px] font-bold opacity-70">Curve is illustrative, not plotted data.</p>
@@ -159,7 +187,13 @@ export function WarmerStats() {
         </div>
       </div>
 
-      <div role="tabpanel" id={`${tabBase}-traffic`} aria-labelledby={`${tabBase}-traffic-tab`} hidden={tab !== "traffic"}>
+      <div
+        role="tabpanel"
+        id={`${tabBase}-traffic`}
+        aria-labelledby={`${tabBase}-traffic-tab`}
+        className={`[grid-area:1/1] ${tab === "traffic" ? "" : "invisible"}`}
+        inert={tab !== "traffic"}
+      >
       <p className="mt-4 text-[11px] font-extrabold uppercase tracking-wide opacity-70">
         {A.source} · {A.period}
       </p>
@@ -229,9 +263,7 @@ export function WarmerStats() {
               strokeLinecap="round"
             />
             <path d={`M${rd(xs[PEAK_I] - 18)} ${rd(ys[PEAK_I] - 10)} l 6 4 l -7 3`} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
-            <text x={rd(xs[PEAK_I] - 76)} y={rd(ys[PEAK_I] - 2)} textAnchor="end" fontSize="15" fontWeight="800" fill={INK} className="wr-display">
-              Peak {A.peak.day} · {A.peak.visitors}
-            </text>
+
           </motion.g>
 
           {/* active day */}
@@ -240,12 +272,7 @@ export function WarmerStats() {
           )}
           <circle cx={rd(tipX)} cy={rd(ys[shown])} r="7" fill={active === null ? RED : YELLOW} stroke={INK} strokeWidth="3" />
 
-          <text x={PAD.l} y={H - 6} fontSize="13" fontWeight="700" fill={INK} opacity="0.7">
-            {A.dailyStart}
-          </text>
-          <text x={W - PAD.r} y={H - 6} fontSize="13" fontWeight="700" fill={INK} opacity="0.7" textAnchor="end">
-            {A.dailyEnd}
-          </text>
+
         </svg>
 
         {active !== null && (
@@ -279,6 +306,8 @@ export function WarmerStats() {
         <p className="text-[11px] font-bold opacity-70">Daily values approximate</p>
       </div>
       </div>
+      </div>
+      {footnote && <p className="mt-4 border-t-2 border-dashed pt-3 text-[13px] font-bold leading-snug" style={{ borderColor: INK }}>{footnote}</p>}
     </div>
   );
 }
