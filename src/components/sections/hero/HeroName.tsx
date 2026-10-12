@@ -40,7 +40,7 @@ function useDecode(word: string, delay: number, duration: number, enabled: boole
 }
 
 function NameLine({ word, delay, reduce }: { word: string; delay: number; reduce: boolean }) {
-  const shown = useDecode(word, delay, 900, !reduce);
+  const shown = useDecode(word, delay, 700, !reduce);
   const base = "absolute left-0 top-0 whitespace-nowrap";
   return (
     <motion.span
@@ -104,8 +104,8 @@ export function HeroName({ first, last, className = "" }: { first: string; last:
         {first} {last}
       </span>
       <span aria-hidden className="flex flex-col">
-        <NameLine word={first.toUpperCase()} delay={350} reduce={reduce} />
-        <NameLine word={last.toUpperCase()} delay={550} reduce={reduce} />
+        <NameLine word={first.toUpperCase()} delay={300} reduce={reduce} />
+        <NameLine word={last.toUpperCase()} delay={450} reduce={reduce} />
       </span>
     </h1>
   );

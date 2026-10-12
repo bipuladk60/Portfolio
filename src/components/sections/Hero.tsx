@@ -35,7 +35,7 @@ export function Hero() {
           {/* Identity */}
           <div className="relative min-w-0 lg:col-span-7">
             <Glow color="var(--signal)" strength={13} className="-left-40 -top-24 h-[34rem] w-[50rem] max-w-none" />
-            <Reveal delay={0.25} className="mb-5 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-signal">
+            <Reveal delay={0.15} className="mb-5 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-signal">
               <span aria-hidden className="h-px w-10 bg-signal" />
               {profile.role}
             </Reveal>
@@ -46,18 +46,18 @@ export function Hero() {
               className="text-[clamp(3.25rem,14.5vw,7.75rem)] text-text lg:text-[clamp(4rem,8.6vw,8rem)]"
             />
 
-            <Reveal delay={0.9} className="mt-7 max-w-xl">
+            <Reveal delay={0.5} className="mt-7 max-w-xl">
               <p className="text-lg leading-relaxed text-text/90 md:text-xl">{profile.tagline}</p>
             </Reveal>
 
-            <Reveal delay={1.0} className="mt-6 flex max-w-xl items-start gap-3 border-l-2 border-signal/60 py-1 pl-4">
+            <Reveal delay={0.58} className="mt-6 flex max-w-xl items-start gap-3 border-l-2 border-signal/60 py-1 pl-4">
               <p className="font-mono text-[13px] leading-relaxed text-dim">
                 <span className="mr-2 text-signal">STATUS</span>
                 {profile.status}
               </p>
             </Reveal>
 
-            <Reveal delay={1.1} className="mt-9 flex flex-wrap gap-3">
+            <Reveal delay={0.65} className="mt-9 flex flex-wrap gap-3">
               <a
                 href="#route"
                 className="group inline-flex items-center gap-3 bg-signal px-5 py-3 font-display text-sm font-semibold uppercase tracking-[0.14em] text-bg transition-colors hover:bg-[#ffc93d]"
@@ -77,7 +77,7 @@ export function Hero() {
           {/* Route telemetry: one instrument card (map + live clocks) */}
           <div className="relative min-w-0 lg:col-span-5">
             <Glow color="var(--sky)" strength={9} className="-right-24 -top-16 h-[26rem] w-[34rem] max-w-none" />
-            <Reveal delay={0.55} y={18}>
+            <Reveal delay={0.4} y={18}>
               <Surface as="figure" accent="var(--signal)" corners className="min-w-0">
                 <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line/70 px-4 py-3">
                   <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-text">

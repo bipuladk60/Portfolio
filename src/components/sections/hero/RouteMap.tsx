@@ -130,7 +130,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox, framed = true }
 
   useEffect(() => {
     if (reduce || !inView) return;
-    const controls = animate(progress, [0, 1], { duration: 5.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 1.2, delay: 2.4 });
+    const controls = animate(progress, [0, 1], { duration: 5.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 1.2, delay: 1.3 });
     return () => controls.stop();
   }, [reduce, inView, progress]);
 
@@ -393,7 +393,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox, framed = true }
           strokeLinecap="round"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: reduce ? 0 : 0.8, delay: reduce ? 0 : 0.5 }}
+          transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.4 }}
         />
         <motion.path
           d={LAND_DOTS}
@@ -404,14 +404,14 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox, framed = true }
           strokeLinecap="round"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: reduce ? 0 : 1.1, delay: reduce ? 0 : 0.6, ease: EASE }}
+          transition={{ duration: reduce ? 0 : 0.6, delay: reduce ? 0 : 0.45, ease: EASE }}
         />
 
         {/* Real country outlines, Natural Earth 1:50m */}
         <motion.g
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: reduce ? 0 : 0.8, delay: reduce ? 0 : 0.8 }}
+          transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.5 }}
           strokeLinejoin="round"
         >
           <path
@@ -439,7 +439,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox, framed = true }
           strokeLinecap="round"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: reduce ? 0 : 1.6, delay: reduce ? 0 : 1.1, ease: EASE }}
+          transition={{ duration: reduce ? 0 : 0.6, delay: reduce ? 0 : 0.6, ease: EASE }}
         />
 
         {!reduce && (
@@ -460,7 +460,7 @@ export function RouteMap({ usaPath, nepalPath, usaBox, nepalBox, framed = true }
             className="absolute inset-0 rounded-full border border-signal/30"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: reduce ? 0 : 0.6, delay: reduce ? 0 : 0.9, ease: EASE }}
+            transition={{ duration: reduce ? 0 : 0.45, delay: reduce ? 0 : 0.7, ease: EASE }}
           >
             <div className="absolute inset-[25%] rounded-full border border-signal/20" />
             <div

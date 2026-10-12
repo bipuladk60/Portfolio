@@ -11,7 +11,7 @@ export function ScrollCue({ href = "#telemetry" }: { href?: string }) {
       className="group inline-flex flex-col items-center gap-1.5 px-3 py-2 text-dim transition-colors hover:text-signal focus-visible:text-signal"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 1.6, ease: [0.2, 0.8, 0.2, 1] }}
+      transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.75, ease: [0.2, 0.8, 0.2, 1] }}
     >
       <span className="hud-label text-current!">Begin ascent</span>
       <span aria-hidden className="flex flex-col items-center -space-y-1.5">
