@@ -1,6 +1,7 @@
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
 import { education, profile, stats } from "@/data/content";
 import { Reveal } from "./hero/Reveal";
+import { DegreeGauge } from "./telemetry/DegreeGauge";
 import { StatGauge } from "./telemetry/StatGauge";
 
 /** Splits an education `detail` string ("GPA x · a, b, c") into a GPA value and the remaining notes. */
@@ -31,6 +32,9 @@ export function Telemetry() {
               <StatGauge value={s.value} suffix={s.suffix} label={s.label} index={i} />
             </li>
           ))}
+          <li>
+            <DegreeGauge index={stats.length} />
+          </li>
         </ul>
       </Reveal>
 

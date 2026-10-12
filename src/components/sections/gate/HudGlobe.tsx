@@ -2,23 +2,56 @@
 
 import { useEffect, useRef } from "react";
 import { useInView, useReducedMotion } from "motion/react";
-import { LAND_DOTS } from "../hero/geo";
+import { GLOBE_CODES, GLOBE_LAND_OTHER, GLOBE_ROWS, GLOBE_STEP } from "@/data/globeDots";
 import { GREEN, toonHeat } from "@/components/toon/toon";
 
-const N = 3200;
-
-// Coarse 3-degree land cells from the hero map's shared land mask (equirectangular, 2 units per degree).
-const LAND = (() => {
-  const cells = new Set<number>();
-  for (const m of LAND_DOTS.matchAll(/M([\d.]+) ([\d.]+)/g)) {
-    cells.add(Math.floor(Number(m[2]) / 6) * 1000 + Math.floor(Number(m[1]) / 6));
-  }
-  return cells;
-})();
-const isLand = (lat: number, lon: number) => LAND.has(Math.floor((90 - lat) / 3) * 1000 + Math.floor((lon + 180) / 3));
-
-export type HudGuess = { lat: number; lon: number; t: number };
+export type HudGuess = { code: string; lat: number; lon: number; t: number };
 type LatLon = { lat: number; lon: number };
+
+/** Decoded lattice: unit vectors plus the country index (0 ocean, 1..n country, 255 other land). */
+type Lattice = { n: number; x: Float32Array; y: Float32Array; z: Float32Array; c: Uint8Array; ocean: Uint8Array };
+let LATTICE: Lattice | null = null;
+
+function lattice(): Lattice {
+  if (LATTICE) return LATTICE;
+  let n = 0;
+  for (const row of GLOBE_ROWS) for (let k = 1; k < row.length; k += 2) n += row[k];
+  const x = new Float32Array(n);
+  const y = new Float32Array(n);
+  const z = new Float32Array(n);
+  const c = new Uint8Array(n);
+  const ocean = new Uint8Array(n); // a sparse subset of ocean dots is drawn, so the sea reads as texture
+  let i = 0;
+  GLOBE_ROWS.forEach((row, r) => {
+    const lat = 90 - GLOBE_STEP / 2 - r * GLOBE_STEP;
+    let len = 0;
+    for (let k = 1; k < row.length; k += 2) len += row[k];
+    const la = (lat * Math.PI) / 180;
+    let j = 0;
+    for (let k = 0; k < row.length; k += 2) {
+      for (let m = 0; m < row[k + 1]; m++, j++, i++) {
+        const lo = ((-180 + ((j + 0.5) * 360) / len) * Math.PI) / 180;
+        x[i] = Math.cos(la) * Math.sin(lo);
+        y[i] = Math.sin(la);
+        z[i] = Math.cos(la) * Math.cos(lo);
+        c[i] = row[k];
+        ocean[i] = row[k] === 0 && r % 2 === 0 && j % 2 === 0 ? 1 : 0;
+      }
+    }
+  });
+  LATTICE = { n, x, y, z, c, ocean };
+  return LATTICE;
+}
+
+const CODE_INDEX = new Map(GLOBE_CODES.map((code, i) => [code, i + 1]));
+/** The answer's own dots turn green when the round is solved. */
+const NEPAL_INDEX = CODE_INDEX.get("NPL") ?? -1;
+/** Countries too small for the lattice get a marker dot instead of a fill. */
+const DOT_COUNT = (() => {
+  const counts = new Map<number, number>();
+  for (const row of GLOBE_ROWS) for (let k = 0; k < row.length; k += 2) counts.set(row[k], (counts.get(row[k]) ?? 0) + row[k + 1]);
+  return counts;
+})();
 
 function toVec(lat: number, lon: number): [number, number, number] {
   const la = (lat * Math.PI) / 180;
@@ -27,6 +60,7 @@ function toVec(lat: number, lon: number): [number, number, number] {
 }
 
 const TILT = -0.4;
+const FILL_MS = 650;
 
 type Props = {
   guesses: HudGuess[];
@@ -37,7 +71,8 @@ type Props = {
 
 /**
  * HUD-styled orthographic dot globe (Canvas 2D) for the checkpoint round.
- * Guesses are marked in Warmer's heat colours; solving sends a heat wave out from the answer.
+ * Every land dot belongs to a country, so a guess fills its whole country in Warmer's heat colour,
+ * the way the real game paints the map. Solving sends a heat wave out from the answer.
  * DPR <= 1.5, paused offscreen, static under reduced motion.
  */
 export function HudGlobe({ guesses, focus, bloom }: Props) {
@@ -46,16 +81,20 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
   const inView = useInView(wrap, { margin: "120px" });
   const reduce = useReducedMotion();
   const props = useRef({ guesses, focus, bloom });
-  const state = useRef({ rot: 0.6, focusUntil: 0, wave: 0 });
+  const state = useRef({ rot: 0.6, focusUntil: 0, wave: 0, filledAt: new Map<string, number>() });
   const redraw = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     props.current = { guesses, focus, bloom };
-    if (focus) state.current.focusUntil = performance.now() + 2400;
-    if (!bloom) state.current.wave = 0;
+    const s = state.current;
+    const now = performance.now();
+    for (const g of guesses) if (!s.filledAt.has(g.code)) s.filledAt.set(g.code, reduce ? 0 : now);
+    for (const code of [...s.filledAt.keys()]) if (!guesses.some((g) => g.code === code)) s.filledAt.delete(code);
+    if (focus) s.focusUntil = now + 2400;
+    if (!bloom) s.wave = 0;
     if (reduce) {
-      if (focus) state.current.rot = (-focus.lon * Math.PI) / 180;
-      if (bloom) state.current.wave = 1;
+      if (focus) s.rot = (-focus.lon * Math.PI) / 180;
+      if (bloom) s.wave = 1;
     }
     redraw.current?.();
   }, [guesses, focus, bloom, reduce]);
@@ -66,21 +105,7 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
     if (!canvas || !el) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const pts = new Float32Array(N * 3);
-    const land = new Uint8Array(N);
-    const golden = Math.PI * (3 - Math.sqrt(5));
-    for (let i = 0; i < N; i++) {
-      const y = 1 - ((i + 0.5) / N) * 2;
-      const r = Math.sqrt(1 - y * y);
-      const phi = i * golden;
-      const x = Math.cos(phi) * r;
-      const z = Math.sin(phi) * r;
-      pts[i * 3] = x;
-      pts[i * 3 + 1] = y;
-      pts[i * 3 + 2] = z;
-      land[i] = isLand((Math.asin(y) * 180) / Math.PI, (Math.atan2(x, z) * 180) / Math.PI) ? 1 : 0;
-    }
+    const L = lattice();
     const s = state.current;
     let size = 0;
     let dpr = 1;
@@ -91,7 +116,7 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
       canvas.height = Math.round(size * dpr);
     };
 
-    const draw = (t = 0) => {
+    const draw = (now = performance.now()) => {
       if (!size) return;
       const { guesses: gs, bloom: bl } = props.current;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -100,6 +125,8 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
       const cx = size / 2;
       const cy = size / 2;
       const unit = size / 320;
+      // dot size follows the lattice spacing so neighbouring dots never merge
+      const pitch = R * ((GLOBE_STEP * Math.PI) / 180);
 
       const g = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.35, R * 0.1, cx, cy, R);
       g.addColorStop(0, "rgba(46,64,82,0.55)");
@@ -115,31 +142,68 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
       const st = Math.sin(TILT);
       const bv = bl ? toVec(bl.lat, bl.lon) : null;
 
-      for (let i = 0; i < N; i++) {
-        const x = pts[i * 3];
-        const y = pts[i * 3 + 1];
-        const z = pts[i * 3 + 2];
+      // guessed countries: index -> [colour, fill progress 0..1]
+      const fills = new Map<number, [string, number]>();
+      for (const q of gs) {
+        const idx = CODE_INDEX.get(q.code);
+        if (!idx) continue;
+        const at = s.filledAt.get(q.code) ?? 0;
+        const p = at === 0 ? 1 : Math.min(1, (now - at) / FILL_MS);
+        fills.set(idx, [toonHeat(q.t, q.t === 0), 1 - (1 - p) ** 3]);
+      }
+
+      // batch dots into one path per colour + alpha. At 1-2 px a square reads as a dot and is far
+      // cheaper to fill than an arc, which keeps ~10k front-facing dots inside the frame budget.
+      const paths = new Map<string, Path2D>();
+      const dot = (col: string, alpha: number, px: number, py: number, r: number) => {
+        const key = `${col}|${Math.round(alpha * 10) / 10}`;
+        let p = paths.get(key);
+        if (!p) paths.set(key, (p = new Path2D()));
+        p.rect(px - r, py - r, r * 2, r * 2);
+      };
+
+      for (let i = 0; i < L.n; i++) {
+        const c = L.c[i];
+        if (c === 0 && !L.ocean[i] && !(bv && s.wave > 0)) continue;
+        const x = L.x[i];
+        const y = L.y[i];
+        const z = L.z[i];
         const x1 = x * cr + z * sr;
         const z1 = -x * sr + z * cr;
         const y2 = y * ct - z1 * st;
         const z2 = y * st + z1 * ct;
         if (z2 < 0) continue;
-        let col = "#8A97A6";
-        let alpha = land[i] ? 0.45 + 0.45 * z2 : 0.05 + 0.07 * z2;
-        let rad = land[i] ? 0.9 + 0.8 * z2 : 0.5 + 0.5 * z2;
+        const px = cx + x1 * R;
+        const py = cy - y2 * R;
+        const shade = 0.55 + 0.45 * z2;
+
         if (bv && s.wave > 0) {
           const d = Math.acos(Math.max(-1, Math.min(1, x * bv[0] + y * bv[1] + z * bv[2]))) / Math.PI;
           if (d < s.wave) {
-            col = d < 0.04 ? GREEN : toonHeat(d);
-            alpha = Math.max(alpha, (land[i] ? 0.85 : 0.45) * (0.5 + 0.5 * z2));
-            rad *= 1.15;
+            if (c === 0 && !L.ocean[i]) continue;
+            const col = c === NEPAL_INDEX ? GREEN : toonHeat(Math.round(d * 40) / 40);
+            dot(col, (c ? 0.9 : 0.4) * shade, px, py, pitch * (c ? 0.42 : 0.3));
+            continue;
           }
+          if (c === 0 && !L.ocean[i]) continue;
         }
-        ctx.globalAlpha = alpha;
+
+        if (c === 0) {
+          dot("#8A97A6", 0.05 + 0.08 * z2, px, py, pitch * 0.22);
+          continue;
+        }
+        const f = c === GLOBE_LAND_OTHER ? undefined : fills.get(c);
+        if (f) {
+          dot(f[0], 0.95 * shade, px, py, pitch * (0.3 + 0.14 * f[1]));
+          continue;
+        }
+        dot("#8A97A6", 0.25 + 0.5 * z2, px, py, pitch * 0.3);
+      }
+      for (const [key, p] of paths) {
+        const [col, a] = key.split("|");
+        ctx.globalAlpha = Number(a);
         ctx.fillStyle = col;
-        ctx.beginPath();
-        ctx.arc(cx + x1 * R, cy - y2 * R, rad * unit, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fill(p);
       }
       ctx.globalAlpha = 1;
 
@@ -149,7 +213,7 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
       ctx.arc(cx, cy, R, 0, Math.PI * 2);
       ctx.stroke();
 
-      // guess markers
+      // marker dots only for countries too small to own lattice dots; a ring pulses on the newest guess
       gs.forEach((q, idx) => {
         const [qx, qy, qz] = toVec(q.lat, q.lon);
         const qx1 = qx * cr + qz * sr;
@@ -160,20 +224,23 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
         const px = cx + qx1 * R;
         const py = cy - qy2 * R;
         const col = toonHeat(q.t, q.t === 0);
-        ctx.fillStyle = col;
-        ctx.strokeStyle = "#0A0D12";
-        ctx.lineWidth = 2 * unit;
-        ctx.beginPath();
-        ctx.arc(px, py, 6 * unit * (0.6 + 0.4 * qz2), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        if (idx === gs.length - 1) {
-          const p = reduce ? 0.4 : (t % 1500) / 1500;
-          ctx.globalAlpha = 1 - p;
-          ctx.strokeStyle = col;
+        const ci = CODE_INDEX.get(q.code);
+        if (!ci || !DOT_COUNT.get(ci)) {
+          ctx.fillStyle = col;
+          ctx.strokeStyle = "#0A0D12";
           ctx.lineWidth = 1.5 * unit;
           ctx.beginPath();
-          ctx.arc(px, py, (8 + p * 18) * unit, 0, Math.PI * 2);
+          ctx.arc(px, py, 4 * unit * (0.6 + 0.4 * qz2), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+        if (idx === gs.length - 1) {
+          const p = reduce ? 0.4 : (now % 1600) / 1600;
+          ctx.globalAlpha = (1 - p) * 0.9;
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 1.25 * unit;
+          ctx.beginPath();
+          ctx.arc(px, py, (6 + p * 18) * unit, 0, Math.PI * 2);
           ctx.stroke();
           ctx.globalAlpha = 1;
         }
@@ -181,11 +248,15 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
     };
 
     resize();
-    redraw.current = () => draw(0);
+    redraw.current = () => draw();
     let running = false;
     let raf = 0;
     let last = 0;
     const loop = (t: number) => {
+      raf = requestAnimationFrame(loop);
+      // idle spin only needs ~30 fps; guesses, focus moves and the solve wave run at full rate
+      const busy = props.current.bloom || t < s.focusUntil || [...s.filledAt.values()].some((at) => at && t - at < FILL_MS);
+      if (!busy && last && t - last < 30) return;
       const dt = last ? Math.min(50, t - last) : 16;
       last = t;
       const f = props.current.focus;
@@ -200,19 +271,18 @@ export function HudGlobe({ guesses, focus, bloom }: Props) {
       }
       if (props.current.bloom) s.wave = Math.min(1, s.wave + dt / 1400);
       draw(t);
-      raf = requestAnimationFrame(loop);
     };
 
     const ro = new ResizeObserver(() => {
       resize();
-      if (!running) draw(0);
+      if (!running) draw();
     });
     ro.observe(el);
     if (inView && !reduce) {
       running = true;
       raf = requestAnimationFrame(loop);
     } else {
-      draw(0);
+      draw();
     }
     return () => {
       running = false;

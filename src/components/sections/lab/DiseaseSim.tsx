@@ -21,6 +21,8 @@ import { useReducedMotionSafe } from "./motion";
 const STEP_MS = 170; // ~6 simulated days per second (the notebook animates at 5 fps)
 const DPR_MAX = 1.5;
 const FIRST_SEED = 20240401;
+/** Pause on a finished run before the next outbreak starts, so the ending can be read. */
+const HOLD_MS = 1800;
 /** Reduced motion: show a frame well into the outbreak instead of animating to it. */
 const STILL_DAY = 40;
 
@@ -158,6 +160,9 @@ export function DiseaseSim() {
   const playingRef = useRef(false);
   const reduceRef = useRef(false);
   const touchedRef = useRef(false); // the visitor has pressed play/pause, so no autoplay
+  const holdRef = useRef(0); // when the current run finished; the loop starts a new one after HOLD_MS
+  const popRef = useRef<number>(P.population);
+  const initRef = useRef<number>(P.initialInfected);
   const [playing, setPlaying] = useState(false);
   const [population, setPopulation] = useState<number>(P.population);
   const [initial, setInitial] = useState<number>(P.initialInfected);
@@ -206,16 +211,21 @@ export function DiseaseSim() {
         setStats(readStats(sim));
       }
       if (isDone(sim)) {
+        // runs forever: hold the finished run for a moment, then start a fresh outbreak with a new seed
         accRef.current = STEP_MS; // settle the interpolation on the final positions
         if (fieldRef.current) drawField(fieldRef.current, sim, 1);
-        playingRef.current = false;
-        setPlaying(false);
-        rafRef.current = 0;
-        return;
+        if (!holdRef.current) holdRef.current = ts;
+        else if (ts - holdRef.current > HOLD_MS) {
+          holdRef.current = 0;
+          simRef.current = createSim(newSeed(), popRef.current, initRef.current);
+          accRef.current = 0;
+          setStats(readStats(simRef.current));
+          paint(1);
+        }
       }
       rafRef.current = requestAnimationFrame(frame);
     },
-    [getSim],
+    [getSim, paint],
   );
 
   /** Run the loop only while playing, on screen and the tab is visible. */
@@ -241,6 +251,9 @@ export function DiseaseSim() {
   const restart = useCallback(
     (pop: number, init: number, play: boolean) => {
       stop();
+      holdRef.current = 0;
+      popRef.current = pop;
+      initRef.current = init;
       simRef.current = createSim(newSeed(), pop, init);
       accRef.current = 0;
       setStats(readStats(simRef.current));
@@ -305,7 +318,7 @@ export function DiseaseSim() {
 
   const onPlay = () => {
     touchedRef.current = true;
-    if (stats.done) restart(population, initial, true);
+    if (stats.done && !playing) restart(population, initial, true);
     else setPlay(!playing);
   };
 
@@ -317,12 +330,8 @@ export function DiseaseSim() {
   ];
 
   return (
-    <div
-      ref={rootRef}
-      data-cursor-box="lock"
-      className="grid gap-6 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_240px]"
-    >
-      <div className="relative aspect-square w-full border border-line bg-bg">
+    <div ref={rootRef} className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_200px]">
+      <div className="relative aspect-square w-full bg-bg/70">
         <canvas
           ref={fieldRef}
           className="absolute inset-0 h-full w-full"
@@ -367,7 +376,7 @@ export function DiseaseSim() {
             onClick={onPlay}
             className="flex-1 cursor-pointer border border-water/60 px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] text-water transition-colors hover:bg-water hover:text-bg"
           >
-            {stats.done ? "Run again" : playing ? "Pause" : "Play"}
+            {playing ? "Pause" : stats.done ? "Run again" : "Play"}
           </button>
           <button
             type="button"

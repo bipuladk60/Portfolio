@@ -1,24 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Chakra_Petch, Fredoka, IBM_Plex_Sans, JetBrains_Mono, Nunito } from "next/font/google";
+import { Barlow, Fredoka, Martian_Mono, Nunito, Saira_Condensed } from "next/font/google";
 import { CHAPTER_BOOT_SCRIPT } from "@/lib/chapter-boot";
 import "./globals.css";
 
-const chakra = Chakra_Petch({
-  variable: "--font-chakra",
+// Chapter 1 (the expedition HUD) fonts.
+// Saira Condensed: tall, squared headings that read like expedition signage and mission patches.
+const display = Saira_Condensed({
+  variable: "--font-display-face",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
   display: "swap",
 });
 
-const plex = IBM_Plex_Sans({
-  variable: "--font-plex",
+// Barlow: a slightly rounded grotesk drawn from highway signage; warm and very legible for body copy.
+const body = Barlow({
+  variable: "--font-body-face",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
+// Martian Mono: a wide instrument-panel mono for telemetry, labels and readouts.
+const mono = Martian_Mono({
+  variable: "--font-mono-face",
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
@@ -59,7 +63,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: CHAPTER_BOOT_SCRIPT }} />
       </head>
-      <body className={`${chakra.variable} ${plex.variable} ${jetbrains.variable} ${fredoka.variable} ${nunito.variable} grain antialiased`}>
+      <body className={`${display.variable} ${body.variable} ${mono.variable} ${fredoka.variable} ${nunito.variable} grain antialiased`}>
         {children}
       </body>
     </html>

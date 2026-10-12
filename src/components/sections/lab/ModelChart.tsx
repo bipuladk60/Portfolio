@@ -27,11 +27,6 @@ export function ModelChart() {
                 <div className="mb-2 flex items-baseline justify-between gap-3">
                   <span className={`text-sm ${isBest ? "text-text" : "text-dim"}`}>
                     {m.name}
-                    {isBest && (
-                      <span className="ml-2 border border-water px-1.5 py-px font-mono text-[10px] uppercase tracking-[0.14em] text-water">
-                        Best
-                      </span>
-                    )}
                   </span>
                   <span className={`font-mono text-sm tabular-nums ${isBest ? "text-water" : "text-dim"}`}>{m.accuracy.toFixed(1)}%</span>
                 </div>
@@ -46,7 +41,6 @@ export function ModelChart() {
                       background: isBest
                         ? "var(--water)"
                         : "repeating-linear-gradient(90deg, var(--line-hi) 0 6px, color-mix(in oklab, var(--line-hi) 60%, transparent) 6px 8px)",
-                      boxShadow: isBest ? "0 0 18px -4px var(--water)" : undefined,
                     }}
                     initial={{ scaleX: 0 }}
                     whileInView={{ scaleX: 1 }}

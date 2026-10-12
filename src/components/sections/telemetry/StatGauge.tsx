@@ -12,7 +12,9 @@ const START = 135; // dial starts bottom-left
 
 const polar = (deg: number, r = R) => {
   const a = (deg * Math.PI) / 180;
-  return [CX + r * Math.cos(a), CY + r * Math.sin(a)] as const;
+  // rounded so server and client produce identical attribute strings (no hydration mismatch)
+  const round = (v: number) => Math.round(v * 100) / 100;
+  return [round(CX + r * Math.cos(a)), round(CY + r * Math.sin(a))] as const;
 };
 
 function arcPath(fromDeg: number, toDeg: number, r = R) {

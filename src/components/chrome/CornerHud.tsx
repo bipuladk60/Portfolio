@@ -67,7 +67,7 @@ function skin(toon: boolean, wide = false): CSSProperties {
         fontWeight: 600,
         letterSpacing: wide ? "0.08em" : "0.06em",
       }
-    : { fontFamily: "var(--font-jetbrains), ui-monospace, monospace" };
+    : { fontFamily: "var(--font-mono-face), ui-monospace, monospace" };
 }
 
 function PaletteButton({ toon }: { toon: boolean }) {

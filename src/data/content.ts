@@ -28,8 +28,16 @@ export const stats = [
   { value: 6, suffix: "", label: "Hackathons competed" },
   // 400+ MHD Connect attendees + 2,224 Warmer visitors (last 30 days only, so a floor, not a total).
   { value: 2600, suffix: "+", label: "Users · MHD Connect + Warmer" },
-  { value: 82, suffix: "%", label: "Best model accuracy (PFAS study)" },
+  // Degree progress is computed live from `degree` below (see DegreeGauge), so it is not a fixed number here.
 ];
+
+// Start date inferred from the first USM activity on record (Hatchathon, Nov 2023), i.e. Fall 2023 entry.
+export const degree = {
+  name: "B.S. Computer Science & Mathematics",
+  start: "2023-08-15",
+  graduation: "2027-05-08",
+  graduationLabel: "May 2027",
+};
 
 export const education = [
   {
@@ -279,26 +287,24 @@ export const diseaseSim = {
   stack: ["Python", "NumPy", "SciPy", "Matplotlib"],
 };
 
-export const mlWork = [
-  {
-    title: "Heart Disease Prediction",
-    when: "2026",
-    detail: "scikit-learn pipeline on the Cleveland dataset; a tuned Logistic Regression beat Random Forest and Gradient Boosting.",
-    metrics: [
-      { label: "ROC-AUC (test)", value: "0.961" },
-      { label: "Recall", value: "0.929" },
-    ],
-    stack: ["Python", "scikit-learn", "pandas"],
+// Source: github.com/bipuladk60/RNN_Music_Generator (music_generator.ipynb + Readme.md, built on MIT 6.S191 Lab 1).
+// `sample` is the model's own output quoted in the README; the site replays it, it does not generate music.
+export const musicRnn = {
+  title: "RNN Music Generation",
+  when: "Jul 2024",
+  href: "https://github.com/bipuladk60/RNN_Music_Generator",
+  pitch: "A character-level LSTM that learned to write folk tunes in ABC notation, one character at a time.",
+  bullets: [
+    "Trained on 817 folk songs in ABC notation, an 83-character vocabulary.",
+    "Embedding (256) into an LSTM (1,024 units) into a dense layer over the vocabulary.",
+    "Generates by sampling each next character from the predicted distribution, then renders the text to audio.",
+  ],
+  stack: ["Python", "TensorFlow", "Keras", "NumPy"],
+  sample: {
+    header: "X:1\nT:Example\nM:4/4\nL:1/8\nK:A Dorian",
+    body: "FG|ABce fcAF|GEEF GFEC|DB,ED EDB,|EFE EFD|FGF E2D D2C|A,CE cEE|DED AGF|GEE E2:|",
   },
-  {
-    title: "RNN Music Generation",
-    when: "Jul 2024",
-    detail: "LSTM model in TensorFlow/Keras that composes music in ABC notation.",
-    metrics: [],
-    stack: ["TensorFlow", "Keras"],
-    href: "https://github.com/bipuladk60/RNN_Music_Generator",
-  },
-];
+};
 
 // Featured game: Warmer is live; it is the one to lead with.
 export const games = [
