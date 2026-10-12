@@ -38,13 +38,17 @@ The page is one ascent from 1,400 m to 8,849 m. Each section is a "camp" at a fi
 This is a dark mission-control look with Himalayan cartography and prayer-flag colours.
 
 - **Palette** (`src/app/globals.css`, exposed as Tailwind colours): bg `#0A0D12`, panel `#10151C`, line `#1F2B38`, text `#E9E5DA`, dim `#8A97A6`. Each accent maps to a prayer-flag meaning: signal amber `#F2B418` (wins), sky blue `#4C8DFF` (links), fire red `#FF5C5C` (projects), water green `#34C98A` (research), air `#EDEDE6` (contact).
-- **Type:** Chakra Petch for headings, IBM Plex Sans for body text, JetBrains Mono for telemetry and the small `.hud-label` captions.
-- **Look:** clean first. Fewer boxes, hairlines over bracketed panels, generous whitespace, and no decorative stamps that carry no information.
-- **Signature visuals:** a zoomable route map with real Nepal and USA outlines (Natural Earth), live dual clocks for Nepal and Central time, a hackathon ridge line, and a live in-browser re-run of a stochastic disease transmission model.
+- **Type:** Saira Condensed for headings (tall, squared, like expedition signage), Barlow for body text (a warm grotesk drawn from highway signs) and Martian Mono for telemetry and the small `.hud-label` captions (a wide, instrument-panel mono).
+- **Look:** clean, but still an instrument. There's generous whitespace and no box-in-box nesting. HUD details carry information: every section opens on a survey line (camp number, altitude, a tick ruler and the climb from the previous camp), and key visuals sit in framed instruments with corner brackets, a figure number and a live status light.
+- **Signature visuals:** a zoomable route map with real Nepal and USA outlines (Natural Earth), live dual clocks for Nepal and Central time, a hackathon ridge line, and a live degree-progress dial.
+- **Research & ML:** all three entries share one layout (`lab/LabEntry.tsx`): text on the left and a framed figure on the right.
+  - PFAS and COPD: the study's findings plus a model comparison.
+  - Stochastic disease transmission: the notebook's agent-based model re-run in the browser. It loops forever, starting a new outbreak after each run.
+  - RNN music generation: the model's real generated tune, replayed one sampled character at a time onto a piano roll, with opt-in sound.
 
 ### The Checkpoint
 
-Between the chapters there's a full round of Warmer drawn in the HUD style. You type a country, and each guess shows its distance, a warm-to-cold heat colour and a direction arrow. Hints escalate so nobody gets stuck: a clue after 2 guesses, "highest point on Earth" after 4, and a Reveal button after 6. The answer is always Nepal.
+Between the chapters there's a full round of Warmer drawn in the HUD style. The globe is a 1-degree equal-area dot lattice (`src/data/globeDots.ts`, about 41k dots, generated from Natural Earth 1:50m) in which every land dot knows its country. A guess fills its whole country in heat colour, and each guess also shows its distance and a direction arrow. Hints escalate so nobody gets stuck: a clue after 2 guesses, "highest point on Earth" after 4, and a Reveal button after 6. The answer is always Nepal.
 
 Solving it plays a single eased transition of about 2.5 s. The night deepens, a warm light rises from the globe and becomes the day sun, the sky slides from night through dawn to day, and clouds settle where chapter 2's clouds sit. Escape, a click or the Skip pill skips it, and reduced motion gets a quick cross-fade.
 
