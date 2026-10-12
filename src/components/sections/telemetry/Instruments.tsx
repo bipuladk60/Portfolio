@@ -18,7 +18,10 @@ const analytics = games[0].analytics;
 function degreeProgress() {
   const start = Date.parse(degree.start);
   const end = Date.parse(degree.graduation);
-  return Math.max(0, Math.min(1, (Date.now() - start) / (end - start)));
+  const f = Math.max(0, Math.min(1, (Date.now() - start) / (end - start)));
+  // Quantised (one step is a few hours) so useSyncExternalStore sees a stable snapshot between calls;
+  // a raw Date.now() fraction changes every call and makes React re-render forever.
+  return Math.round(f * 1e4) / 1e4;
 }
 
 /** Fractions of the degree span where each new academic year starts (the Aug anniversaries of `degree.start`). */
@@ -330,9 +333,8 @@ export function InstrumentCluster() {
           value={wins.value}
           suffix={wins.suffix}
           label={wins.label}
-          detail={WINS.map((w) => year(w.when)).join(" · ")}
           accent="var(--signal)"
-          srText={`${wins.value} ${wins.label}`}
+          srText={`${wins.value} ${wins.label}: ${WINS.map((w) => year(w.when)).join(", ")}`}
           visual={(r, d) => <Flags run={r} delay={d} reduce={reduce} />}
           run={run}
           reduce={reduce}
@@ -361,7 +363,7 @@ export function InstrumentCluster() {
           detail={
             <>
               {u.detail}
-              <span className="block text-dim/80">Chart: Warmer daily visitors, approx.</span>
+              <span className="block text-dim/80">Warmer daily visitors · approx.</span>
             </>
           }
           accent="var(--signal)"

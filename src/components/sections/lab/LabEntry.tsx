@@ -94,7 +94,7 @@ export function LabEntry({ n, meta, title, award, facts, children, stack, link, 
         )}
       </motion.div>
 
-      <div className="min-w-0 lg:col-span-7">
+      <div className="min-w-0 lg:col-span-7 lg:self-center">
         <Instrument n={n} label={figure.label} status={figure.status} reduce={reduce}>
           {figure.node}
         </Instrument>

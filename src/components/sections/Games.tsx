@@ -5,7 +5,7 @@ import { FoundSticker } from "./games/FoundSticker";
 import { WarmerStats } from "./games/WarmerStats";
 import { GREEN, INK, ORANGE, WARMER_CSS, YELLOW } from "@/components/toon/toon";
 import { Reveal } from "./shared/Reveal";
-import { ToonHeader } from "./shared/ToonHeader";
+import { GAMES_HEADING_ID, ToonHeader } from "./shared/ToonHeader";
 
 const CHIP_COLORS = [YELLOW, "#a8d8ff", GREEN];
 const TILTS = ["-1.5deg", "1deg", "-0.6deg"];
@@ -21,6 +21,7 @@ export function Games() {
       <SkyWorld>
         <ToonHeader
           campId="games"
+          headingId={GAMES_HEADING_ID}
           title="Welcome to Warmer"
           kicker="You just played it. Warmer is the daily geography game I build and run; here is how it works and how it's doing."
         />

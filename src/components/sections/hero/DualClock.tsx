@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-type Station = { code: string; city: string; zone: string; fallbackAbbr: string };
+/** `state` is dropped below `sm`, where the clock cell is too narrow for "Hattiesburg, MS". */
+type Station = { code: string; city: string; state?: string; zone: string; fallbackAbbr: string };
 
 const STATIONS: Station[] = [
   { code: "NP", city: "Nepal", zone: "Asia/Kathmandu", fallbackAbbr: "NPT" },
-  { code: "MS", city: "Hattiesburg, MS", zone: "America/Chicago", fallbackAbbr: "CT" },
+  { code: "MS", city: "Hattiesburg", state: "MS", zone: "America/Chicago", fallbackAbbr: "CT" },
 ];
 
 type Reading = { time: string; abbr: string; offset: string; minutes: number };
@@ -70,7 +71,10 @@ export function DualClock() {
       <div key={s.code} className={`min-w-0 ${i === 1 ? "text-right" : ""}`}>
         <dt className={`hud-label flex items-center gap-2 ${i === 1 ? "justify-end" : ""}`}>
           <span className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${i === 0 ? "bg-signal" : "bg-sky"}`} aria-hidden />
-          <span className={`truncate ${accent}`}>{s.city}</span>
+          <span className={`truncate ${accent}`}>
+            {s.city}
+            {s.state && <span className="hidden sm:inline">, {s.state}</span>}
+          </span>
         </dt>
         <dd className="mt-1.5">
           <time className="block font-mono text-lg tabular-nums tracking-tight text-text sm:text-2xl" suppressHydrationWarning>

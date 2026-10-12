@@ -118,11 +118,11 @@ export function RouteGlyph({
       </svg>
       <div className="mt-2 flex max-w-[460px] justify-between gap-4 font-mono text-[11px] leading-relaxed">
         <p>
-          <span className="block uppercase tracking-[0.12em] text-signal">{from.place}</span>
+          <span className="block whitespace-nowrap uppercase tracking-[0.08em] text-signal sm:tracking-[0.12em]">{from.place}</span>
           <span className="text-dim">{from.note}</span>
         </p>
         <p className="text-right">
-          <span className="block uppercase tracking-[0.12em] text-sky">{to.place}</span>
+          <span className="block whitespace-nowrap uppercase tracking-[0.08em] text-sky sm:tracking-[0.12em]">{to.place}</span>
           <span className="text-dim">{to.note}</span>
         </p>
       </div>

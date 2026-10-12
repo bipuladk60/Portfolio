@@ -28,7 +28,7 @@ const RNN_FACTS = [
 /** Research & ML: three entries on one shared layout (text left, framed instrument right). */
 export function Lab() {
   return (
-    <CampSection campId="lab" className="md:py-28!">
+    <CampSection campId="lab" className="md:pt-28! md:pb-12!">
       {/* a cool water-green glow behind the heading, the section colour */}
       <div
         aria-hidden

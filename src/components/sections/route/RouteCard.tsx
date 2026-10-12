@@ -11,7 +11,7 @@ export const roleAccent = (e: Experience) => (e.concurrent ? "var(--signal)" : "
 
 /**
  * One role as a single card (one level of containment): dates, company and role on the left; the
- * summary, every bullet and the stack chips on the right. Lights up when the route reaches it.
+ * summary, every bullet and the stack line on the right. Lights up when the route reaches it.
  * Nothing waits behind hover; hover only lifts the card.
  */
 export function RouteCard({ entry, lit }: { entry: Experience; lit: boolean }) {
@@ -43,13 +43,10 @@ export function RouteCard({ entry, lit }: { entry: Experience; lit: boolean }) {
 
         <div className="relative grid gap-5 p-5 sm:p-7 lg:grid-cols-[15rem_1fr] lg:gap-10">
           <header className="min-w-0">
-            <p
-              className="inline-flex items-center gap-2 border px-2 py-1 font-mono text-[11px] tracking-[0.06em]"
-              style={{ color: accent, borderColor: `color-mix(in oklab, ${accent} 40%, transparent)` }}
-            >
+            <p className="font-mono text-[11px] tracking-[0.06em]" style={{ color: accent }}>
               {entry.when}
             </p>
-            <h3 className="mt-3 font-display text-xl font-bold leading-tight text-text sm:text-2xl">{entry.company}</h3>
+            <h3 className="mt-2 font-display text-xl font-bold leading-tight text-text sm:text-2xl">{entry.company}</h3>
             <p className="mt-1.5 text-[15px] text-text/85">{entry.role}</p>
             <p className="mt-1 text-sm text-dim">{entry.where}</p>
             {entry.concurrent && (
@@ -70,16 +67,10 @@ export function RouteCard({ entry, lit }: { entry: Experience; lit: boolean }) {
                 </li>
               ))}
             </ul>
-            <ul className="mt-5 flex flex-wrap gap-1.5" aria-label="Stack">
-              {entry.stack.map((s) => (
-                <li
-                  key={s}
-                  className="border border-line-hi/80 bg-bg/40 px-2 py-0.5 font-mono text-[11px] tracking-wide text-text/75 transition-colors duration-300 hover:text-text"
-                >
-                  {s}
-                </li>
-              ))}
-            </ul>
+            <p className="mt-5 font-mono text-[11px] leading-relaxed text-dim">
+              <span className="sr-only">Stack: </span>
+              {entry.stack.join(" · ")}
+            </p>
           </div>
         </div>
       </Surface>

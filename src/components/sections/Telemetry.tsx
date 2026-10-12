@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { CampSection, SectionHeader } from "@/components/hud/SectionHeader";
 import { Surface } from "@/components/hud/Surface";
 import { Assemble, AssembleItem } from "@/components/hud/Assemble";
@@ -90,13 +91,18 @@ export function Telemetry() {
                       )}
                     </p>
                     {d.notes && (
-                      <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Coursework">
-                        {d.notes.split(/,\s*/).map((c) => (
-                          <li key={c} className="border border-line-hi/80 bg-bg/40 px-2 py-0.5 text-xs text-text/75">
-                            {c}
-                          </li>
+                      <p className="mt-2 text-sm leading-relaxed text-text/70">
+                        <span className="sr-only">Coursework: </span>
+                        {/* each item keeps its trailing dot, so a wrapped line never starts with "·" */}
+                        {d.notes.split(/,\s*/).map((c, j, all) => (
+                          <Fragment key={c}>
+                            <span className="whitespace-nowrap">
+                              {c}
+                              {j < all.length - 1 && " ·"}
+                            </span>{" "}
+                          </Fragment>
                         ))}
-                      </ul>
+                      </p>
                     )}
                   </li>
                 );
