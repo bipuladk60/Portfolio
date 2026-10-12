@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { motion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import type { Hackathon } from "@/data/content";
 import { ResultGlyph } from "./Markers";
 import { EASE } from "./motion";
@@ -31,12 +33,14 @@ export function Patch({
   const isWin = h.result === "win";
   const color = isWin ? "var(--signal)" : "var(--sky)";
   const year = h.when.split(" ").pop();
+  const ref = useRef<HTMLLIElement>(null);
+  const shown = useReveal(ref, "-5% 0px");
 
   return (
     <motion.li
+      ref={ref}
       initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-5% 0px" }}
+      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
       transition={reduce ? { duration: 0 } : { delay: 0.5 + index * 0.06, duration: 0.45, ease: EASE }}
     >
       <button

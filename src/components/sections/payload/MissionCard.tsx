@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import type { Project } from "@/data/content";
 import { GREEN, INK, ORANGE, RED, YELLOW } from "@/components/toon/toon";
 import { EASE } from "../shared/prng";
@@ -39,12 +40,15 @@ export function MissionCard({ project, index, visual, large = false, className =
     </li>
   );
 
+  const revealRef = useRef<HTMLLIElement>(null);
+  const revealed = useReveal(revealRef, "-8% 0px");
+
   return (
     <motion.li
       className={`list-none ${className}`}
+      ref={revealRef}
       initial={{ opacity: 0, y: 30, rotate: 0 }}
-      whileInView={{ opacity: 1, y: 0, rotate: TILTS[index % TILTS.length] }}
-      viewport={{ once: true, margin: "-8% 0px" }}
+      animate={revealed ? { opacity: 1, y: 0, rotate: TILTS[index % TILTS.length] } : { opacity: 0, y: 30, rotate: 0 }}
       transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 210, damping: 18, delay: index * 0.08 }}
     >
       <article data-cursor-box="" className="wr-sticker wr-wobble flex h-full flex-col overflow-hidden">

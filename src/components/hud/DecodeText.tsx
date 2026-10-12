@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInView, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/<>[]=+";
 
@@ -19,7 +20,7 @@ type DecodeTextProps = {
  */
 export function DecodeText({ text, className = "", duration = 700, delay = 0, as = "span" }: DecodeTextProps) {
   const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const inView = useReveal(ref, "-10% 0px");
   const reduce = useReducedMotion();
   const [shown, setShown] = useState(text);
   const [running, setRunning] = useState(false);

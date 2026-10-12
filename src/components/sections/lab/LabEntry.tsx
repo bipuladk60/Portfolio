@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { MotionConfig, motion, type Variants } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import { EASE, useReducedMotionSafe } from "./motion";
 
 type LabEntryProps = {
@@ -34,16 +35,17 @@ const item: Variants = {
  */
 export function LabEntry({ n, meta, title, award, facts, children, stack, link, figure }: LabEntryProps) {
   const reduce = useReducedMotionSafe();
-  const vp = { once: true, margin: "-12% 0px" } as const;
+  const colRef = useRef<HTMLDivElement>(null);
+  const colShown = useReveal(colRef, "-12% 0px");
   return (
     <MotionConfig reducedMotion="user">
     <article className="grid gap-10 lg:grid-cols-12 lg:gap-12">
       <motion.div
+        ref={colRef}
         className="min-w-0 lg:col-span-5"
         variants={col}
         initial={reduce ? false : "hidden"}
-        whileInView="show"
-        viewport={vp}
+        animate={colShown || reduce ? "show" : "hidden"}
       >
         <motion.p variants={item} className="hud-label flex items-center gap-3">
           <span className="text-water">{n}</span>
@@ -129,14 +131,17 @@ export function Instrument({
   reduce: boolean;
   children: ReactNode;
 }) {
+  // The figure is observed once; its corner accents (scale 0, zero area) and contents follow it.
+  const ref = useRef<HTMLElement>(null);
+  const shown = useReveal(ref, "-12% 0px") || reduce;
   return (
     <motion.figure
+      ref={ref}
       data-cursor-box="lock"
       className="group/fig relative border border-line transition-[border-color] duration-500 hover:border-[color-mix(in_oklab,var(--water)_32%,var(--line))]"
       style={{ background: "linear-gradient(180deg, color-mix(in oklab, var(--water) 5%, var(--panel)) 0%, color-mix(in oklab, var(--panel) 45%, transparent) 70%)" }}
       initial={reduce ? false : { opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-12% 0px" }}
+      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.6, ease: EASE }}
     >
       {/* glow behind the frame; stays inside the column so it never widens the page */}
@@ -151,8 +156,7 @@ export function Instrument({
           aria-hidden
           className={`pointer-events-none absolute -m-px h-2.5 w-2.5 border-water transition-[width,height] duration-300 [transition-timing-function:var(--ease-hud)] group-hover/fig:h-4 group-hover/fig:w-4 ${c}`}
           initial={reduce ? false : { scale: 0, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          viewport={{ once: true }}
+          animate={shown ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
           transition={{ delay: 0.15 + i * 0.05, duration: 0.4, ease: EASE }}
         />
       ))}
@@ -168,8 +172,7 @@ export function Instrument({
       <motion.div
         className="p-4 md:p-5"
         initial={reduce ? false : { opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: "-12% 0px" }}
+        animate={{ opacity: shown ? 1 : 0 }}
         transition={{ delay: 0.3, duration: 0.6, ease: EASE }}
       >
         {children}

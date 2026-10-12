@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 
 type BBox = [number, number, number, number];
 type Slot = { x: number; y: number; w: number; h: number };
@@ -54,10 +56,11 @@ export function RouteGlyph({
   const [ax, ay] = np.at(nepalXY);
   const [bx, by] = us.at(msXY);
   const arc = `M${ax} ${ay}C${r1(ax + 50)} ${r1(ay - 70)} ${r1(bx - 60)} ${r1(by - 70)} ${bx} ${by}`;
-  const view = { once: true, margin: "0px 0px -10% 0px" } as const;
+  const wrap = useRef<HTMLDivElement>(null);
+  const shown = useReveal(wrap, "0px 0px -10% 0px") || !!reduce;
 
   return (
-    <div>
+    <div ref={wrap}>
       <svg aria-hidden viewBox="0 0 352 86" className="w-full max-w-[460px] overflow-visible" fill="none">
         <defs>
           <linearGradient id="glyph-arc" x1="0" x2="1" y1="0" y2="0">
@@ -95,8 +98,7 @@ export function RouteGlyph({
           strokeWidth={1.6}
           strokeLinecap="round"
           initial={{ pathLength: reduce ? 1 : 0 }}
-          whileInView={{ pathLength: 1 }}
-          viewport={view}
+          animate={{ pathLength: shown ? 1 : 0 }}
           transition={{ duration: reduce ? 0 : 1.4, delay: reduce ? 0 : 0.4, ease: EASE }}
         />
         <circle cx={ax} cy={ay} r={3} fill="var(--signal)" stroke="var(--bg)" strokeWidth={1.5} />
@@ -108,8 +110,7 @@ export function RouteGlyph({
           stroke="var(--bg)"
           strokeWidth={1.5}
           initial={{ opacity: reduce ? 1 : 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={view}
+          animate={{ opacity: shown ? 1 : 0 }}
           transition={{ duration: reduce ? 0 : 0.3, delay: reduce ? 0 : 1.7 }}
         />
         <text x={168} y={72} textAnchor="middle" fill="var(--text-dim)" fontSize={8.5} letterSpacing="0.08em" fontFamily="var(--font-mono-face), monospace">

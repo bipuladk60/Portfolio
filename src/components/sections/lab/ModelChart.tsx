@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { motion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import { research } from "@/data/content";
 import { EASE, useReducedMotionSafe } from "./motion";
 
@@ -11,6 +13,9 @@ const TICKS = [0, 25, 50, 75, 100];
 /** Horizontal accuracy bars on a true 0-100% axis; the best model is lit. Unboxed. */
 export function ModelChart() {
   const reduce = useReducedMotionSafe();
+  // Bars start at scaleX 0; observe the list, not the bars.
+  const listRef = useRef<HTMLUListElement>(null);
+  const shown = useReveal(listRef, "-10% 0px");
   return (
     <figure className="flex h-full flex-col">
       <figcaption className="hud-label mb-3">
@@ -19,7 +24,7 @@ export function ModelChart() {
           : {models.map((m) => `${m.name} ${m.accuracy.toFixed(1)}%`).join(", ")}.
         </span>
       </figcaption>
-        <ul className="flex flex-1 flex-col justify-evenly gap-4" aria-hidden>
+        <ul ref={listRef} className="flex flex-1 flex-col justify-evenly gap-4" aria-hidden>
           {models.map((m, i) => {
             const isBest = m.accuracy === best;
             return (
@@ -43,8 +48,7 @@ export function ModelChart() {
                         : "repeating-linear-gradient(90deg, var(--line-hi) 0 6px, color-mix(in oklab, var(--line-hi) 60%, transparent) 6px 8px)",
                     }}
                     initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true, margin: "-10% 0px" }}
+                    animate={{ scaleX: shown ? 1 : 0 }}
                     transition={reduce ? { duration: 0 } : { delay: 0.15 + i * 0.12, duration: 0.9, ease: EASE }}
                   />
                 </div>

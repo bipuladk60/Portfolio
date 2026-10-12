@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { animate, motion, useInView, useReducedMotion } from "motion/react";
+import { animate, motion, useReducedMotion } from "motion/react";
+import { useReveal } from "@/lib/reveal";
 import { games } from "@/data/content";
 import { GREEN, INK, ORANGE, RED, YELLOW } from "@/components/toon/toon";
 import type { SearchDay, WarmerSearchLive } from "@/lib/server/searchConsole";
@@ -111,7 +112,7 @@ function Stat({ label, value, growth, start }: { label: string; value: number; g
 /** Analytics sticker: real Vercel Analytics totals + an approximate daily visitors chart that draws on scroll. */
 export function WarmerStats({ footnote, live = null }: { footnote?: string; live?: WarmerSearchLive | null }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const inView = useReveal(ref, "-10% 0px");
   const reduce = useReducedMotion();
   const [active, setActive] = useState<number | null>(null);
   const gradId = useId().replace(/[^a-zA-Z0-9]/g, "");
