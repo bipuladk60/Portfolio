@@ -281,8 +281,22 @@ export const games = [
       "Daily puzzle with streaks and a shareable result grid, plus unlimited practice.",
       "Real-time multiplayer races for up to 8 players over Supabase Realtime.",
       "A 'learn about this country' card after every solve, so each game teaches something.",
-      "Handled SEO and distribution myself and reached 300 visitors in the first week.",
+      "Handled SEO and distribution myself: 300 visitors in the first week, 2,224 in the last 30 days.",
     ],
+    // Vercel Analytics, production, last 30 days (Sep 12 – Oct 11, 2026), screenshot from the owner.
+    analytics: {
+      period: "Last 30 days",
+      source: "Vercel Analytics",
+      visitors: 2224,
+      visitorsGrowth: "+140%",
+      pageViews: 4693,
+      pageViewsGrowth: "+122%",
+      peak: { day: "Oct 8", visitors: 136 },
+      // Daily visitors Sep 12 → Oct 11, traced by eye from the analytics chart (approximate, for the sparkline only).
+      daily: [34, 33, 51, 59, 100, 72, 64, 49, 39, 86, 70, 77, 68, 77, 59, 63, 63, 83, 80, 83, 89, 62, 80, 102, 109, 95, 136, 80, 87, 92],
+      dailyStart: "Sep 12",
+      dailyEnd: "Oct 11",
+    },
     stack: ["Next.js", "TypeScript", "d3-geo", "Supabase", "Vercel"],
   },
 ];

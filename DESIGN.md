@@ -89,3 +89,10 @@ cultural kitsch (prayer flags and peepal tree are specific, respectful motifs, n
   stay as a small label only.
 - Hero: no tick-ruler scales on the sides. The route map shows real outlines of the USA and Nepal
   (`src/data/countries.ts`, Natural Earth 1:50m) and is zoomable/pannable while the map box is active.
+
+## Revision 4 rules (owner feedback)
+- Hero is clean: no viewport corner brackets / frame and no corner coordinate stamps.
+- Game Room gets its own immersive world, the way the old dusk scene broke the HUD, but themed on Warmer itself
+  (warmergames.com: cartoon sky, clouds, sticker-style cards, warm→cold heat colours, globe). Feature Warmer's real
+  analytics from `games[0].analytics` (2,224 visitors / 4,693 page views in the last 30 days, growth chips, daily sparkline
+  labelled approximate). No bounce rate.
